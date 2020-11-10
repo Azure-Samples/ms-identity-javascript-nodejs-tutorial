@@ -4,9 +4,6 @@
  */
 
 const msal = require('@azure/msal-node');
-const jwt = require('jsonwebtoken')
-const jwksClient = require('jwks-rsa');
-const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 
 const auth = require('../../auth.json');

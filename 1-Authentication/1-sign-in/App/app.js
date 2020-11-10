@@ -9,7 +9,7 @@ const path = require('path');
 
 const router = require('./routes/router');
 
-const SERVER_PORT = process.env.PORT || 5000;
+const SERVER_PORT = process.env.PORT || 4000;
 
 const app = express();
 
