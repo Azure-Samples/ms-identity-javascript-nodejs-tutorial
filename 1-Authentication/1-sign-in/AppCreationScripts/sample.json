@@ -1,6 +1,6 @@
 {
     "Sample": {
-        "Title": "A Node.js & Express Web App authenticating users with MSAL Node against Azure AD",
+        "Title": "A Node.js & Express Web App authenticating users against Azure AD with MSAL Node",
         "Level": 100,
         "Client": "Node.js Express Web App",
         "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",

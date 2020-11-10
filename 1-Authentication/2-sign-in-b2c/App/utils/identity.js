@@ -4,9 +4,6 @@
  */
 
 const msal = require('@azure/msal-node');
-const jwt = require('jsonwebtoken')
-const jwksClient = require('jwks-rsa');
-const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 
 const auth = require('../../auth.json');
@@ -14,8 +11,10 @@ const auth = require('../../auth.json');
 const msalConfig = {
     auth: {
         clientId: auth.credentials.clientId,
-        authority: "https://login.microsoftonline.com/" + auth.credentials.tenantId,
-        clientSecret: auth.credentials.clientSecret
+        authority: auth.policies.authorities.signUpSignIn.authority,
+        knownAuthorities: [auth.policies.authorityDomain],
+        clientSecret: auth.credentials.clientSecret,
+        redirectUri: auth.configuration.redirectUri,
     },
     system: {
         loggerOptions: {
@@ -27,7 +26,6 @@ const msalConfig = {
         }
     }
 };
-
 
 /**
  * Middleware here can be used with express sessions in route controllers
@@ -45,57 +43,87 @@ const msalConfig = {
 // Create msal application object
 const msalClient = new msal.ConfidentialClientApplication(msalConfig);
 
+/** 
+ * Request Configuration
+ * We manipulate these two request objects below 
+ * to acquire a token with the appropriate claims.
+ */
+const authCodeRequest = {
+    redirectUri: msalConfig.auth.redirectUri,
+};
+
+const tokenRequest = {
+    redirectUri: msalConfig.auth.redirectUri,
+};
+
 const APP_STATES = {
-    login: "login",
-    logout: "logout",
-    acquireToken: "acquireToken"
+    login: "signin",
+    logout: "signout",
+    acquireToken: "acquireToken",
+    signUpSignIn: "signUpSignIn",
+    passwordReset: "passwordReset",
+    editProfile: "editProfile",
 }
 
-const OIDC_SCOPES = ["openid", "profile", "offline_access"];
+const OIDC_SCOPES = ["openid", "profile"];
 
 let nonce;
 
 // ============ MIDDLEWARE =============
 
 exports.signIn = (req, res, next) => {
+    if (authCodeRequest.state === APP_STATES.passwordReset) {
 
-    nonce = generateGuid();
+        nonce = generateGuid();
 
-    const authCodeUrlParameters = {
-        redirectUri: auth.configuration.redirectUri,
-        scopes: OIDC_SCOPES,
-        state: base64EncodeUrl(JSON.stringify({
+        const state = base64EncodeUrl(JSON.stringify({
+            stage: APP_STATES.passwordReset,
+            path: req.route.path,
+            nonce: nonce
+        }));
+
+        // if coming for password reset, set the authority to password reset
+        getAuthCode(auth.policies.authorities.resetPassword.authority, OIDC_SCOPES, state, res);
+    } else {
+        // else, login as usual
+
+        nonce = generateGuid();
+
+        const state = base64EncodeUrl(JSON.stringify({
             stage: APP_STATES.login,
             path: req.route.path,
             nonce: nonce
         }))
-    };
 
-    // get url to sign user in and consent to scopes needed for application
-    msalClient.getAuthCodeUrl(authCodeUrlParameters)
-        .then((response) => {
-            res.redirect(response);
-        }).catch((error) => {
-            console.log(JSON.stringify(error));
-        });
+        getAuthCode(auth.policies.authorities.signUpSignIn.authority, OIDC_SCOPES, state, res);
+    }
+};
+
+exports.editProfile = (req, res, next) => {
+    nonce = generateGuid();
+
+    const state = base64EncodeUrl(JSON.stringify({
+        stage: APP_STATES.login,
+        path: req.route.path,
+        nonce: nonce
+    }))
+
+    getAuthCode(auth.policies.authorities.editProfile.authority, OIDC_SCOPES, state, res);
 };
 
 exports.handleRedirect = async(req, res, next) => {
-    console.log(req.query.state)
+
     const state = JSON.parse(base64DecodeUrl(req.query.state))
 
     if (state.nonce === nonce) {
         if (state.stage === APP_STATES.login) {
-            const tokenRequest = {
-                redirectUri: auth.configuration.redirectUri,
-                scopes: OIDC_SCOPES,
-                code: req.query.code,
-            };
+            
+            tokenRequest.scopes = OIDC_SCOPES;
+            tokenRequest.code = req.query.code;
         
             msalClient.acquireTokenByCode(tokenRequest)
                 .then((response) => {
                     console.log("\nResponse: \n:", response);
-        
                     if (validateIdToken(response.idTokenClaims)) {
         
                         req.session.idTokenClaims = response.idTokenClaims;
@@ -106,40 +134,48 @@ exports.handleRedirect = async(req, res, next) => {
                         return res.status(401).redirect('/401.html');;
                     }
                 }).catch((error) => {
-                    console.log(error);
+                    console.log(req.query.error)
+                    if (req.query.error) {
+
+                        /**
+                         * When the user selects "forgot my password" on the sign-in page, B2C service will throw an error.
+                         * We are to catch this error and redirect the user to login again with the resetPassword authority.
+                         * For more information, visit: https://docs.microsoft.com/azure/active-directory-b2c/user-flow-overview#linking-user-flows
+                         */
+                        if (JSON.stringify(req.query.error_description).includes("AADB2C90118")) {
+
+                            nonce = generateGuid();
+
+                            const state = base64EncodeUrl(JSON.stringify({
+                                stage: APP_STATES.passwordReset,
+                                path: req.route.path,
+                                nonce: nonce
+                            }))
+
+                            authCodeRequest.authority = auth.policies.authorities.resetPassword.authority;
+                            authCodeRequest.state = state;
+                            return res.redirect('/signin');
+                        }
+                    }
                     res.status(500).send(error);
                 });
-        } else if (state.stage === APP_STATES.acquireToken) {
+        } else if (state.stage === APP_STATES.passwordReset) {
+
+            // once the password is reset, redirect the user to login again with the new password
+            nonce = generateGuid();
             
-            const tokenRequest = {
-                code: req.query.code,
-                scopes: auth.resources.graphAPI.scopes,
-                redirectUri: auth.configuration.redirectUri,
-            };
-    
-            msalClient.acquireTokenByCode(tokenRequest)
-                .then((response) => {
-    
-                    // store access token somewhere
-                    validateAccessToken(response.accessToken)
-                    req.session.graphToken = response.accessToken;
-    
-                    // call the web API
-                    callAPI(auth.resources.graphAPI.endpoint, response.accessToken, (graphResponse) => {
-                        req.session.graphResponse = graphResponse;
-                        return res.status(200).redirect(state.path);
-                    });
-                    
-                }).catch((error) => {
-                    console.log(error);
-                    res.status(500).send(error);
-                });
+            const state = base64EncodeUrl(JSON.stringify({
+                stage: APP_STATES.login,
+                path: req.route.path,
+                nonce: nonce
+            }))
+
+            authCodeRequest.state = state;
+            res.redirect('/signin');
         } else {
             res.status(500).send("unknown");
         }
     } else {
-        console.log(state.nonce);
-        console.log(nonce);
         res.status(401).redirect('/401.html');
     }
 };
@@ -154,34 +190,6 @@ exports.signOut = (req, res) => {
     });
 };
 
-exports.getToken = (req, res, next) => {
-    if (!req.session.graphToken) {
-        
-        nonce = generateGuid();
-
-        const authCodeUrlParameters = {
-            redirectUri: auth.configuration.redirectUri,
-            scopes: auth.resources.graphAPI.scopes,
-            state: base64EncodeUrl(JSON.stringify({
-                stage: APP_STATES.acquireToken,
-                path: req.route.path,
-                nonce: nonce
-            })) 
-        };
-    
-        // get url to sign user in and consent to scopes needed for application
-        msalClient.getAuthCodeUrl(authCodeUrlParameters)
-            .then((response) => {
-                return res.redirect(response);
-            }).catch((error) => {
-                console.log(JSON.stringify(error));
-                return res.status(500).send(JSON.stringify(error));
-            });
-    } else {
-        next();
-    }
-};
-
 exports.isAuthenticated = (req, res, next) => {
     if (!req.session.isAuthenticated) {
         return res.redirect('/401.html');
@@ -189,78 +197,47 @@ exports.isAuthenticated = (req, res, next) => {
     next();
 };
 
-exports.isAuthorized = (req, res, next) => {
-    if (!req.session.graphToken) {
-        return res.redirect('/401.html');
-    }
-    next();
-}
 
 // ========= UTILITIES ============
+
+/**
+ * This method is used to generate an auth code request
+ * @param {string} authority: the authority to request the auth code from 
+ * @param {array} scopes: scopes to request the auth code for 
+ * @param {string} state: state of the application
+ * @param {object} res: express middleware response object
+ */
+const getAuthCode = (authority, scopes, state, res) => {
+
+    // prepare the request
+    authCodeRequest.authority = authority;
+    authCodeRequest.scopes = scopes;
+    authCodeRequest.state = state;
+
+    tokenRequest.authority = authority;
+
+    // request an authorization code to exchange for a token
+    return msalClient.getAuthCodeUrl(authCodeRequest)
+        .then((response) => {
+            res.redirect(response);
+        })
+        .catch((error) => {
+            res.status(500).send(error);
+        });
+}
 
 const validateIdToken = (idTokenClaims) => {
     const now = Math.round((new Date()).getTime() / 1000); // in UNIX format
     
     checkAudience = idTokenClaims["aud"] === auth.credentials.clientId ? true : false;
-    checkTenant = idTokenClaims["tid"] === auth.credentials.tenantId ? true : false;
     checkTimestamp = idTokenClaims["iat"] < now && idTokenClaims["exp"] > now ? true: false;
 
-    if (checkAudience && checkTenant && checkTimestamp) {
+    if (checkAudience && checkTimestamp) {
         return true;
     } else {
         return false;
     }
 };
-
-const validateAccessToken = (token) => {
-    console.log(token);
-
-    // TODO: claims validation logic
-    // check scp
-    // check audience
-    // check issuer
-    // check tid if allowed
-    // check nonce replay
-
-    const validationOptions = {
-        audience: auth.credentials.clientId,
-    }
-
-    // without verifying signature
-    // var decoded = jwt.decode(token, {complete: true});
-
-    jwt.verify(token, getSigningKeys, validationOptions, (err, payload) => {
-        if (err) {
-            console.log(err);
-        }
-        console.log(payload);
-    });
-};
-
-const getSigningKeys = (header, callback) => {
-    const client = jwksClient({
-        jwksUri: 'https://login.microsoftonline.com/' + auth.credentials.tenantId + '/discovery/v2.0/keys'
-    });
-
-    client.getSigningKey(header.kid, function (err, key) {
-        const signingKey = key.publicKey || key.rsaPublicKey;
-        callback(null, signingKey);
-    });
-};
-
-const callAPI = (endpoint, accessToken, callback) => {
-    const options = {
-        headers: {
-            Authorization: `Bearer ${accessToken}`
-        }
-    };
-
-    console.log('request made to web API at: ' + new Date().toString());
-
-    axios.default.get(endpoint, options)
-        .then(response => callback(response.data))
-        .catch(error => console.log(error));
-}
 
 // ======== CRYPTO UTILS ==========
 

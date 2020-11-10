@@ -154,47 +154,12 @@ exports.signOut = (req, res) => {
     });
 };
 
-exports.getToken = (req, res, next) => {
-    if (!req.session.graphToken) {
-        
-        nonce = generateGuid();
-
-        const authCodeUrlParameters = {
-            redirectUri: auth.configuration.redirectUri,
-            scopes: auth.resources.graphAPI.scopes,
-            state: base64EncodeUrl(JSON.stringify({
-                stage: APP_STATES.acquireToken,
-                path: req.route.path,
-                nonce: nonce
-            })) 
-        };
-    
-        // get url to sign user in and consent to scopes needed for application
-        msalClient.getAuthCodeUrl(authCodeUrlParameters)
-            .then((response) => {
-                return res.redirect(response);
-            }).catch((error) => {
-                console.log(JSON.stringify(error));
-                return res.status(500).send(JSON.stringify(error));
-            });
-    } else {
-        next();
-    }
-};
-
 exports.isAuthenticated = (req, res, next) => {
     if (!req.session.isAuthenticated) {
         return res.redirect('/401.html');
     }
     next();
 };
-
-exports.isAuthorized = (req, res, next) => {
-    if (!req.session.graphToken) {
-        return res.redirect('/401.html');
-    }
-    next();
-}
 
 // ========= UTILITIES ============
 
@@ -211,56 +176,6 @@ const validateIdToken = (idTokenClaims) => {
         return false;
     }
 };
-
-const validateAccessToken = (token) => {
-    console.log(token);
-
-    // TODO: claims validation logic
-    // check scp
-    // check audience
-    // check issuer
-    // check tid if allowed
-    // check nonce replay
-
-    const validationOptions = {
-        audience: auth.credentials.clientId,
-    }
-
-    // without verifying signature
-    // var decoded = jwt.decode(token, {complete: true});
-
-    jwt.verify(token, getSigningKeys, validationOptions, (err, payload) => {
-        if (err) {
-            console.log(err);
-        }
-        console.log(payload);
-    });
-};
-
-const getSigningKeys = (header, callback) => {
-    const client = jwksClient({
-        jwksUri: 'https://login.microsoftonline.com/' + auth.credentials.tenantId + '/discovery/v2.0/keys'
-    });
-
-    client.getSigningKey(header.kid, function (err, key) {
-        const signingKey = key.publicKey || key.rsaPublicKey;
-        callback(null, signingKey);
-    });
-};
-
-const callAPI = (endpoint, accessToken, callback) => {
-    const options = {
-        headers: {
-            Authorization: `Bearer ${accessToken}`
-        }
-    };
-
-    console.log('request made to web API at: ' + new Date().toString());
-
-    axios.default.get(endpoint, options)
-        .then(response => callback(response.data))
-        .catch(error => console.log(error));
-}
 
 // ======== CRYPTO UTILS ==========
 

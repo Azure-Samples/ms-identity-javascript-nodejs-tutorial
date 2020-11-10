@@ -16,7 +16,8 @@ router.get('/signout', identity.signOut);
 router.get('/redirect', identity.handleRedirect);
 
 // protected routes
-router.get('/profile', identity.isAuthenticated, identity.getToken, mainController.getProfile); // get token for this route to call web API
+router.get('/profile', identity.isAuthenticated, mainController.getProfile); // get token for this route to call web API
+router.get('/edit', identity.isAuthenticated, identity.editProfile);
 
 // 404
 router.get('*', (req, res) => res.status(404).redirect('/404.html'));

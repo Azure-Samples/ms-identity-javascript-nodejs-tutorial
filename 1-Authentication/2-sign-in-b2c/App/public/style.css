@@ -17,6 +17,11 @@ h1 {
     margin: 5% auto 5% auto;
 }
 
+#editButton {
+    margin-top: 20px;
+    margin-bottom: -25px;
+}
+
 .footer {
     position: fixed;
     left: 0;
