@@ -31,7 +31,7 @@ We recommend following the chapters in successive order. However, the code sampl
 - [VS Code Azure Tools Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack)
 - A modern web browser -while **MSAL.js** fully supports **IE11**, samples here use **ES6** conventions and will not run on **Internet Explorer**
 
-Please refer to each sample's README for sample-specific prerequisites.
+Please refer to each chapter's README for sample-specific prerequisites.
 
 ## Recommendations
 
@@ -39,7 +39,7 @@ Please refer to each sample's README for sample-specific prerequisites.
 - [Fiddler](https://www.telerik.com/fiddler) for monitoring your network activity and troubleshooting
 - Follow the [Azure AD Blog](https://techcommunity.microsoft.com/t5/azure-active-directory-identity/bg-p/Identity) to stay up-to-date with the latest developments
 
-Please refer to each sample's README for sample-specific recommendations.
+Please refer to each chapter's README for sample-specific recommendations.
 
 ## Contents
 
@@ -67,7 +67,7 @@ Alternatively, choose below the sample you want to review.
 
 ### Chapter 2: Sign-in a user and get an Access Token for Microsoft Graph or your protected Web API
 
-Here we build on the concepts we learnt earlier to authenticate users and acquire Access Tokens for your own Web APIs and the **Microsoft Graph API**
+Here we build on the concepts we learnt earlier to authenticate users and acquire Access Tokens for your own Web APIs and the **Microsoft Graph API**.
 
 |                |               |
 |----------------|---------------|
