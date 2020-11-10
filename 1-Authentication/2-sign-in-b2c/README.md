@@ -87,7 +87,7 @@ As a first step you'll need to:
 1. Sign in to the [Azure portal](https://portal.azure.com).
 1. If your account is present in more than one Azure AD B2C tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD B2C tenant.
 
-### Create User Flows and Custom Policies
+### Create User Flows
 
 Please refer to: [Tutorial: Create user flows in Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/tutorial-create-user-flows)
 
@@ -95,7 +95,7 @@ Please refer to: [Tutorial: Create user flows in Azure Active Directory B2C](htt
 
 Please refer to: [Tutorial: Add identity providers to your applications in Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/tutorial-add-identity-providers)
 
-### Register the webApp app (WebAppB2C)
+### Register the app
 
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD B2C** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
@@ -113,7 +113,7 @@ Please refer to: [Tutorial: Add identity providers to your applications in Azure
    - The generated key value will be displayed when you select the **Add** button. Copy the generated value for use in the steps later.
    - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
 
-#### Configure the webApp app (WebAppB2C) to use your app registration
+#### Configure the app to use your app registration
 
 Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
 

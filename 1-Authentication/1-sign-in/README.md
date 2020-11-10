@@ -143,9 +143,9 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `auth.json` file.
-1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of the `WebApp` application copied from the **Azure Portal**.
+1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of the application copied from the **Azure Portal**.
 1. Find the key `TenantId` and replace the existing value with your Azure AD tenant ID copied from the **Azure Portal**.
-1. Find the key `ClientSecret` and replace the existing value with the key you saved during the creation of the `WebApp` application copied from the **Azure Portal**.
+1. Find the key `ClientSecret` and replace the existing value with the key you saved during the creation of the application copied from the **Azure Portal**.
 1. Find the key `homePageRoute` and replace the existing value with the home page route of your application, e.g. `/home`.
 1. Find the key `redirectUri` and replace the existing value with the redirect URI that you have registered on **Azure Portal**, e.g. `http://localhost:4000/redirect`.
 1. Find the key `postLogoutRedirectUri` and replace the existing value with the URI of the page that you wish to be redirected after signing-out, e.g `http://localhost:4000/`.
@@ -178,6 +178,8 @@ Were we successful in addressing your learning objective? Consider taking a mome
 ### ID Token validation
 
 ### Sign-out
+
+### National Clouds
 
 ## More information
 
