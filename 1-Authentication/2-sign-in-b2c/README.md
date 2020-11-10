@@ -102,7 +102,7 @@ Please refer to: [Tutorial: Add identity providers to your applications in Azure
 1. In the **Register an application page** that appears, enter your application's registration information:
    - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `WebAppB2C`.
    - Under **Supported account types**, select **Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox, Outlook.com)**.
-   - In the **Redirect URI (optional)** section, select **Web** in the combo-box and enter the following redirect URI: `https://localhost:4000/redirect`.
+   - In the **Redirect URI (optional)** section, select **Web** in the combo-box and enter the following redirect URI: `http://localhost:4000/redirect`.
 1. Select **Register** to create the application.
 1. In the app's registration screen, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
 1. Select **Save** to save your changes.
@@ -120,15 +120,15 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `auth.json` file.
-1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of the `WebAppB2C` application copied from the Azure portal.
-1. Find the key `TenantId` and replace the existing value with your Azure AD tenant ID.
-1. Find the key `ClientSecret` and replace the existing value with the key you saved during the creation of the `WebAppB2C` app, in the Azure portal.
+1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of the application copied from the **Azure Portal**.
+1. Find the key `TenantId` and replace the existing value with your Azure AD tenant ID copied from the **Azure Portal**.
+1. Find the key `ClientSecret` and replace the existing value with the key you saved during the creation of the application, on the **Azure Portal**.
 1. Find the key `homePageRoute` and replace the existing value with the home page route of your application, e.g. `/home`.
 1. Find the key `redirectUri` and replace the existing value with the redirect URI that you have registered on **Azure Portal**, e.g. `http://localhost:4000/redirect`.
 1. Find the key `postLogoutRedirectUri` and replace the existing value with the URI of the page that you wish to be redirected after signing-out, e.g `http://localhost:4000/`.
-1. Find the key `policies.names` and replace it with the names (IDs) of your policies/user-flows e.g. `b2c_1_susi`.
-1. Find the key `policies.authorities` abd replace it with the authority strings of your policies/user-flows e.g. `https://fabrikamb2c.b2clogin.com/fabrikamb2c.onmicrosoft.com/b2c_1_susi`.
-1. Find the key `policies.authorityDomain` abd replace it with the domain of your authority e.g. `fabrikamb2c.b2clogin.com`.
+1. Find the key `policies.names` and replace it with the names (IDs) of your policies/user-flows, e.g. `b2c_1_susi`.
+1. Find the key `policies.authorities` abd replace it with the authority strings of your policies/user-flows, e.g. `https://fabrikamb2c.b2clogin.com/fabrikamb2c.onmicrosoft.com/b2c_1_susi`.
+1. Find the key `policies.authorityDomain` abd replace it with the domain of your authority, e.g. `fabrikamb2c.b2clogin.com`.
 
 ## Running the sample
 
@@ -157,9 +157,9 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ### ID Token validation
 
-### User flows
-
 ### Sign-out
+
+### User flows
 
 ## More information
 
