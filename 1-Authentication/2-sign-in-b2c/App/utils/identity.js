@@ -72,23 +72,41 @@ let nonce;
 // ============ MIDDLEWARE =============
 
 exports.signIn = (req, res, next) => {
-    if (authCodeRequest.state === APP_STATES.passwordReset) {
+    let state = null;
 
-        nonce = generateGuid();
+    if (authCodeRequest.state) {
+        state = JSON.parse(base64DecodeUrl(authCodeRequest.state))
+    }
 
-        const state = base64EncodeUrl(JSON.stringify({
-            stage: APP_STATES.passwordReset,
-            path: req.route.path,
-            nonce: nonce
-        }));
+    if (state) {
+        if (state.stage === APP_STATES.passwordReset) {
 
-        // if coming for password reset, set the authority to password reset
-        getAuthCode(auth.policies.authorities.resetPassword.authority, OIDC_SCOPES, state, res);
+            nonce = generateGuid();
+    
+            const state = base64EncodeUrl(JSON.stringify({
+                stage: APP_STATES.passwordReset,
+                path: req.route.path,
+                nonce: nonce
+            }));
+    
+            // if coming for password reset, set the authority to password reset
+            getAuthCode(auth.policies.authorities.resetPassword.authority, OIDC_SCOPES, state, res);
+        } else {
+            // else, login as usual
+    
+            nonce = generateGuid();
+    
+            const state = base64EncodeUrl(JSON.stringify({
+                stage: APP_STATES.login,
+                path: req.route.path,
+                nonce: nonce
+            }))
+    
+            getAuthCode(auth.policies.authorities.signUpSignIn.authority, OIDC_SCOPES, state, res);
+        }
     } else {
-        // else, login as usual
-
         nonce = generateGuid();
-
+    
         const state = base64EncodeUrl(JSON.stringify({
             stage: APP_STATES.login,
             path: req.route.path,
@@ -135,15 +153,17 @@ exports.handleRedirect = async(req, res, next) => {
                     }
                 }).catch((error) => {
                     console.log(req.query.error)
+                    console.log(req.query.error_description)
+                    console.log('hey1')
                     if (req.query.error) {
-
+                        console.log('hey2')
                         /**
                          * When the user selects "forgot my password" on the sign-in page, B2C service will throw an error.
                          * We are to catch this error and redirect the user to login again with the resetPassword authority.
                          * For more information, visit: https://docs.microsoft.com/azure/active-directory-b2c/user-flow-overview#linking-user-flows
                          */
                         if (JSON.stringify(req.query.error_description).includes("AADB2C90118")) {
-
+                            console.log('hey3')
                             nonce = generateGuid();
 
                             const state = base64EncodeUrl(JSON.stringify({
@@ -171,6 +191,7 @@ exports.handleRedirect = async(req, res, next) => {
             }))
 
             authCodeRequest.state = state;
+
             res.redirect('/signin');
         } else {
             res.status(500).send("unknown");
@@ -204,7 +225,7 @@ exports.isAuthenticated = (req, res, next) => {
  * This method is used to generate an auth code request
  * @param {string} authority: the authority to request the auth code from 
  * @param {array} scopes: scopes to request the auth code for 
- * @param {string} state: state of the application
+ * @param {object} state: state of the application
  * @param {object} res: express middleware response object
  */
 const getAuthCode = (authority, scopes, state, res) => {
@@ -212,6 +233,7 @@ const getAuthCode = (authority, scopes, state, res) => {
     // prepare the request
     authCodeRequest.authority = authority;
     authCodeRequest.scopes = scopes;
+    console.log(state);
     authCodeRequest.state = state;
 
     tokenRequest.authority = authority;
