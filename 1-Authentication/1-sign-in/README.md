@@ -10,6 +10,7 @@ name: A Node.js & Express Web App authenticating users against Azure AD with MSA
 urlFragment: ms-identity-javascript-nodejs-tutorial
 description: "This sample demonstrates a Node.js & Express Web App authenticating users against Azure AD with MSAL Node"
 ---
+
 # A Node.js & Express Web App authenticating users against Azure AD with MSAL Node
 
  1. [Overview](#overview)
@@ -27,7 +28,7 @@ description: "This sample demonstrates a Node.js & Express Web App authenticatin
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web application that authenticates users against Azure AD, with the help of [Microsoft Authentication Library for Node.js]() (MSAL Node). In doing so, it also illustrates various authentication concepts, such as [OIDC scopes](), [ID Tokens](), [ID Token validation](), [National Clouds]() and more.
+This sample demonstrates a Node.js & Express web application that authenticates users against Azure AD, with the help of [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it also illustrates various authentication concepts, such as [OpenID scopes](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes), [ID Tokens](https://docs.microsoft.com/azure/active-directory/develop/id-tokens), [ID Token validation]() and more.
 
 ## Scenario
 
@@ -73,6 +74,7 @@ or download and extract the repository .zip file.
 Locate the root of the sample folder. Then:
 
 ```console
+    cd 1-Authentication\1-sign-in
     npm install
 ```
 
@@ -123,7 +125,7 @@ As a first step you'll need to:
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
 1. In the **Register an application page** that appears, enter your application's registration information:
-   - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `WebApp`.
+   - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `ms-identity-nodejs-webapp`.
    - Under **Supported account types**, select **Accounts in this organizational directory only**.
    - In the **Redirect URI (optional)** section, select **Web** in the combo-box and enter the following redirect URI: `http://localhost:4000/redirect`.
 1. Select **Register** to create the application.

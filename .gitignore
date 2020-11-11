@@ -105,3 +105,4 @@ dist
 
 # NPM lock file
 package-lock.json
+/.vs

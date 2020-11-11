@@ -13,26 +13,26 @@
         "Kind": "WebApp",
         "Audience": "AzureADMyOrg",
         "HomePage": "https://localhost:4000",
-        "ReplyUrls": "https://localhost:4000/redirect",
+        "ReplyUrls": "http://localhost:4000/redirect",
         "PasswordCredentials": "Auto"
       }
     ],
     "CodeConfiguration": [
       {
-        "App": "webApp",
+        "App": "ms-identity-nodejs-webapp",
         "SettingKind": "JSON",
         "SettingFile": "\\..\\auth.json",
         "Mappings": [
           {
-            "key": "ClientId",
+            "key": "clientId",
             "value": ".AppId"
           },
           {
-            "key": "TenantId",
+            "key": "tenantId",
             "value": "$tenantId"
           },
           {
-            "key": "ClientSecret",
+            "key": "clientSecret",
             "value": ".AppKey"
           }
         ]

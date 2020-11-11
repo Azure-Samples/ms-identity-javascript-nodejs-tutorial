@@ -137,16 +137,16 @@ Function ConfigureApplications
     $user = Get-AzureADUser -ObjectId $creds.Account.Id
 
    # Create the webApp AAD application
-   Write-Host "Creating the AAD application (WebApp)"
+   Write-Host "Creating the AAD application (ms-identity-nodejs-webapp)"
    # Get a 2 years application key for the webApp Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
    $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
    $webAppAppKey = $pw
    # create the application 
-   $webAppAadApplication = New-AzureADApplication -DisplayName "WebApp" `
+   $webAppAadApplication = New-AzureADApplication -DisplayName "ms-identity-nodejs-webapp" `
                                                   -HomePage "https://localhost:4000" `
-                                                  -ReplyUrls "https://localhost:4000/redirect" `
+                                                  -ReplyUrls "http://localhost:4000/redirect" `
                                                   -IdentifierUris "https://$tenantName/WebApp" `
                                                   -PasswordCredentials $key `
                                                   -PublicClient $False
@@ -164,7 +164,7 @@ Function ConfigureApplications
    }
 
 
-   Write-Host "Done creating the webApp application (WebApp)"
+   Write-Host "Done creating the webApp application (ms-identity-nodejs-webapp)"
 
    # URL of the AAD application in the Azure portal
    # Future? $webAppPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.ObjectId+"/isMSAApp/"
@@ -172,10 +172,10 @@ Function ConfigureApplications
    Add-Content -Value "<tr><td>webApp</td><td>$currentAppId</td><td><a href='$webAppPortalUrl'>WebApp</a></td></tr>" -Path createdApps.html
 
 
-   # Update config file for 'webApp'
+   # Update config file for 'ms-identity-nodejs-webapp'
    $configFile = $pwd.Path + "\..\auth.json"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "ClientId" = $webAppAadApplication.AppId;"TenantId" = $tenantId;"ClientSecret" = $webAppAppKey };
+   $dictionary = @{ "clientId" = $webAppAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $webAppAppKey };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
   
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  

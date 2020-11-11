@@ -59,9 +59,9 @@ Function Cleanup
     # Removes the applications
     Write-Host "Cleaning-up applications from tenant '$tenantName'"
 
-    Write-Host "Removing 'webApp' (WebApp) if needed"
-    Get-AzureADApplication -Filter "DisplayName eq 'WebApp'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
-    $apps = Get-AzureADApplication -Filter "DisplayName eq 'WebApp'"
+    Write-Host "Removing 'webApp' (ms-identity-nodejs-webapp) if needed"
+    Get-AzureADApplication -Filter "DisplayName eq 'ms-identity-nodejs-webapp'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
+    $apps = Get-AzureADApplication -Filter "DisplayName eq 'ms-identity-nodejs-webapp'"
     if ($apps)
     {
         Remove-AzureADApplication -ObjectId $apps.ObjectId
@@ -73,7 +73,7 @@ Function Cleanup
         Write-Host "Removed WebApp.."
     }
     # also remove service principals of this app
-    Get-AzureADServicePrincipal -filter "DisplayName eq 'WebApp'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
+    Get-AzureADServicePrincipal -filter "DisplayName eq 'ms-identity-nodejs-webapp'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
     
 }
 
