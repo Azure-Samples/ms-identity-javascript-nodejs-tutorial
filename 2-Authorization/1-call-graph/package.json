@@ -1,0 +1,31 @@
+{
+  "name": "msal-node-auth-code",
+  "version": "1.0.0",
+  "description": "sample app for msal-node",
+  "main": "app.js",
+  "private": false,
+  "scripts": {
+    "start": "node App/app.js",
+    "build": "npm run build",
+    "dev": "nodemon App/app.js"
+  },
+  "author": "derisen",
+  "license": "MIT",
+  "dependencies": {
+    "@azure/msal-node": "^1.0.0-alpha.14",
+    "axios": "^0.21.0",
+    "body-parser": "^1.19.0",
+    "bootstrap": "^4.5.3",
+    "connect-mongodb-session": "^2.4.1",
+    "ejs": "^3.0.1",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "jwks-rsa": "^1.8.1",
+    "mongodb": "^3.5.0",
+    "uuid": "^8.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
