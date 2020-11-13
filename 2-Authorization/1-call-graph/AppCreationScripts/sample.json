@@ -1,0 +1,51 @@
+{
+    "Sample": {
+        "Title": "A Node.js & Express Web App calling Microsoft Graph API using MSAL Node",
+        "Level": 100,
+        "Client": "Node.js Express Web App",
+        "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
+        "Endpoint": "AAD v2.0"
+    },
+    "AADApps": [
+      {
+        "Id": "webApp",
+        "Name": "ExpressWebApp-3",
+        "Kind": "WebApp",
+        "Audience": "AzureADMyOrg",
+        "HomePage": "https://localhost:4000/",
+        "ReplyUrls": "http://localhost:4000/redirect",
+        "PasswordCredentials": "Auto",
+        "RequiredResourcesAccess": [
+          {
+            "Resource": "Microsoft Graph",
+            "DelegatedPermissions": [ "User.Read" ]
+          }
+        ]
+      }
+    ],
+    "CodeConfiguration": [
+      {
+        "App": "webApp",
+        "SettingKind": "JSON",
+        "SettingFile": "\\..\\auth.json",
+        "Mappings": [
+          {
+            "key": "clientId",
+            "value": ".AppId"
+          },
+          {
+            "key": "tenantId",
+            "value": "$tenantId"
+          },
+          {
+            "key": "clientSecret",
+            "value": ".AppKey"
+          },
+          {
+            "key": "redirectUri",
+            "value": ".ReplyUrls"
+          }
+        ]
+      }
+    ]
+  }

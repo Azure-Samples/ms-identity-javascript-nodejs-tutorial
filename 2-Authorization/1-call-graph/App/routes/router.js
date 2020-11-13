@@ -21,7 +21,8 @@ router.get('/signout', msal.signOut);
 router.get('/redirect', msal.handleRedirect);
 
 // protected routes
-router.get('/profile', msal.isAuthenticated, msal.getToken, mainController.getProfile); // get token for this route to call web API
+router.get('/profile', msal.isAuthenticated, msal.getToken, mainController.getProfilePage); // get token for this route to call web API
+router.get('/id', msal.isAuthenticated, mainController.getIdPage);
 router.get('/write', msal.isAuthenticated, todoController.writeNote);
 router.post('/write', msal.isAuthenticated, todoController.postNote);
 router.get('/notes/:noteId', msal.isAuthenticated, todoController.seeNote);
