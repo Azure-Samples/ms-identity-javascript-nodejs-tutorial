@@ -3,6 +3,7 @@
         "Title": "A Node.js & Express Web App calling Microsoft Graph API using MSAL Node",
         "Level": 100,
         "Client": "Node.js Express Web App",
+        "Service": "Microsoft Graph",
         "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
         "Endpoint": "AAD v2.0"
     },
