@@ -235,6 +235,13 @@ Function ConfigureApplications
 
    $requiredResourcesAccess.Add($requiredPermissions)
 
+   # Add Required Resources Access (from 'webApp' to 'Windows Azure Service Management API')
+   Write-Host "Getting access from 'webApp' to 'Windows Azure Service Management API'"
+   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "Windows Azure Service Management API" `
+                                                -requiredDelegatedPermissions "user_impersonation" `
+
+   $requiredResourcesAccess.Add($requiredPermissions)
+
 
    Set-AzureADApplication -ObjectId $webAppAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
    Write-Host "Granted permissions."
@@ -242,7 +249,7 @@ Function ConfigureApplications
    # Update config file for 'webApp'
    $configFile = $pwd.Path + "\..\auth.json"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "clientId" = $webAppAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $webAppAppKey;"redirectUri" = $webAppAadApplication.ReplyUrls };
+   $dictionary = @{ "clientId" = $webAppAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $webAppAppKey;"redirectUri" = $webAppAadApplication.ReplyUrls;"postLogoutRedirectUri" = $webAppAadApplication.HomePage };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
   
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  

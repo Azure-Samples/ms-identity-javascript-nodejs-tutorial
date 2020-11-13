@@ -20,6 +20,10 @@
           {
             "Resource": "Microsoft Graph",
             "DelegatedPermissions": [ "User.Read" ]
+          },
+          {
+            "Resource": "Windows Azure Service Management API",
+            "DelegatedPermissions": [ "user_impersonation" ]
           }
         ]
       }
@@ -45,6 +49,10 @@
           {
             "key": "redirectUri",
             "value": ".ReplyUrls"
+          },
+          {
+            "key": "postLogoutRedirectUri",
+            "value": ".HomePage"
           }
         ]
       }

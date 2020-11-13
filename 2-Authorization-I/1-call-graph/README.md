@@ -9,9 +9,9 @@ products:
   - microsoft-identity-platform  
 name: A Node.js & Express Web App calling Microsoft Graph API using MSAL Node
 urlFragment: ms-identity-javascript-nodejs-tutorial
-description: "This sample demonstrates a Node.js Express Web App application that authenticates users against Azure AD"
+description: "This sample demonstrates a Node.js Express Web App application that authenticates users against Azure AD and obtains access token to call Microsoft Graph"
 ---
-# A Node.js & Express Web App calling Microsoft Graph API using MSAL Node
+# A Node.js & Express Web App calling Microsoft Graph using MSAL Node
 
  1. [Overview](#overview)
  1. [Scenario](#scenario)
@@ -28,12 +28,13 @@ description: "This sample demonstrates a Node.js Express Web App application tha
 
 ## Overview
 
-This sample demonstrates a Node.js Express Web App application that authenticates users against Azure AD and obtains a token from .
+This sample demonstrates a Node.js & Express web application that authenticates users against [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and obtains [Access Tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) to call [Microsoft Graph API](https://docs.microsoft.com/graph/overview) (Graph API) and [Azure Resource Manager API](https://docs.microsoft.com/azure/azure-resource-manager/management/overview) (ARM API), with the help of [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it also illustrates various authorization concepts, such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [Dynamic Scopes and Incremental Consent](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent), **working with multiple resources** and more.
 
 ## Scenario
 
-1. The client Node.js Express Web App application uses **MSAL Node** to obtain an ID Token from **Azure AD**.
-2. The **ID Token** proves that the user has successfully authenticated against **Azure AD**.
+1. The client application uses the **MSAL Node** to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
+1. The **Access Token** is used as a *bearer* token to authorize the user to access the **resource** (Graph API or ARM API).
+1. The **resource owner** responds with the resource that the user has access to.
 
 ![Overview](./ReadmeFiles/topology.png)
 
@@ -53,7 +54,6 @@ This sample demonstrates a Node.js Express Web App application that authenticate
 - [Node.js](https://nodejs.org/en/download/) must be installed to run this sample.
 - A modern web browser. This sample uses **ES6** conventions and will not run on **Internet Explorer**.
 - [Visual Studio Code](https://code.visualstudio.com/download) is recommended for running and editing this sample.
-- [VS Code Azure Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack) extension is recommended for interacting with Azure through VS Code Interface.
 - An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://docs.microsoft.com/azure/active-directory/develop/quickstart-create-new-tenant)
 - A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**. Therefore, if you signed in to the [Azure portal](https://portal.azure.com) with a personal account and have never created a user account in your directory before, you need to do that now.
 
@@ -144,6 +144,12 @@ As a first step you'll need to:
    - In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
    - In the **Delegated permissions** section, select the **User.Read** in the list. Use the search box if necessary.
    - Select the **Add permissions** button at the bottom.
+1. Still in the **API permissions** blade,
+   - Select the **Add a permission** button and then,
+   - Ensure that the **Microsoft APIs** tab is selected.
+   - In the *Commonly used Microsoft APIs* section, select **Azure Service Management**
+   - In the **Delegated permissions** section, select the **user_impersonation** in the list. Use the search box if necessary.
+   - Select the **Add permissions** button at the bottom.
 
 #### Configure the web app to use your app registration
 
@@ -152,10 +158,22 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `auth.json` file.
-1. Find the key `clientId` and replace the existing value with the **application ID** (clientId) of the `ExpressWebApp` application copied from the Azure portal.
+1. Find the key `clientId` and replace the existing value with the **application ID** (clientId) of the `ExpressWebApp` application copied from the Azure Portal.
 1. Find the key `tenantId` and replace the existing value with your Azure AD **tenant ID**.
-1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of the `ExpressWebApp` app, in the Azure portal.
+1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of the `ExpressWebApp` app, in the Azure Portal.
+1. Find the key `homePageRoute` and replace the existing value with the route that you wish to be redirected after sign-in, e.g. `/home`.
 1. Find the key `redirectUri` and replace the existing value with the **Redirect URI** for `ExpressWebApp` app. For example, `https://localhost:4000/redirect`.
+1. Find the `postLogoutRedirectUri` and replace the existing value with the URI that you wish to be redirected after sign-out, e.g. `https://localhost:4000/`
+
+The rest of the **key-value** pairs are for resources/APIs that you would like to call. They are set as **default**, but you can modify them as you wish:
+
+```json
+        "nameOfYourResource": {
+            "callingPageRoute": "/<route_where_this_resource_will_be_called_from>",
+            "endpoint": "<uri_coordinates_of_the_resource>",
+            "scopes": ["scope1_of_the_resource", "scope1_of_the_resource", "..."]
+        },
+```
 
 ## Running the sample
 
@@ -169,7 +187,8 @@ Locate the root of the sample folder. Then:
 
 1. Open your browser and navigate to `http://localhost:4000`.
 1. Click the **Sign-in** button on the top right corner.
-1. Once you sign-in, click on the **Profile** button to call **Microsoft Graph**.
+1. Once you sign-in, click on the **See my profile** button to call **Microsoft Graph**.
+1. Once you sign-in, click on the **Get my tenant** button to call **Azure Resource Manager**.
 
 ![Screenshot](./ReadmeFiles/screenshot.png)
 
@@ -181,8 +200,72 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ## About the code
 
-> - Describe where the code uses auth libraries, or calls the graph
-> - Describe specific aspects (e.g. caching, validation etc.)
+### Protected resources and scopes
+
+In order to access a protected resource on behalf of a signed-in user, the app needs to present a valid **Access Token** to that resource owner (for example, Microsoft Graph). The intended recipient of an **Access Token** is represented by the `aud` claim (in this case, it should be the Microsoft Graph API's App ID); in case the value for the `aud` claim does not mach the resource **APP ID URI**, the token should be considered invalid. Likewise, the permissions that an **Access Token** grants is represented by the `scp` claim. See [Access Token claims](https://docs.microsoft.com/azure/active-directory/develop/access-tokens#payload-claims) for more information.
+
+Scopes can come in various forms so it pays off to be familiar with them. The following are all resource scopes:
+
+- `user.read` - short-hand expression for Microsoft Graph **User** resource scope
+- `https://management.azure.com/user_impersonation` - https expression of a multi-tenant resource scope
+- `api://9k8521c1-bab5-1256-a87b-574f83c463z6/access_as_user` - expression of a single-tenant resource (e.g. custom web API) scope
+
+### Dynamic scopes and incremental consent
+
+In **Azure AD**, the scopes (permissions) set directly on the application registration are called **static scopes**. Other scopes that are only defined within the code are called **dynamic scopes**. Consider:
+
+```javascript
+     const loginRequest = {
+          scopes: [ "openid", "profile", "User.Read" ]
+     };
+     const tokenRequest = {
+          scopes: [ "Mail.Read" ]
+     };
+
+     // will return an ID Token and an Access Token with scopes: "openid", "profile" and "User.Read"
+     msalInstance.login(loginRequest);
+
+     // will fail and fallback to an interactive method prompting a consent screen
+     // after consent, the received token will be issued for "openid", "profile" ,"User.Read" and "Mail.Read" combined
+     msalInstance.acquireToken(tokenRequest);
+```
+
+In the code snippet above, the user will be prompted for consent once they authenticate and receive an **ID Token** and an **Access Token** with scope `User.Read`. Later, if they request an **Access Token** for `User.Read`, they will not be asked for consent again (in other words, they can acquire a token *silently*). On the other hand, the user did not consented to `Mail.Read` at the authentication stage. As such, they will be asked for consent when requesting an **Access Token** for that scope. The token received will contain all the previously consented scopes, hence the term *incremental consent*.
+
+### Working with multiple resources
+
+When you have to access different resources (for instance, Microsoft Graph API *and* Azure Resource Manager API), initiate a separate token request for each:
+
+```javascript
+    // "User.Read" stands as shorthand for "graph.microsoft.com/User.Read"
+    const graphToken = await msalInstance.getToken({
+         scopes: [ "User.Read" ]
+    });
+    const customApiToken = await msalInstance.getToken({
+         scopes: [ "api://<myCustomApiClientId>/My.Scope" ]
+    });
+```
+
+Bear in mind that you can request multiple scopes for the same resource (e.g. `User.Read`, `User.Write` and `Calendar.Read` for Graph API).
+
+```javascript
+    const graphToken = await msalInstance.getToken({
+         scopes: [ "User.Read", "User.Write", "Calendar.Read"] // all Graph API scopes
+    });
+```
+
+In case you erroneously pass multiple resources in your token request, the token you will receive will only be issued for the first resource.
+
+```javascript
+    // you will only receive a token for Graph API's "User.Read" scope here
+    const myToken = await msalInstance.getToken({
+         scopes: [ "User.Read", "api://<myCustomApiClientId>/My.Scope" ]
+    });
+```
+
+### Access Token validation
+
+Clients should treat access tokens as opaque strings, as the contents of the token are intended for the **resource only** (such as a web API or Microsoft Graph). For validation and debugging purposes, developers can decode **JWT**s (*JSON Web Tokens*) using a site like [jwt.ms](https://jwt.ms).
 
 ## More information
 

@@ -174,7 +174,7 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
                         res.status(500).send(error);
                     });
             } else if (state.stage === constants.AppStages.ACQUIRE_TOKEN) {
-                
+
                 let resourceName = this.getResourceName(state.path);
 
                 const tokenRequest = {
@@ -185,17 +185,15 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
 
                 this.acquireTokenByCode(tokenRequest)
                     .then((response) => {
-
-                        // store access token somewhere
-                        // this.validateAccessToken(response.accessToken)
-
+                        console.log("\nResponse: \n:", response);
+                        
                         req.session[resourceName] = {
                             accessToken: response.accessToken,
                         }
 
                         // call the web API
-                        this.callAPI(this.rawConfig.resources[resourceName].endpoint, response.accessToken, (graphResponse) => {
-                            req.session[resourceName].resourceResponse = graphResponse;
+                        this.callAPI(this.rawConfig.resources[resourceName].endpoint, response.accessToken, (resourceResponse) => {
+                            req.session[resourceName].resourceResponse = resourceResponse;
                             return res.status(200).redirect(state.path);
                         });
                         
@@ -243,7 +241,8 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
             // initiate the first leg of auth code grant to get token
             this.getAuthCode(
                 this.msalConfig.auth.authority, 
-                scopes, state, this.msalConfig.auth.redirectUri, res);
+                scopes, state, this.msalConfig.auth.redirectUri, res
+                );
 
         } else {
             next();

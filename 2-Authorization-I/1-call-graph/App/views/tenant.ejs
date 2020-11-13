@@ -6,43 +6,27 @@
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link rel="stylesheet" href="/style.css">
-        <title>Read</title>
+        <title>Tenant</title>
     </head>
     <body>
 
         <%- include('includes/navbar', {isAuthenticated: isAuthenticated}); %>
+
         <div class="table-area-div">
             <table class="table">
                 <thead class="thead-dark">
                     <tr>
-                        <th scope="col"></th>
-                        <th scope="col">Title</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">Status</th>
-                        <th scope="col"></th>
-                       <th scope="col"></th>
+                        <th scope="col">Claim</th>
+                        <th scope="col">Value</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% notes.map((note, index) => { %>
+                    <% for (const [key, value] of Object.entries(tenant)) { %>
                         <tr>
-                            <th scope="row"><%= index + 1 %></th>
-                            <td><a href="/notes/<%= note._id %>"> <%= note.title %> </a></td>
-                            <td><%= note.description %></td>
-                            <td><%= note.status %></td>
-                            <td>
-                                <a href='/notes/<%= note._id %>?edit=true'>
-                                    <button type='submit' class="btn btn-secondary btn-sm">EDIT</button>
-                                </a>
-                            </td>
-                            <td>    
-                                <form action='/delete' method='POST'>
-                                    <input type='hidden' name='noteId' value='<%=note._id %>'>
-                                    <button type='submit' class="btn btn-secondary btn-sm">DELETE</button>
-                                </form>
-                            </td>
+                            <td><%= key %></td>
+                            <td><%= value %></td>
                         </tr>
-                    <% }) %>
+                    <% } %>
                 </tbody>
             </table>
         </div> 

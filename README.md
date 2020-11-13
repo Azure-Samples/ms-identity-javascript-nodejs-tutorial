@@ -9,6 +9,7 @@ products:
 - azure-storage
 - azure-key-vault
 - azure-functions
+- azure-resource-manager
 - azure-active-directory
 - azure-active-directory-b2c
 - microsoft-identity-platform
@@ -43,43 +44,36 @@ Please refer to each chapter's README for sample-specific recommendations.
 
 ## Contents
 
-- For **Azure AD**, start the tutorial from [here](./1-Authentication/1-1-sign-in/README-incremental.md)
-- For **Azure AD B2C**, start the tutorial from [here](./1-Authentication/1-2-sign-in-b2c/README-incremental.md)
+- For **Azure AD**, start the tutorial from [here](./1-Authentication/1-sign-in/README-incremental.md)
+- For **Azure AD B2C**, start the tutorial from [here](./1-Authentication/2-sign-in-b2c/README-incremental.md)
 
-Alternatively, choose below the sample you want to review.  
+Alternatively, choose below the sample you want to review.
 
-<!-- | Chapter              | Covers                                                                      |
-|----------------------|-----------------------------------------------------------------------------|
-| `Authentication`     | ID tokens, sign-in, sign-out, single sign-on (SSO), national clouds         |
-| `Authorization I`    | Access tokens, acquiring a token, scopes and resources, MS Graph API        |
-| `Authorization II`   | Protecting a web API, authorizing users to call a web API, token validation |
-| `Advanced Grants`    | On-behalf-of flow, device code flow, client credentials flow                |
-| `Access Control`     | Roles (RBAC), groups, conditional access, overage scenarios                 |
-| `Deployment`         | Multi-tenant (SaaS) applications, managed identity, key vaults, hosting     |
-| `Hybrid Identity`    | ADFS, on-prem authentication, migration scenarios, Azure AD Connect         | -->
-
-### Chapter 1: Adding Authentication with Azure AD in your web application
+### Chapter 1: Add Authentication to your web app
 
 |               |               |
 |---------------|---------------|
-| <img src="./1-Authentication/1-1-sign-in/ReadmeFiles/topology_signin.png" width="200"> | [**Sign-in with Azure AD**](https://github.com/Azure-Samples/ms-identity-javascript-tutorial/tree/main/1-Authentication/1-1-sign-in) </br> Sign-in your users with  **Azure AD** and learn to work with **ID Tokens**. Learn how **single sign-on (SSO)** works. |
-| <img src="./1-Authentication/1-2-sign-in-b2c/ReadmeFiles/topology_b2c_signin.png" width="200"> | [**Sign-in with Azure AD B2C**](https://github.com/Azure-Samples/ms-identity-javascript-tutorial/tree/main/1-Authentication/1-2-sign-in-b2c) </br> Sign-in your customers with **Azure AD B2C**. Learn to integrate with **external social identity providers**. Learn how to use **user-flows** and **custom policies**. |
+| <img src="./1-Authentication/1-sign-in/ReadmeFiles/topology_signin.png" width="200"> | [**Sign-in with Azure AD**](./1-Authentication/1-sign-in/README.md) </br> Sign-in your users with  **Azure AD** and learn to work with **ID Tokens**. Learn how **single sign-on (SSO)** works. |
+| <img src="./1-Authentication/2-sign-in-b2c/ReadmeFiles/topology_b2c_signin.png" width="200"> | [**Sign-in with Azure AD B2C**](./1-Authentication/2-sign-in-b2c/README.md) </br> Sign-in your customers with **Azure AD B2C**. Learn to integrate with **external social identity providers**. Learn how to use **user-flows** and **custom policies**. |
 
-### Chapter 2: Sign-in a user and get an Access Token for Microsoft Graph or your protected Web API
-
-Here we build on the concepts we learnt earlier to authenticate users and acquire Access Tokens for your own Web APIs and the **Microsoft Graph API**.
+### Chapter 2: Sign-in a user and get an Access Token for Microsoft Graph
 
 |                |               |
 |----------------|---------------|
-| <img src="./2-Authorization-I/2-1-call-graph/ReadmeFiles/topology_callgraph.png" width="200"> | [**Get an Access Token from Azure AD and call Microsoft Graph**](https://github.com/Azure-Samples/ms-identity-javascript-tutorial/tree/main/2-Authorization-I/2-1-call-graph) </br> Authenticate your users and acquire an **Access Token** for Microsoft Graph and then call the **Microsoft Graph API**. |
-| <img src="./3-Authorization-II/3-1-call-api/ReadmeFiles/topology_callapi.png" width="200"> | [**Protect and call a web API on Azure AD**](https://github.com/Azure-Samples/ms-identity-javascript-tutorial/tree/main/3-Authorization-II/3-1-call-api) </br> Protect your web API with the **Azure AD**. Use a client application to sign-in a user, acquire an **Access Token** for your web API and call your protected Web API. |
-| <img src="./3-Authorization-II/3-2-call-api-b2c/ReadmeFiles/topology_b2c_callapi.png" width="200"> | [**Protect and call a web API on Azure AD B2C**](https://github.com/Azure-Samples/ms-identity-javascript-tutorial/tree/main/3-Authorization-II/3-2-call-api-b2c) </br> Protect your web API with **Azure AD B2C**. Use a client application to sign-in a user, acquire an **Access Token** for your web API and call your protected web API. |
+| <img src="./2-Authorization-I/1-call-graph/ReadmeFiles/topology_callgraph.png" width="200"> | [**Get an Access Token from Azure AD and call Microsoft Graph**](./2-Authorization-I/1-call-graph/README.md) </br> Authenticate your users and acquire an **Access Token** for Microsoft Graph and then call the **Microsoft Graph API**. |
+
+### Chapter 3: Protect an API and call the API from your client app
+
+|                |               |
+|----------------|---------------|
+| <img src="./3-Authorization-II/1-call-api/ReadmeFiles/topology_callapi.png" width="200"> | [**Protect and call a web API on Azure AD**](./3-Authorization-II/1-call-api/README.md) </br> Protect your web API with the **Azure AD**. Use a client application to sign-in a user, acquire an **Access Token** for your web API and call your protected web API. |
+| <img src="./3-Authorization-II/2-call-api-b2c/ReadmeFiles/topology_b2c_callapi.png" width="200"> | [**Protect and call a web API on Azure AD B2C**](./3-Authorization-II/2-call-api-b2c/README.md) </br> Protect your web API with **Azure AD B2C**. Use a client application to sign-in a user, acquire an **Access Token** for your web API and call your protected web API. |
 
 ### Chapter 3: Deploy your app to Azure
 
 |                 |               |
 |-----------------|---------------|
-| <img src="./5-Deployment/ReadmeFiles/topology_dep.png" width="200"> | [**Deploy to Azure Storage and App Service**](https://github.com/Azure-Samples/ms-identity-javascript-tutorial/tree/main/5-Deployment) </br> Prepare your app for deployment to various **Azure** services. Learn how to package and upload files, configure authentication parameters and use **Azure** services for managing your operations. |
+| <img src="./4-Deployment/ReadmeFiles/topology_dep.png" width="200"> | [**Deploy to Azure Storage and App Service**](./4-Deployment/README.md) </br> Prepare your app for deployment to various **Azure** services. Learn how to package and upload files, configure authentication parameters and use **Azure** services for managing your operations. |
 
 ## We'd love your feedback!
 
