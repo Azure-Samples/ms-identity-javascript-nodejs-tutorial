@@ -10,10 +10,10 @@
     "AADApps": [
       {
         "Id": "webApp",
-        "Name": "ExpressWebApp-3",
+        "Name": "ExpressWebApp-2",
         "Kind": "WebApp",
         "Audience": "AzureADMyOrg",
-        "HomePage": "https://localhost:4000/",
+        "HomePage": "http://localhost:4000/",
         "ReplyUrls": "http://localhost:4000/redirect",
         "PasswordCredentials": "Auto",
         "RequiredResourcesAccess": [

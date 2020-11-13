@@ -167,7 +167,7 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
                             // edit here if you would like to change redirect after successful login
                             return res.status(200).redirect(this.rawConfig.configuration.homePageRoute);
                         } else {
-                            return res.status(401).redirect('/401.html');
+                            return res.status(401).send("Not Permitted");
                         }
                     }).catch((error) => {
                         console.log(error);
@@ -202,10 +202,10 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
                         res.status(500).send(error);
                     });
             } else {
-                res.status(500).send("unknown");
+                res.status(500).send("Unknown app stage");
             }
             } else {
-                res.status(401).redirect('/401.html');
+                res.status(401).send("Not Permitted");
             }
     };
 
@@ -241,23 +241,23 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
             // initiate the first leg of auth code grant to get token
             this.getAuthCode(
                 this.msalConfig.auth.authority, 
-                scopes, state, this.msalConfig.auth.redirectUri, res
-                );
-
+                scopes, state, 
+                this.msalConfig.auth.redirectUri, 
+                res);
         } else {
             next();
         }
     };
 
     /**
-     * Middleware checks for id token (and redirects to get sign-in?)
+     * Middleware checks for id token (and redirects to sign-in?)
      * @param {Object} req: express request object
      * @param {Object} res: express response object
      * @param {Function} next: express next 
      */
     isAuthenticated = (req, res, next) => {        
         if (!req.session.isAuthenticated) {
-            return res.redirect('/401.html');
+            return res.send("Not Permitted");
         }
         next();
     };
@@ -279,7 +279,7 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
         }
         
         if (!this.hasTokenForProtectedRoute(req.session, resourceName)) {
-            return res.redirect('/401.html');
+            return res.send("Not Permitted");
         }
         next();
     };
@@ -306,7 +306,7 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
 
     /**
      * Validates the access token for signature 
-     * and a given set of claims
+     * and against a predefined set of claims
      * @param {Object} token: raw access token
      */
     validateAccessToken = (accessToken) => {
@@ -341,7 +341,7 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
      */
     getSigningKeys = (header, callback) => {
         const client = jwksClient({
-            jwksUri: 'https://login.microsoftonline.com/' + this.rawConfig.credentials.tenantId + '/discovery/v2.0/keys'
+            jwksUri: `${constants.AuthorityStrings.AAD}${this.rawConfig.credentials.tenantId}/discovery/v2.0/keys`
         });
     
         client.getSigningKey(header.kid, function (err, key) {
@@ -413,7 +413,7 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
 
     /**
      * Util method to get the resource name for a given callingPageRoute (auth.json)
-     * @param {String} path 
+     * @param {String} path: /path string that the resource is associated with 
      */
     getResourceName = (path) => {
         let index = Object.values(this.rawConfig.resources).findIndex(resource => resource.callingPageRoute === path);

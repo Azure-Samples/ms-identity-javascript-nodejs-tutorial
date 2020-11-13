@@ -192,17 +192,17 @@ Function ConfigureApplications
     $user = Get-AzureADUser -ObjectId $creds.Account.Id
 
    # Create the webApp AAD application
-   Write-Host "Creating the AAD application (ExpressWebApp-3)"
+   Write-Host "Creating the AAD application (ExpressWebApp-2)"
    # Get a 2 years application key for the webApp Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
    $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
    $webAppAppKey = $pw
    # create the application 
-   $webAppAadApplication = New-AzureADApplication -DisplayName "ExpressWebApp-3" `
-                                                  -HomePage "https://localhost:4000/" `
+   $webAppAadApplication = New-AzureADApplication -DisplayName "ExpressWebApp-2" `
+                                                  -HomePage "http://localhost:4000/" `
                                                   -ReplyUrls "http://localhost:4000/redirect" `
-                                                  -IdentifierUris "https://$tenantName/ExpressWebApp-3" `
+                                                  -IdentifierUris "https://$tenantName/ExpressWebApp-2" `
                                                   -PasswordCredentials $key `
                                                   -PublicClient $False
 
@@ -219,12 +219,12 @@ Function ConfigureApplications
    }
 
 
-   Write-Host "Done creating the webApp application (ExpressWebApp-3)"
+   Write-Host "Done creating the webApp application (ExpressWebApp-2)"
 
    # URL of the AAD application in the Azure portal
    # Future? $webAppPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.ObjectId+"/isMSAApp/"
    $webAppPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>webApp</td><td>$currentAppId</td><td><a href='$webAppPortalUrl'>ExpressWebApp-3</a></td></tr>" -Path createdApps.html
+   Add-Content -Value "<tr><td>webApp</td><td>$currentAppId</td><td><a href='$webAppPortalUrl'>ExpressWebApp-2</a></td></tr>" -Path createdApps.html
 
    $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
 
