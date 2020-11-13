@@ -5,6 +5,10 @@ const mainController = require('../controllers/mainController');
 const auth = require('../../auth.json');
 const MsalExpressMiddleware = require('../utils/msalExpressMiddleware');
 
+/**
+ * pass in a configuration file to initiate an msal object
+ * that will expose the middleware functions
+ */
 const msal = new MsalExpressMiddleware(auth);
 
 // initialize router
@@ -17,12 +21,12 @@ router.get('/home', mainController.getHomePage);
 // authentication routes
 router.get('/signin', msal.signIn);
 router.get('/signout', msal.signOut);
-router.get('/redirect', msal.handleRedirect);
+router.get('/redirect', msal.handleRedirect); 
 
 // protected routes
 router.get('/id', msal.isAuthenticated, mainController.getIdPage);
 router.get('/profile', msal.isAuthenticated, msal.getToken, mainController.getProfilePage); // get token for this route to call web API
-router.get('/tenant', msal.getToken, mainController.getTenantPage) // get token for this route to call web API
+router.get('/tenant', msal.isAuthenticated, msal.getToken, mainController.getTenantPage) // get token for this route to call web API
 
 // 404
 router.get('*', (req, res) => res.status(404).redirect('/404.html'));

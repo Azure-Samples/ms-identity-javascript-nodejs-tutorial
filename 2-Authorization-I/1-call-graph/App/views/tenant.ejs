@@ -13,6 +13,16 @@
         <%- include('includes/navbar', {isAuthenticated: isAuthenticated}); %>
 
         <div class="table-area-div">
+            <p>Calling <strong>Azure Resource Manager API</strong>...</p>
+            <ul>
+                <li><strong>resource:</strong> <mark>Tenant</mark> object</li>
+                <li><strong>endpoint:</strong> <mark>https://management.azure.com/tenants?api-version=2020-01-01</mark></li>
+                <li><strong>scope:</strong> <mark>https://management.azure.com/user_impersonation</mark></li>
+            </ul>
+            <p>Contents of the <strong>response</strong> is below:</p>
+        </div>
+
+        <div class="table-area-div">
             <table class="table">
                 <thead class="thead-dark">
                     <tr>

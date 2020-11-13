@@ -72,7 +72,7 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
 
     /**
      * Maps the custom JSON configuration file to configuration
-     * object exprected by MSAL Node
+     * object expected by MSAL Node
      * @param {JSON} config
      */
     static shapeConfiguration = (config) => {
