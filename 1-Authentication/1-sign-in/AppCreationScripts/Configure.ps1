@@ -137,17 +137,17 @@ Function ConfigureApplications
     $user = Get-AzureADUser -ObjectId $creds.Account.Id
 
    # Create the webApp AAD application
-   Write-Host "Creating the AAD application (ms-identity-nodejs-webapp)"
+   Write-Host "Creating the AAD application (ExpressWebApp-1)"
    # Get a 2 years application key for the webApp Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
    $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
    $webAppAppKey = $pw
    # create the application 
-   $webAppAadApplication = New-AzureADApplication -DisplayName "ms-identity-nodejs-webapp" `
-                                                  -HomePage "https://localhost:4000" `
+   $webAppAadApplication = New-AzureADApplication -DisplayName "ExpressWebApp-1" `
+                                                  -HomePage "http://localhost:4000" `
                                                   -ReplyUrls "http://localhost:4000/redirect" `
-                                                  -IdentifierUris "https://$tenantName/WebApp" `
+                                                  -IdentifierUris "https://$tenantName/ExpressWebApp-1" `
                                                   -PasswordCredentials $key `
                                                   -PublicClient $False
 
@@ -164,18 +164,18 @@ Function ConfigureApplications
    }
 
 
-   Write-Host "Done creating the webApp application (ms-identity-nodejs-webapp)"
+   Write-Host "Done creating the webApp application (ExpressWebApp-1)"
 
    # URL of the AAD application in the Azure portal
    # Future? $webAppPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.ObjectId+"/isMSAApp/"
    $webAppPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>webApp</td><td>$currentAppId</td><td><a href='$webAppPortalUrl'>WebApp</a></td></tr>" -Path createdApps.html
+   Add-Content -Value "<tr><td>webApp</td><td>$currentAppId</td><td><a href='$webAppPortalUrl'>ExpressWebApp-1</a></td></tr>" -Path createdApps.html
 
 
-   # Update config file for 'ms-identity-nodejs-webapp'
+   # Update config file for 'webApp'
    $configFile = $pwd.Path + "\..\auth.json"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "clientId" = $webAppAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $webAppAppKey };
+   $dictionary = @{ "clientId" = $webAppAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $webAppAppKey;"redirectUri" = $webAppAadApplication.ReplyUrls;"postLogoutRedirectUri" = $webAppAadApplication.HomePage };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
   
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  

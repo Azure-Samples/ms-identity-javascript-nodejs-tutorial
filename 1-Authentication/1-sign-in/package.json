@@ -1,23 +1,20 @@
 {
   "name": "msal-node-tutorial-signin",
   "version": "1.0.0",
-  "description": "A Node.js & Express Web App authenticating users against Azure AD with MSAL Node",
+  "description": "A Node.js & Express web app authenticating users against Azure AD with MSAL Node",
   "main": "app.js",
   "scripts": {
     "start": "node App/app.js",
-    "build": "npm run build",
     "dev": "nodemon App/app.js"
   },
   "author": "derisen",
   "license": "MIT",
   "dependencies": {
-    "@azure/msal-node": "^1.0.0-beta.0",
     "body-parser": "^1.19.0",
     "bootstrap": "^4.5.3",
     "ejs": "^3.0.1",
     "express": "^4.17.1",
-    "express-session": "^1.17.1",
-    "uuid": "^8.3.1"
+    "express-session": "^1.17.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"

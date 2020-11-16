@@ -9,17 +9,17 @@
     "AADApps": [
       {
         "Id": "webApp",
-        "Name": "WebApp",
+        "Name": "ExpressWebApp-1",
         "Kind": "WebApp",
         "Audience": "AzureADMyOrg",
-        "HomePage": "https://localhost:4000",
+        "HomePage": "http://localhost:4000",
         "ReplyUrls": "http://localhost:4000/redirect",
         "PasswordCredentials": "Auto"
       }
     ],
     "CodeConfiguration": [
       {
-        "App": "ms-identity-nodejs-webapp",
+        "App": "webApp",
         "SettingKind": "JSON",
         "SettingFile": "\\..\\auth.json",
         "Mappings": [
@@ -34,6 +34,14 @@
           {
             "key": "clientSecret",
             "value": ".AppKey"
+          },
+          {
+            "key": "redirectUri",
+            "value": ".ReplyUrls"
+          },
+          {
+            "key": "postLogoutRedirectUri",
+            "value": ".HomePage"
           }
         ]
       }

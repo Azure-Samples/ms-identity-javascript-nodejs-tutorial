@@ -1,27 +1,21 @@
 {
   "name": "msal-node-tutorial-call-graph",
   "version": "1.0.0",
-  "description": "This sample demonstrates a Node.js Express Web App application that authenticates users against Azure AD and obtains access token to call Microsoft Graph",
+  "description": "A Node.js & Express web app calling Microsoft Graph API using MSAL Node",
   "main": "app.js",
-  "private": false,
   "scripts": {
     "start": "node App/app.js",
-    "build": "npm run build",
     "dev": "nodemon App/app.js"
   },
   "author": "derisen",
   "license": "MIT",
   "dependencies": {
-    "@azure/msal-node": "^1.0.0-beta.1",
     "axios": "^0.21.0",
     "body-parser": "^1.19.0",
     "bootstrap": "^4.5.3",
     "ejs": "^3.0.1",
     "express": "^4.17.1",
-    "express-session": "^1.17.1",
-    "jsonwebtoken": "^8.5.1",
-    "jwks-rsa": "^1.11.0",
-    "uuid": "^8.3.1"
+    "express-session": "^1.17.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"

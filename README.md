@@ -62,18 +62,24 @@ Alternatively, choose below the sample you want to review.
 |----------------|---------------|
 | <img src="./2-Authorization-I/1-call-graph/ReadmeFiles/topology_callgraph.png" width="200"> | [**Get an Access Token from Azure AD and call Microsoft Graph**](./2-Authorization-I/1-call-graph/README.md) </br> Authenticate your users and acquire an **Access Token** for Microsoft Graph and then call the **Microsoft Graph API**. |
 
-### Chapter 3: Protect an API and call the API from your client app
+### Chapter 3: Protect a web API and call the API from your client app
 
 |                |               |
 |----------------|---------------|
 | <img src="./3-Authorization-II/1-call-api/ReadmeFiles/topology_callapi.png" width="200"> | [**Protect and call a web API on Azure AD**](./3-Authorization-II/1-call-api/README.md) </br> Protect your web API with the **Azure AD**. Use a client application to sign-in a user, acquire an **Access Token** for your web API and call your protected web API. |
 | <img src="./3-Authorization-II/2-call-api-b2c/ReadmeFiles/topology_b2c_callapi.png" width="200"> | [**Protect and call a web API on Azure AD B2C**](./3-Authorization-II/2-call-api-b2c/README.md) </br> Protect your web API with **Azure AD B2C**. Use a client application to sign-in a user, acquire an **Access Token** for your web API and call your protected web API. |
 
-### Chapter 3: Deploy your app to Azure
+### Chapter 4: Call a web API that calls another web API on behalf of a user
 
 |                 |               |
 |-----------------|---------------|
-| <img src="./4-Deployment/ReadmeFiles/topology_dep.png" width="200"> | [**Deploy to Azure Storage and App Service**](./4-Deployment/README.md) </br> Prepare your app for deployment to various **Azure** services. Learn how to package and upload files, configure authentication parameters and use **Azure** services for managing your operations. |
+| <img src="./4-AdvancedGrants/4-1-call-api-graph/ReadmeFiles/topology_obo.png" width="200"> | [**Call a web API that calls Microsoft Graph on behalf of a user**](./4-AdvancedGrants/1-call-api-graph) </br> Enhance your protected web API to acquire an **Access Token** for Microsoft Graph **on-behalf-of** a user signed-in to the client app. |
+
+### Chapter 5: Deploy your app to Azure
+
+|                 |               |
+|-----------------|---------------|
+| <img src="./5-Deployment/ReadmeFiles/topology_dep.png" width="200"> | [**Deploy to Azure Storage and App Service**](./5-Deployment/README.md) </br> Prepare your app for deployment to various **Azure** services. Learn how to package and upload files, configure authentication parameters and use **Azure** services for managing your operations. |
 
 ## We'd love your feedback!
 

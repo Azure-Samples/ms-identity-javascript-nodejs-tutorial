@@ -1,7 +1,7 @@
 {
-  "name": "msal-node-tutorial-signin-b2c",
+  "name": "msal-node-tutorial-call-api",
   "version": "1.0.0",
-  "description": "A Node.js & Express web app authenticating users against Azure AD B2C using MSAL Node",
+  "description": "A Node.js & Express web app calling a custom web API using MSAL Node",
   "main": "app.js",
   "scripts": {
     "start": "node App/app.js",

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
+
 /**
  * 
  */
@@ -79,15 +84,6 @@ exports.PromptValue = {
     CONSENT: "consent",
     NONE: "none",
 };
-
-/**
- * allowed values for response_mode
- */
-exports.ResponseMode = {
-    QUERY: "query",
-    FRAGMENT: "fragment",
-    FORM_POST: "form_post"
-}
 
 /**
  * Credential Type stored in the cache

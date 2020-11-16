@@ -1,0 +1,19 @@
+{
+  "name": "msal-node-commons",
+  "version": "1.0.0",
+  "description": "Helps creating protected web apps and web APIs with Microsoft identity platform and Azure AD B2C using MSAL Node",
+  "author": "derisen",
+  "license": "MIT",
+  "dependencies": {
+    "@azure/msal-node": "^1.0.0-beta.1",
+    "axios": "^0.21.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "jwks-rsa": "^1.8.1",
+    "uuid": "^8.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}

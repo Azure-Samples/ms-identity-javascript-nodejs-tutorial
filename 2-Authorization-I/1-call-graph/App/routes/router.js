@@ -2,14 +2,11 @@ const express = require('express');
 
 const mainController = require('../controllers/mainController');
 
+const MsalExpressMiddleware = require('../../../../MsalNodeCommons/MsalExpressMiddleware');
 const auth = require('../../auth.json');
-const MsalExpressMiddleware = require('../utils/msalExpressMiddleware');
+const cache = require('../utils/cachePlugin');
 
-/**
- * pass in a configuration file to initiate an msal object
- * that will expose the middleware functions
- */
-const msal = new MsalExpressMiddleware(auth);
+const msal = new MsalExpressMiddleware(auth, cache);
 
 // initialize router
 const router = express.Router();
