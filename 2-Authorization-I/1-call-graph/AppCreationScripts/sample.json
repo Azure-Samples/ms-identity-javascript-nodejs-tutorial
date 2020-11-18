@@ -9,8 +9,8 @@
     },
     "AADApps": [
       {
-        "Id": "webApp",
-        "Name": "ExpressWebApp-2",
+        "Id": "Client",
+        "Name": "ExpressWebApp-c2s1",
         "Kind": "WebApp",
         "Audience": "AzureADMyOrg",
         "HomePage": "http://localhost:4000/",
@@ -30,7 +30,7 @@
     ],
     "CodeConfiguration": [
       {
-        "App": "webApp",
+        "App": "Client",
         "SettingKind": "JSON",
         "SettingFile": "\\..\\auth.json",
         "Mappings": [

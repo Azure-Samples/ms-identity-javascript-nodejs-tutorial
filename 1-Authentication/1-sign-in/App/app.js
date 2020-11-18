@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(express.static(path.join(__dirname, './public')));
 
-app.use(session({secret: 'vancouver', resave: false, saveUninitialized: false}));
+app.use(session({secret: 'your-secret', resave: false, saveUninitialized: false}));
 
 app.use(router);
 

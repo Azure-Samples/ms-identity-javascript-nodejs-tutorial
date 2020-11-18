@@ -27,7 +27,7 @@ description: "This sample demonstrates a Node.js Express Web App application tha
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web application that authenticates users against Azure AD, with the help of [Microsoft Authentication Library for Node.js]() (MSAL Node). In doing so, it also illustrates various authentication concepts, such as [OIDC scopes](), [ID Tokens](), [ID Token validation](), [user-flows](), [custom policies]() and more.
+This sample demonstrates a Node.js & Express web application that authenticates users against Azure AD, with the help of [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it also illustrates various authentication concepts, such as [OpenID scopes](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes), [ID Tokens](https://docs.microsoft.com/azure/active-directory/develop/id-tokens), [ID Token validation](https://docs.microsoft.com/azure/active-directory/develop/id-tokens#validating-an-id_token), [user-flows](https://docs.microsoft.com/azure/active-directory-b2c/user-flow-overview) and more.
 
 ## Scenario
 
@@ -50,7 +50,6 @@ This sample demonstrates a Node.js & Express web application that authenticates 
 - [Node.js](https://nodejs.org/en/download/) must be installed to run this sample.
 - A modern web browser. This sample uses **ES6** conventions and will not run on **Internet Explorer**.
 - [Visual Studio Code](https://code.visualstudio.com/download) is recommended for running and editing this sample.
-- [VS Code Azure Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack) extension is recommended for interacting with Azure through VS Code Interface.
 - An **Azure AD B2C** tenant. For more information see: [How to get an Azure AD B2C tenant](https://docs.microsoft.com/azure/active-directory-b2c/tutorial-create-tenant)
 - A user account in your **Azure AD B2C** tenant.
 
@@ -120,9 +119,9 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `auth.json` file.
-1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of the application copied from the **Azure Portal**.
-1. Find the key `TenantId` and replace the existing value with your Azure AD tenant ID copied from the **Azure Portal**.
-1. Find the key `ClientSecret` and replace the existing value with the key you saved during the creation of the application, on the **Azure Portal**.
+1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of the application copied from **Azure Portal**.
+1. Find the key `TenantId` and replace the existing value with your Azure AD tenant ID (or tenant name) copied from **Azure Portal**.
+1. Find the key `ClientSecret` and replace the existing value with the key you saved during the creation of the application, on **Azure Portal**.
 1. Find the key `homePageRoute` and replace the existing value with the home page route of your application, e.g. `/home`.
 1. Find the key `redirectUri` and replace the existing value with the redirect URI that you have registered on **Azure Portal**, e.g. `http://localhost:4000/redirect`.
 1. Find the key `postLogoutRedirectUri` and replace the existing value with the URI of the page that you wish to be redirected after signing-out, e.g `http://localhost:4000/`.

@@ -9,9 +9,10 @@ const auth = require('./auth.json');
 
 const msal = new MsalExpressMiddleware(auth);
 
-// protected route
+// protected resource
 app.get('/api', msal.isAuthorized, (req, res, next) => {
-    res.send('hello!');
+    // req.authInfo contains the decoded token info
+    res.status(200).json({'name': req.authInfo['name']});
 })
 
 app.listen(SERVER_PORT, () => console.log(`Msal Node Web API listening on port ${SERVER_PORT}!`))

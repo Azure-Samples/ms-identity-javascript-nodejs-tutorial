@@ -9,8 +9,9 @@ const auth = require('./auth.json');
 
 const msal = new MsalExpressMiddleware(auth);
 
-// protected route
+// protected resource
 app.get('/api', msal.isAuthorized, (req, res, next) => {
+    // req.authInfo contains the decoded token info
     res.status(200).json({'name': req.authInfo['name']});
 })
 

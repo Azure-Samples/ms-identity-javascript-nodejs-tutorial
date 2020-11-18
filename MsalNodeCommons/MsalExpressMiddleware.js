@@ -116,20 +116,25 @@ class MsalExpressMiddleware {
          * Request Configuration
          * We manipulate these three request objects below 
          * to acquire a token with the appropriate claims
-         */
-        req.session.authCodeRequest = {
-            authority: "",
-            scopes: [],
-            state: {},
-            redirectUri: ""
-        };
+         */        
 
-        req.session.tokenRequest = {
-            authority: "",
-            scopes: [],
-            state: {},
-            redirectUri: ""
-        };
+        if (!req.session['authCodeRequest']) {
+            req.session.authCodeRequest = {
+                authority: "",
+                scopes: [],
+                state: {},
+                redirectUri: ""
+            };
+        }
+
+        if (!req.session['tokenRequest']) {
+            req.session.tokenRequest = {
+                authority: "",
+                scopes: [],
+                state: {},
+                redirectUri: ""
+            };
+        }
 
         // current account id
         req.session.homeAccountId = "";
@@ -140,7 +145,6 @@ class MsalExpressMiddleware {
         // state in context
         const state = Object.keys(req.session.authCodeRequest.state).length !== 0 ? 
             JSON.parse(CryptoUtilities.base64DecodeUrl(req.session.authCodeRequest.state)) : null;
-
         /**
          * We check here what this sign-in is for. In B2C scenarios, a sign-in 
          * can be for initiating the password reset user-flow. 
@@ -151,7 +155,7 @@ class MsalExpressMiddleware {
                     stage: constants.AppStages.RESET_PASSWORD,
                     path: req.route.path,
                     rand: req.session.rand
-                }), 'utf-8');
+                }), 'null');
     
             // if coming for password reset, set the authority to resetPassword
             this.getAuthCode(
@@ -161,7 +165,7 @@ class MsalExpressMiddleware {
                 this.msalConfig.auth.redirectUri,
                 req,
                 res
-            );
+                );
 
         } else {
             // sign-in as usual
@@ -170,7 +174,7 @@ class MsalExpressMiddleware {
                     stage: constants.AppStages.SIGN_IN,
                     path: req.route.path,
                     rand: req.session.rand
-                }), 'utf8');
+                }), null);
 
             // get url to sign user in (and consent to scopes needed for application)
             this.getAuthCode(
@@ -221,7 +225,6 @@ class MsalExpressMiddleware {
         // check if rand matches
         if (state.rand === req.session.rand) {
             if (state.stage === constants.AppStages.SIGN_IN) {
-
                 // token request should have auth code
                 const tokenRequest = {
                     redirectUri: this.msalConfig.auth.redirectUri,
@@ -266,12 +269,13 @@ class MsalExpressMiddleware {
                                         stage: constants.AppStages.RESET_PASSWORD,
                                         path: req.route.path,
                                         rand: req.session.rand
-                                    }), 'utf-8');
+                                    }), null);
 
                                 req.session.authCodeRequest.state = newState;
                                 req.session.authCodeRequest.authority = this.rawConfig.policies.resetPassword.authority;
-
+                                console.log(req.session.authCodeRequest);
                                 // redirect to sign in page again with resetPassword authority
+
                                 return res.redirect(state.path);
                             }
                         }
@@ -307,7 +311,6 @@ class MsalExpressMiddleware {
                         res.status(500).send(error);
                     });
             } else if (state.stage === constants.AppStages.RESET_PASSWORD) {
-
                 // once the password is reset, redirect the user to login again with the new password
                 req.session.rand = CryptoUtilities.generateGuid();
                 
@@ -316,7 +319,7 @@ class MsalExpressMiddleware {
                         stage: constants.AppStages.SIGN_IN,
                         path: req.route.path,
                         rand: req.session.rand
-                    }), 'utf-8');
+                    }), null);
 
                 req.session.authCodeRequest.state = newState;
 
@@ -337,6 +340,7 @@ class MsalExpressMiddleware {
      */
     getToken = async(req, res, next) => {
 
+        // get scopes for token request
         let scopes = Object.values(this.rawConfig.resources)
             .find(resource => resource.callingPageRoute === req.route.path).scopes;
 
@@ -354,7 +358,7 @@ class MsalExpressMiddleware {
 
         // TODO: cache fail safe
         if (!account) {
-            throw new Error('account not found: sign-in first');
+            throw new Error('account not found');
             
         }
 
@@ -385,7 +389,7 @@ class MsalExpressMiddleware {
                         stage: constants.AppStages.ACQUIRE_TOKEN,
                         path: req.route.path,
                         rand: req.session.rand
-                    }), 'utf-8'); // TODO: utf-8 encoding
+                    }), null);
 
                 // initiate the first leg of auth code grant to get token
                 this.getAuthCode(
@@ -484,7 +488,7 @@ class MsalExpressMiddleware {
                 stage: constants.AppStages.SIGN_IN,
                 path: req.route.path,
                 rand: req.session.rand
-            }), 'utf-8');
+            }), null);
 
         this.getAuthCode(
             policies.editProfile.authority, 
@@ -512,13 +516,11 @@ class MsalExpressMiddleware {
          */
         const checkAudience = idTokenClaims["aud"] === this.msalConfig.auth.clientId ? true : false;
         const checkTimestamp = idTokenClaims["iat"] < now && idTokenClaims["exp"] > now ? true: false;
-        const checkTenant = this.rawConfig.hasOwnProperty('policies') || idTokenClaims["tid"] === this.rawConfig.credentials.tenantId ? true : false;
-    
-        if (checkAudience && checkTimestamp && checkTenant) {
-            return true;
-        }
 
-        return false;
+        // TODO: B2C check tenant
+        const checkTenant = (this.rawConfig.hasOwnProperty('policies') && idTokenClaims["tid"] === undefined) || idTokenClaims["tid"] === this.rawConfig.credentials.tenantId ? true : false;
+
+        return checkAudience && checkTimestamp
     };
 
     /**
@@ -532,9 +534,10 @@ class MsalExpressMiddleware {
         const authHeader = req.headers.authorization;
         const accessToken = authHeader.split(' ')[1];
 
+        // we will first decode to get kid in header
         const decodedToken = jwt.decode(accessToken, {complete: true});
 
-        // obtains signin keys from discovery endpoint
+        // obtains signing keys from discovery endpoint
         const keys = await this.getSigningKeys(decodedToken.header);
 
         try {
@@ -543,7 +546,7 @@ class MsalExpressMiddleware {
 
             /**
              * Validate the token with respect to issuer, audience, scope
-             * and timestamp. For more information, visit:
+             * and timestamp, though implementation and extent vary. For more information, visit:
              * https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validating-tokens
              */
             const checkIssuer = verifiedToken['iss'].includes(this.rawConfig.credentials.tenantId) ? true : false;

@@ -1,6 +1,6 @@
 {
     "Sample": {
-        "Title": "A Node.js & Express Web App calling a custom web API using MSAL Node",
+        "Title": "A Node.js & Express Web App calling a custom web API on Azure AD using MSAL Node",
         "Level": 200,
         "Client": "Node.js & Express Web App",
         "Service": "Node.js & Express Web API",
