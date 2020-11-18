@@ -1,0 +1,118 @@
+{
+  "Sample": {
+    "Title": "A Node.js & Express Web App calling a custom web API on Azure AD B2C using MSAL Node",
+    "Level": 200,
+    "Client": "Node.js & Express Web App"
+  },
+  "AppRegistrations": [
+   {
+      "x-ms-id": "Service",
+      "x-ms-name": "ExpressWebApi-c3s2",
+      "x-ms-version": "2.0",
+      "oauth2AllowImplicitFlow": false,
+      "oauth2AllowIdTokenImplicitFlow": false,
+      "codeConfigurations": [
+        {
+        "settingFile": "/WebAPI/auth.json", 
+          "replaceTokens": 
+            {
+            /** 
+            * Note: The following 'key-value' pairs are for illustration only; you may
+            * not have all of them in your configuration file. Azure portal will replace
+            * the values (i.e. text) below with the actual app credentials.
+            * Finally, don't forget to remove this comment.
+            */
+            "appId": "Enter_the_Application_Id_Here",
+            "redirectUri": "Enter_the_Redirect_Uri_Here",
+            "tenantId": "Enter_the_Tenant_Info_Here",
+            "clientSecret": "Enter_the_Client_Secret_Here",
+            "authorityEndpointHost": "Enter_the_Cloud_Instance_Id_Here",
+            "msgraphEndpointHost": "Enter_the_Graph_Endpoint_Here",
+            "signInAudience": "Enter_the_Sign-in_Audience_Here"
+            }
+        }, 
+        {
+        "settingFile": "/WebApp/auth.json", 
+          "replaceTokens": 
+            {
+            /** 
+            * Note: The following 'key-value' pairs are for illustration only; you may
+            * not have all of them in your configuration file. Azure portal will replace
+            * the values (i.e. text) below with the actual app credentials.
+            * Finally, don't forget to remove this comment.
+            */
+            "appId": "Enter_the_Application_Id_Here",
+            "redirectUri": "Enter_the_Redirect_Uri_Here",
+            "tenantId": "Enter_the_Tenant_Info_Here",
+            "clientSecret": "Enter_the_Client_Secret_Here",
+            "authorityEndpointHost": "Enter_the_Cloud_Instance_Id_Here",
+            "msgraphEndpointHost": "Enter_the_Graph_Endpoint_Here",
+            "signInAudience": "Enter_the_Sign-in_Audience_Here"
+            }
+        } ]
+    }
+   {
+      "x-ms-id": "Client",
+      "x-ms-name": "ExpressWebApp-c3s2",
+      "x-ms-version": "2.0",
+      "replyUrlsWithType": [
+        {
+          "url": "http://localhost:4000/redirect",
+          "type": "Web"
+        } ],
+      "oauth2AllowImplicitFlow": false,
+      "oauth2AllowIdTokenImplicitFlow": false,
+      "requiredResourceAccess": [
+        {
+          "x-ms-resourceAppName": "ExpressWebApi-c3s2",
+          "resourceAppId": Service,
+          "resourceAccess": [
+            {
+              "id": "unknown",
+              "type": "Scope",
+              "x-ms-name": "access_as_user"
+            } ]
+        }
+      ],
+      "codeConfigurations": [
+        {
+        "settingFile": "/WebAPI/auth.json", 
+          "replaceTokens": 
+            {
+            /** 
+            * Note: The following 'key-value' pairs are for illustration only; you may
+            * not have all of them in your configuration file. Azure portal will replace
+            * the values (i.e. text) below with the actual app credentials.
+            * Finally, don't forget to remove this comment.
+            */
+            "appId": "Enter_the_Application_Id_Here",
+            "redirectUri": "Enter_the_Redirect_Uri_Here",
+            "tenantId": "Enter_the_Tenant_Info_Here",
+            "clientSecret": "Enter_the_Client_Secret_Here",
+            "authorityEndpointHost": "Enter_the_Cloud_Instance_Id_Here",
+            "msgraphEndpointHost": "Enter_the_Graph_Endpoint_Here",
+            "signInAudience": "Enter_the_Sign-in_Audience_Here"
+            }
+        }, 
+        {
+        "settingFile": "/WebApp/auth.json", 
+          "replaceTokens": 
+            {
+            /** 
+            * Note: The following 'key-value' pairs are for illustration only; you may
+            * not have all of them in your configuration file. Azure portal will replace
+            * the values (i.e. text) below with the actual app credentials.
+            * Finally, don't forget to remove this comment.
+            */
+            "appId": "Enter_the_Application_Id_Here",
+            "redirectUri": "Enter_the_Redirect_Uri_Here",
+            "tenantId": "Enter_the_Tenant_Info_Here",
+            "clientSecret": "Enter_the_Client_Secret_Here",
+            "authorityEndpointHost": "Enter_the_Cloud_Instance_Id_Here",
+            "msgraphEndpointHost": "Enter_the_Graph_Endpoint_Here",
+            "signInAudience": "Enter_the_Sign-in_Audience_Here"
+            }
+        } ]
+    }
+  ]
+}

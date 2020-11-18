@@ -12,67 +12,60 @@ const constants = require('./constants');
 const CryptoUtilities = require('./CryptoUtilities');
 
 /**
- * MSAL Express Middleware is a collection of middleware and utility methods
- * that enables integration of authentication with Express MVC applications
+ * MsalExpressMiddleware is a simple wrapper around MSAL Node
+ * ConfidentialClientApplication object. It offers a collection of middleware 
+ * and utility methods that automate basic authentication and authorization
+ * needs in Express MVC web apps and APIs. 
  * 
- * Middleware here can be used with express sessions in route controllers
+ * You must have express-sessions package installed. Middleware here 
+ * can be used with express sessions in route controllers.
+ * 
  * Session variables accessible are as follows:
- * 
- * req.session.isAuthenticated => boolean
- * req.session.isAuthorized => boolean
- * req.session.idTokenClaims => object
- * req.session.account => object
- * req.session.resourceName.resourceResponse => object
+    * req.session.isAuthenticated => boolean
+    * req.session.isAuthorized => boolean
+    * req.session.idTokenClaims => object
+    * req.session.account => object
+    * req.session.resourceName.accessToken => string
+    * req.session.resourceName.resourceResponse => object
+    * req.session.homeAccountId => string
+    * reg.session.rand => string
+    * req.session.authCodeRequest => object
+    * req.session.tokenRequest => object
  */
-class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
+class MsalExpressMiddleware {
 
-    nonce;
+    // configuration object passed in constructor
     rawConfig;
+
+    // MSAL Node configuration object
     msalConfig;
-    homeAccountId;
 
-    /** 
-     * Request Configuration
-     * We manipulate these three request objects below 
-     * to acquire a token with the appropriate claims
-     */
-    authCodeRequest = {
-        authority: "",
-        scopes: [],
-        state: {},
-        redirectUri: ""
-    };
-
-    tokenRequest = {
-        authority: "",
-        scopes: [],
-        state: {},
-        redirectUri: ""
-    };
-
-    silentRequest = {
-        account: {},
-        scopes: [],
-        state: "",
-    }
+    // MSAL Node ConfidentialClientApplication object
+    msalClient;
     
+    /**
+     * 
+     * @param {JSON} config: auth.json 
+     * @param {Object} cache: cachePlugin
+     */
     constructor(config, cache = null) {
-        super(MsalExpressMiddleware.shapeConfiguration(config, cache));
-
         if (!MsalExpressMiddleware.validateConfiguration(config)) {
             throw new Error("invalid configuration");  
         }
 
         this.rawConfig = config;
         this.msalConfig = MsalExpressMiddleware.shapeConfiguration(config, cache);
-        Object.assign(this, new msal.ConfidentialClientApplication(this.msalConfig));
+        this.msalClient = new msal.ConfidentialClientApplication(this.msalConfig);
     };
 
     /**
      * Validates the fields in the custom JSON configuration file
-     * @param {JSON} config
+     * @param {JSON} config: auth.json
      */
     static validateConfiguration = (config) => {
+
+        // TODO: expand validation logic
+        
         return config.credentials !== undefined &&
         config.credentials.clientId !== undefined && 
         config.credentials.tenantId !== undefined &&
@@ -81,17 +74,18 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
 
     /**
      * Maps the custom JSON configuration file to configuration
-     * object expected by MSAL Node
+     * object expected by MSAL Node ConfidentialClientApplication
      * @param {JSON} config
+     * @param {Object} cachePlugin: passed at initialization
      */
     static shapeConfiguration = (config, cachePlugin) => {
-        const msalConfig = {
+        return {
             auth: {
                 clientId: config.credentials.clientId,
-                authority: config.hasOwnProperty('policies') ? config.policies.authorities.signUpSignIn.authority : constants.AuthorityStrings.AAD + config.credentials.tenantId,
+                authority: config.hasOwnProperty('policies') ? config.policies.signUpSignIn.authority : constants.AuthorityStrings.AAD + config.credentials.tenantId, // single organization
                 clientSecret: config.credentials.clientSecret,
-                redirectUri: config.hasOwnProperty('configuration') ? config.configuration.redirectUri : "",
-                knownAuthorities: config.hasOwnProperty('policies') ? [config.policies.authorityDomain] : [],
+                redirectUri: config.hasOwnProperty('configuration') ? config.configuration.redirectUri : null, // defaults to calling page
+                knownAuthorities: config.hasOwnProperty('policies') ? [config.policies.authorityDomain] : [], // 
             },
             cache: {
                 cachePlugin,
@@ -106,8 +100,6 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
                 }
             }
         };
-
-        return msalConfig;
     };
 
     // ========= MIDDLEWARE ===========
@@ -120,54 +112,92 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
      */
     signIn = (req, res, next) => {
 
-        this.nonce = CryptoUtilities.generateGuid();
+        /** 
+         * Request Configuration
+         * We manipulate these three request objects below 
+         * to acquire a token with the appropriate claims
+         */
+        req.session.authCodeRequest = {
+            authority: "",
+            scopes: [],
+            state: {},
+            redirectUri: ""
+        };
 
-        const state = Object.keys(this.authCodeRequest.state).length !== 0 ? 
-            JSON.parse(CryptoUtilities.base64DecodeUrl(this.authCodeRequest.state)) : null;
+        req.session.tokenRequest = {
+            authority: "",
+            scopes: [],
+            state: {},
+            redirectUri: ""
+        };
 
+        // current account id
+        req.session.homeAccountId = "";
+
+        // random GUID for csrf check 
+        req.session.rand = CryptoUtilities.generateGuid();
+
+        // state in context
+        const state = Object.keys(req.session.authCodeRequest.state).length !== 0 ? 
+            JSON.parse(CryptoUtilities.base64DecodeUrl(req.session.authCodeRequest.state)) : null;
+
+        /**
+         * We check here what this sign-in is for. In B2C scenarios, a sign-in 
+         * can be for initiating the password reset user-flow. 
+         */
         if (state && state.stage === constants.AppStages.RESET_PASSWORD) {
             let state = CryptoUtilities.base64EncodeUrl(
                 JSON.stringify({
                     stage: constants.AppStages.RESET_PASSWORD,
                     path: req.route.path,
-                    nonce: this.nonce
-                }), null);
+                    rand: req.session.rand
+                }), 'utf-8');
     
-            // if coming for password reset, set the authority to password reset
+            // if coming for password reset, set the authority to resetPassword
             this.getAuthCode(
-                this.rawConfig.policies.authorities.resetPassword.authority, 
+                this.rawConfig.policies.resetPassword.authority, 
                 Object.values(constants.OIDCScopes), 
                 state, 
                 this.msalConfig.auth.redirectUri,
+                req,
                 res
             );
 
         } else {
+            // sign-in as usual
             let state = CryptoUtilities.base64EncodeUrl(
                 JSON.stringify({
                     stage: constants.AppStages.SIGN_IN,
                     path: req.route.path,
-                    nonce: this.nonce
-                }), null);
-    
-            // get url to sign user in and consent to scopes needed for application
+                    rand: req.session.rand
+                }), 'utf8');
+
+            // get url to sign user in (and consent to scopes needed for application)
             this.getAuthCode(
                 this.msalConfig.auth.authority, 
                 Object.values(constants.OIDCScopes), 
                 state, 
-                this.msalConfig.auth.redirectUri, 
+                this.msalConfig.auth.redirectUri,
+                req, 
                 res
             );
         }
     };
 
     /**
-     * Initiate sign out and cleans the session
+     * Initiate sign out and clean the session
      * @param {Object} req: express request object
      * @param {Object} res: express response object
      * @param {Function} next: express next 
      */
     signOut = (req, res) => {
+
+        /**
+         * Construct a logout URI and redirect the user to end the 
+         * session with Azure AD/B2C. For more information, visit: 
+         * (AAD) https://docs.microsoft.com/azure/active-directory/develop/v2-protocols-oidc#send-a-sign-out-request
+         * (B2C) https://docs.microsoft.com/azure/active-directory-b2c/openid-connect#send-a-sign-out-request
+         */
         const logoutURI = `${this.msalConfig.auth.authority}/oauth2/v2.0/logout?post_logout_redirect_uri=${this.rawConfig.configuration.postLogoutRedirectUri}`;
 
         req.session.isAuthenticated = false;
@@ -179,39 +209,49 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
     
     /**
      * Middleware that handles redirect depending on request state
+     * There are basically 3 states: sign-in, acquire token
+     * and password reset user-flows for B2C scenarios
      * @param {Object} req: express request object
      * @param {Object} res: express response object
      * @param {Function} next: express next 
      */
     handleRedirect = async(req, res, next) => {
-
         const state = JSON.parse(CryptoUtilities.base64DecodeUrl(req.query.state));
 
-        if (state.nonce === this.nonce) {
+        // check if rand matches
+        if (state.rand === req.session.rand) {
             if (state.stage === constants.AppStages.SIGN_IN) {
 
+                // token request should have auth code
                 const tokenRequest = {
                     redirectUri: this.msalConfig.auth.redirectUri,
-                    scopes: [constants.OIDCScopes.OPENID, constants.OIDCScopes.PROFILE],
+                    scopes: Object.keys(constants.OIDCScopes),
                     code: req.query.code,
                 };
 
-                this.acquireTokenByCode(tokenRequest)
+                // exchange auth code for tokens
+                this.msalClient.acquireTokenByCode(tokenRequest)
                     .then((response) => {
                         console.log("\nResponse: \n:", response);
-            
+
                         if (this.validateIdToken(response.idTokenClaims)) {
                             
-                            this.homeAccountId = response.account.homeAccountId;
+                            req.session.homeAccountId = response.account.homeAccountId;
+
+                            // assign session variables
                             req.session.idTokenClaims = response.idTokenClaims;
                             req.session.isAuthenticated = true;
-            
+
                             return res.status(200).redirect(this.rawConfig.configuration.homePageRoute);
                         } else {
+                            console.log('invalid token');
                             return res.status(401).send("Not Permitted");
                         }
                     }).catch((error) => {
+                        console.log(error);
+
                         if (req.query.error) {
+ 
                             /**
                              * When the user selects "forgot my password" on the sign-in page, B2C service will throw an error.
                              * We are to catch this error and redirect the user to login again with the resetPassword authority.
@@ -219,18 +259,19 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
                              */
                             if (JSON.stringify(req.query.error_description).includes("AADB2C90118")) {
 
-                                this.nonce = CryptoUtilities.generateGuid();
+                                req.session.rand = CryptoUtilities.generateGuid();
 
-                                let interimState = CryptoUtilities.base64EncodeUrl(
+                                let newState = CryptoUtilities.base64EncodeUrl(
                                     JSON.stringify({
                                         stage: constants.AppStages.RESET_PASSWORD,
                                         path: req.route.path,
-                                        nonce: this.nonce
-                                    }), null);
+                                        rand: req.session.rand
+                                    }), 'utf-8');
 
-                                this.authCodeRequest.state = interimState;
-                                this.authCodeRequest.authority = this.rawConfig.policies.authorities.resetPassword.authority;
+                                req.session.authCodeRequest.state = newState;
+                                req.session.authCodeRequest.authority = this.rawConfig.policies.resetPassword.authority;
 
+                                // redirect to sign in page again with resetPassword authority
                                 return res.redirect(state.path);
                             }
                         }
@@ -239,17 +280,21 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
 
             } else if (state.stage === constants.AppStages.ACQUIRE_TOKEN) {
 
+                // get the name of the resource associated with scope
                 let resourceName = this.getResourceName(state.path);
 
                 const tokenRequest = {
                     code: req.query.code,
-                    scopes: this.rawConfig.resources[resourceName].scopes,
+                    scopes: this.rawConfig.resources[resourceName].scopes, // scopes for resourceName
                     redirectUri: this.rawConfig.configuration.redirectUri,
                 };
+                
 
-                this.acquireTokenByCode(tokenRequest)
+                this.msalClient.acquireTokenByCode(tokenRequest)
                     .then((response) => {
                         console.log("\nResponse: \n:", response);
+
+                        req.session[resourceName].accessToken = response.accessToken;
 
                         // call the web API
                         this.callAPI(this.rawConfig.resources[resourceName].endpoint, response.accessToken, (resourceResponse) => {
@@ -264,16 +309,16 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
             } else if (state.stage === constants.AppStages.RESET_PASSWORD) {
 
                 // once the password is reset, redirect the user to login again with the new password
-                this.nonce = CryptoUtilities.generateGuid();
+                req.session.rand = CryptoUtilities.generateGuid();
                 
-                let interimState = CryptoUtilities.base64EncodeUrl(
+                let newState = CryptoUtilities.base64EncodeUrl(
                     JSON.stringify({
                         stage: constants.AppStages.SIGN_IN,
                         path: req.route.path,
-                        nonce: this.nonce
-                    }), null);
+                        rand: req.session.rand
+                    }), 'utf-8');
 
-                this.authCodeRequest.state = interimState;
+                req.session.authCodeRequest.state = newState;
 
                 res.redirect(state.path);
             } else {
@@ -285,7 +330,7 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
     };
 
     /**
-     * Middleware that gets token and passes to next
+     * Middleware that gets token and call web APIs
      * @param {Object} req: express request object
      * @param {Object} res: express response object
      * @param {Function} next: express next 
@@ -299,29 +344,36 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
         
         if (!req.session[resourceName]) {
             req.session[resourceName] = {
+                accessToken: null,
                 resourceResponse: null,
             };
         }
 
         // find account using homeAccountId built after receiving token response
-        let account = await this.getTokenCache().getAccountByHomeId(this.homeAccountId);
+        let account = await this.msalClient.getTokenCache().getAccountByHomeId(req.session.homeAccountId);
 
+        // TODO: cache fail safe
+        if (!account) {
+            throw new Error('account not found: sign-in first');
+            
+        }
 
-        // build silent request
         const silentRequest = {
             account: account,
             scopes: scopes,
         };
 
         // acquire token silently to be used in resource call
-        this.acquireTokenSilent(silentRequest)
+        this.msalClient.acquireTokenSilent(silentRequest)
             .then((response) => {
                 console.log("\nSuccessful silent token acquisition:\nResponse: \n:", response);
+
+                req.session[resourceName].accessToken = response.accessToken;
 
                 // call the web API
                 this.callAPI(this.rawConfig.resources[resourceName].endpoint, response.accessToken, (resourceResponse) => {
                     req.session[resourceName].resourceResponse = resourceResponse;
-                    return next()
+                    return next();
                 });
             })
             .catch((error) => {
@@ -332,33 +384,56 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
                     JSON.stringify({
                         stage: constants.AppStages.ACQUIRE_TOKEN,
                         path: req.route.path,
-                        nonce: this.nonce
-                    }), null);
+                        rand: req.session.rand
+                    }), 'utf-8'); // TODO: utf-8 encoding
 
                 // initiate the first leg of auth code grant to get token
                 this.getAuthCode(
                     this.msalConfig.auth.authority, 
                     scopes, 
                     state, 
-                    this.msalConfig.auth.redirectUri, 
-                    res);
+                    this.msalConfig.auth.redirectUri,
+                    req, 
+                    res
+                    );
                 }
             });
     };
 
     /**
      * Middleware that gets token to be used by the 
-     * downstream web API on-behalf of the user
+     * downstream web API on-behalf of user in context
      * @param {Object} req: express request object
      * @param {Object} res: express response object
      * @param {Function} next: express next 
      */
     getTokenOnBehalf = async(req, res, next) => {
-        next();
+        const authHeader = req.headers.authorization;
+
+        const oboRequest = {
+            oboAssertion: authHeader.split(' ')[1],
+            scopes: ["user.read"],
+        }
+
+        // get the resource name for attaching resource response to req
+        const resourceName = this.getResourceName(req.route.path);
+    
+        this.msalClient.acquireTokenOnBehalfOf(oboRequest)
+            .then((response) => {
+                console.log("\nResponse: \n:", response);
+
+                this.callAPI(this.rawConfig.resources[resourceName].endpoint, response.accessToken, (resourceResponse) => {
+                    req[resourceName].resourceResponse = resourceResponse;
+                    return next();
+                });
+
+            }).catch((error) => {
+                res.status(500).send(error);
+            });
     }
 
     /**
-     * Middleware checks for id token (and redirects to sign-in?)
+     * Check if authenticated in session
      * @param {Object} req: express request object
      * @param {Object} res: express response object
      * @param {Function} next: express next 
@@ -375,21 +450,51 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
     };
 
     /**
-     * Middleware checks for access token (and redirects to get token?)
+     * Receives access token in req authorization header
+     * and validates it using the jwt.verify
      * @param {Object} req: express request object
      * @param {Object} res: express response object
      * @param {Function} next: express next 
      */
     isAuthorized = async(req, res, next) => {
         if (req.headers.authorization) {
-            if (!this.validateAccessToken(req.headers.authorization)) {
+            if (!(await this.validateAccessToken(req))) {
                 return res.status(401).send("Not Permitted");
+            } else {
+                next();
             }
-            next();
         } else {
             res.status(401).send("Not Permitted");
         }
     };
+
+    /**
+     * Initiates the edit profile user-flow in
+     * B2C scenarios. The user should already be signed-in.
+     * @param {Object} req: express request object
+     * @param {Object} res: express response object
+     * @param {Function} next: express next 
+     */
+    editProfile = (req, res, next) => {
+        
+        req.session.rand = CryptoUtilities.generateGuid();
+
+        let state = CryptoUtilities.base64EncodeUrl(
+            JSON.stringify({
+                stage: constants.AppStages.SIGN_IN,
+                path: req.route.path,
+                rand: req.session.rand
+            }), 'utf-8');
+
+        this.getAuthCode(
+            policies.editProfile.authority, 
+            Object.values(constants.OIDCScopes), 
+            state, 
+            this.msalConfig.auth.redirectUri, 
+            req, 
+            res
+        );
+    }
 
     // ============== UTILS ===============
     
@@ -400,49 +505,65 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
     validateIdToken = (idTokenClaims) => {
         const now = Math.round((new Date()).getTime() / 1000); // in UNIX format
         
+        /**
+         * At the very least, check for tenant, audience, issue and expiry dates. 
+         * For more information on validating id tokens, visit: 
+         * https://docs.microsoft.com/azure/active-directory/develop/id-tokens#validating-an-id_token
+         */
         const checkAudience = idTokenClaims["aud"] === this.msalConfig.auth.clientId ? true : false;
         const checkTimestamp = idTokenClaims["iat"] < now && idTokenClaims["exp"] > now ? true: false;
         const checkTenant = this.rawConfig.hasOwnProperty('policies') || idTokenClaims["tid"] === this.rawConfig.credentials.tenantId ? true : false;
     
         if (checkAudience && checkTimestamp && checkTenant) {
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     };
 
     /**
      * Validates the access token for signature 
      * and against a predefined set of claims
-     * @param {Object} token: raw access token
+     * @param {Object} req: Express req object with authorization header
      */
-    validateAccessToken = async(accessTokenInHeader) => {
+    validateAccessToken = async(req) => {
         const now = Math.round((new Date()).getTime() / 1000); // in UNIX format
 
-        const authHeader = accessTokenInHeader;
+        const authHeader = req.headers.authorization;
         const accessToken = authHeader.split(' ')[1];
-    
-        jwt.verify(accessToken, this.getSigningKeys, null, (err, payload) => {
-            if (err) {
-                console.log(err);
-                return false;
-            }
 
-            console.log(payload);
+        const decodedToken = jwt.decode(accessToken, {complete: true});
 
-            const checkAudience = (payload['ver'] === '1.0' && payload['aud'] === 'api://' + this.rawConfig.credentials.clientId) 
-                || (payload['ver'] === '2.0' && payload['aud'] === this.rawConfig.credentials.clientId) ? true : false;
+        // obtains signin keys from discovery endpoint
+        const keys = await this.getSigningKeys(decodedToken.header);
 
-            const checkIssuer = payload['iss'].includes(this.rawConfig.credentials.tenantId) ? true: false;
-            const checkTimestamp = payload["iat"] < now && payload["exp"] > now ? true: false;
-            // TODO: const checkScope = payload['scp'] === 'access_as_user' ? true: false;
+        try {
+            // verify the signature at header section using keys
+            const verifiedToken = jwt.verify(accessToken, keys);
 
-            if (checkAudience && checkIssuer && checkTimestamp) {
+            /**
+             * Validate the token with respect to issuer, audience, scope
+             * and timestamp. For more information, visit:
+             * https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validating-tokens
+             */
+            const checkIssuer = verifiedToken['iss'].includes(this.rawConfig.credentials.tenantId) ? true : false;
+            const checkTimestamp = verifiedToken["iat"] < now && verifiedToken["exp"] > now ? true : false;
+            const checkAudience = (verifiedToken['ver'] === '1.0' && verifiedToken['aud'] === 'api://' + this.rawConfig.credentials.clientId) 
+                || (verifiedToken['ver'] === '2.0' && verifiedToken['aud'] === this.rawConfig.credentials.clientId) ? true : false;
+            const checkScope = this.rawConfig.protected.find(item => item.route === req.route.path).scopes
+                .every(scp => verifiedToken['scp'].includes(scp));
+            
+            if (checkAudience && checkIssuer && checkTimestamp && checkScope) {
+
+                // token claims will be available in the request for the controller
+                req.authInfo = verifiedToken;
                 return true;
-            } else {
-                return false;
             }
-        });
+            return false;
+        } catch(err) {
+            console.log(err);
+            return false;
+        }
     };
     
     /**
@@ -451,9 +572,10 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
      * @param {String} header 
      * @param {Function} callback 
      */
-    getSigningKeys = async(header, callback) => {
+    getSigningKeys = async(header) => {
         let client; 
 
+        // Check if a B2C application
         if (this.rawConfig.hasOwnProperty('policies')) {
             client = jwksClient({
                 jwksUri: `${this.msalConfig.auth.authority}/discovery/v2.0/keys`
@@ -464,14 +586,11 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
             });
         }
     
-        client.getSigningKey(header.kid, function (err, key) {
-            const signingKey = key.publicKey || key.rsaPublicKey;
-            callback(null, signingKey);
-        });
+        return (await client.getSigningKeyAsync(header.kid)).getPublicKey();
     };
 
     /**
-     * this fetches the resource with axios
+     * This fetches the resource with axios
      * @param {String} endpoint: resource endpoint
      * @param {String} accessToken: raw token 
      * @param {Function} callback: call after resource fetched
@@ -485,6 +604,7 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
         
         console.log('request made to web API at: ' + new Date().toString());
     
+        // TODO: remove callback and use promises
         axios.default.get(endpoint, options)
             .then(response => callback(response.data))
             .catch(error => console.log(error));
@@ -496,19 +616,19 @@ class MsalExpressMiddleware extends msal.ConfidentialClientApplication {
      * @param {Array} scopes: scopes to request the auth code for 
      * @param {String} state: state of the application
      * @param {String} redirect: redirect URI
-     * @param {Object} res: express middleware response object
+     * @param {Object} req: express request object
+     * @param {Object} res: express response object
      */
-    getAuthCode = (authority, scopes, state, redirect, res) => {
+    getAuthCode = (authority, scopes, state, redirect, req, res) => {
         // prepare the request
-        this.authCodeRequest.authority = authority;
-        this.authCodeRequest.scopes = scopes;
-        this.authCodeRequest.state = state;
-        this.authCodeRequest.redirectUri = redirect;
+        req.session.authCodeRequest.authority = authority;
+        req.session.authCodeRequest.scopes = scopes;
+        req.session.authCodeRequest.state = state;
+        req.session.authCodeRequest.redirectUri = redirect;
+        req.session.tokenRequest.authority = authority;
 
-        this.tokenRequest.authority = authority;
-
-        // request an authorization code to exchange for a token
-        return this.getAuthCodeUrl(this.authCodeRequest)
+        // request an authorization code to exchange for tokens
+        return this.msalClient.getAuthCodeUrl(req.session.authCodeRequest)
             .then((response) => {
                 res.redirect(response);
             })

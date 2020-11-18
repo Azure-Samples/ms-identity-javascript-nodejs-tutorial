@@ -6,7 +6,8 @@
 const { v4: uuidv4 } = require('uuid');
 
 /**
- * 
+ * Basic cryptography methods for generating GUIDs and encoding state. 
+ * Credits: https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node/src/crypto
  */
 class CryptoUtilities {
 

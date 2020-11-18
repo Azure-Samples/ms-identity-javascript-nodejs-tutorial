@@ -4,20 +4,20 @@
  */
 
 /**
- * 
+ * Basic authentication stages used to determine
+ * appropriate action after redirect occurs
  */
 exports.AppStages = {
-    SIGN_IN: "signIn",
-    SIGN_OUT: "signOut",
-    ACQUIRE_TOKEN: "acquireToken",
-    ACQUIRE_TOKEN_SILENT: "acquireTokenSilent",
-    SIGN_UP_SIGN_IN: "signUpSignIn",
-    RESET_PASSWORD: "resetPassword",
-    EDIT_PROFILE: "editProfile"
+    SIGN_IN: "sign_in",
+    SIGN_OUT: "sign_out",
+    ACQUIRE_TOKEN: "acquire_token",
+    SIGN_UP_SIGN_IN: "sign_up_sign_in",
+    RESET_PASSWORD: "reset_password",
+    EDIT_PROFILE: "edit_profile"
 };
 
 /**
- * 
+ * OpenID Connect scopes
  */
 exports.OIDCScopes = {
     OPENID: "openid",
@@ -35,48 +35,14 @@ exports.AADAuthorityConstants = {
 }
 
 /**
- * Keys in the hashParams sent by AAD Server
- */
-exports.AADServerParamKeys = {
-    CLIENT_ID: "client_id",
-    REDIRECT_URI: "redirect_uri",
-    RESPONSE_TYPE: "response_type",
-    RESPONSE_MODE: "response_mode",
-    GRANT_TYPE: "grant_type",
-    SCOPE: "scope",
-    ERROR_DESCRIPTION: "error_description",
-    ACCESS_TOKEN: "access_token",
-    ID_TOKEN: "id_token",
-    REFRESH_TOKEN: "refresh_token",
-    EXPIRES_IN: "expires_in",
-    STATE: "state",
-    NONCE: "nonce",
-    PROMPT: "prompt",
-    CODE: "code",
-    CODE_CHALLENGE: "code_challenge",
-    CODE_CHALLENGE_METHOD: "code_challenge_method",
-    CODE_VERIFIER: "code_verifier",
-    CLIENT_REQUEST_ID: "client-request-id",
-    POST_LOGOUT_URI: "post_logout_redirect_uri",
-    CLIENT_SECRET: "client_secret",
-    CLIENT_ASSERTION: "client_assertion",
-    CLIENT_ASSERTION_TYPE: "client_assertion_type",
-    TOKEN_TYPE: "token_type",
-    OBO_ASSERTION: "assertion",
-    REQUESTED_TOKEN_USE: "requested_token_use",
-    ON_BEHALF_OF: "on_behalf_of",
-}
-
-/**
- * 
+ * Global AAD cloud authority
  */
 exports.AuthorityStrings = {
     AAD: "https://login.microsoftonline.com/",
-    B2C: ""
 }
 
 /**
- * allowed values for prompt
+ * Allowed values for prompt
  */
 exports.PromptValue = {
     LOGIN: "login",
@@ -92,4 +58,15 @@ exports.CredentialType = {
     ID_TOKEN: "IdToken",
     ACCESS_TOKEN: "AccessToken",
     REFRESH_TOKEN: "RefreshToken",
+}
+
+/**
+ * Allowed fields in JSON configuration file
+ */
+exports.JsonConfiguration = {
+    CREDENTIALS: "credentials",
+    CONFIGURATION: "configuration",
+    RESOURCES: "resources",
+    POLICIES: "policies",
+    PROTECTED: "protected"
 }
