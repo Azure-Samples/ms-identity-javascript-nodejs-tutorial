@@ -191,65 +191,65 @@ Function ConfigureApplications
     # Get the user running the script to add the user as the app owner
     $user = Get-AzureADUser -ObjectId $creds.Account.Id
 
-   # Create the webApp AAD application
-   Write-Host "Creating the AAD application (ExpressWebApp-2)"
-   # Get a 2 years application key for the webApp Application
+   # Create the Client AAD application
+   Write-Host "Creating the AAD application (ExpressWebApp-c2s1)"
+   # Get a 2 years application key for the Client Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
    $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
-   $webAppAppKey = $pw
+   $ClientAppKey = $pw
    # create the application 
-   $webAppAadApplication = New-AzureADApplication -DisplayName "ExpressWebApp-2" `
+   $ClientAadApplication = New-AzureADApplication -DisplayName "ExpressWebApp-c2s1" `
                                                   -HomePage "http://localhost:4000/" `
                                                   -ReplyUrls "http://localhost:4000/redirect" `
-                                                  -IdentifierUris "https://$tenantName/ExpressWebApp-2" `
+                                                  -IdentifierUris "https://$tenantName/ExpressWebApp-c2s1" `
                                                   -PasswordCredentials $key `
                                                   -PublicClient $False
 
    # create the service principal of the newly created application 
-   $currentAppId = $webAppAadApplication.AppId
-   $webAppServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
+   $currentAppId = $ClientAadApplication.AppId
+   $ClientServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
 
    # add the user running the script as an app owner if needed
-   $owner = Get-AzureADApplicationOwner -ObjectId $webAppAadApplication.ObjectId
+   $owner = Get-AzureADApplicationOwner -ObjectId $ClientAadApplication.ObjectId
    if ($owner -eq $null)
    { 
-        Add-AzureADApplicationOwner -ObjectId $webAppAadApplication.ObjectId -RefObjectId $user.ObjectId
-        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($webAppServicePrincipal.DisplayName)'"
+        Add-AzureADApplicationOwner -ObjectId $ClientAadApplication.ObjectId -RefObjectId $user.ObjectId
+        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($ClientServicePrincipal.DisplayName)'"
    }
 
 
-   Write-Host "Done creating the webApp application (ExpressWebApp-2)"
+   Write-Host "Done creating the Client application (ExpressWebApp-c2s1)"
 
    # URL of the AAD application in the Azure portal
-   # Future? $webAppPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.ObjectId+"/isMSAApp/"
-   $webAppPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$webAppAadApplication.AppId+"/objectId/"+$webAppAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>webApp</td><td>$currentAppId</td><td><a href='$webAppPortalUrl'>ExpressWebApp-2</a></td></tr>" -Path createdApps.html
+   # Future? $ClientPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$ClientAadApplication.AppId+"/objectId/"+$ClientAadApplication.ObjectId+"/isMSAApp/"
+   $ClientPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$ClientAadApplication.AppId+"/objectId/"+$ClientAadApplication.ObjectId+"/isMSAApp/"
+   Add-Content -Value "<tr><td>Client</td><td>$currentAppId</td><td><a href='$ClientPortalUrl'>ExpressWebApp-c2s1</a></td></tr>" -Path createdApps.html
 
    $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
 
-   # Add Required Resources Access (from 'webApp' to 'Microsoft Graph')
-   Write-Host "Getting access from 'webApp' to 'Microsoft Graph'"
+   # Add Required Resources Access (from 'Client' to 'Microsoft Graph')
+   Write-Host "Getting access from 'Client' to 'Microsoft Graph'"
    $requiredPermissions = GetRequiredPermissions -applicationDisplayName "Microsoft Graph" `
                                                 -requiredDelegatedPermissions "User.Read" `
 
    $requiredResourcesAccess.Add($requiredPermissions)
 
-   # Add Required Resources Access (from 'webApp' to 'Windows Azure Service Management API')
-   Write-Host "Getting access from 'webApp' to 'Windows Azure Service Management API'"
+   # Add Required Resources Access (from 'Client' to 'Windows Azure Service Management API')
+   Write-Host "Getting access from 'Client' to 'Windows Azure Service Management API'"
    $requiredPermissions = GetRequiredPermissions -applicationDisplayName "Windows Azure Service Management API" `
                                                 -requiredDelegatedPermissions "user_impersonation" `
 
    $requiredResourcesAccess.Add($requiredPermissions)
 
 
-   Set-AzureADApplication -ObjectId $webAppAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
+   Set-AzureADApplication -ObjectId $ClientAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
    Write-Host "Granted permissions."
 
-   # Update config file for 'webApp'
+   # Update config file for 'Client'
    $configFile = $pwd.Path + "\..\auth.json"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "clientId" = $webAppAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $webAppAppKey;"redirectUri" = $webAppAadApplication.ReplyUrls;"postLogoutRedirectUri" = $webAppAadApplication.HomePage };
+   $dictionary = @{ "clientId" = $ClientAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $ClientAppKey;"redirectUri" = $ClientAadApplication.ReplyUrls;"postLogoutRedirectUri" = $ClientAadApplication.HomePage };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
   
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  
