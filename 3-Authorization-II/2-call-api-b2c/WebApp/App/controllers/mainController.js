@@ -11,6 +11,6 @@ exports.getIdPage = (req, res, next) => {
 
 exports.getWebAPI = (req, res, next) => {
     const isAuthenticated = req.session.isAuthenticated;
-    const claims = req.session.idTokenClaims;
-    res.render('webapi', {isAuthenticated: isAuthenticated, claims: claims});
+    const response = req.session.webAPI["resourceResponse"];
+    res.render('webapi', {isAuthenticated: isAuthenticated, response: response});
 }

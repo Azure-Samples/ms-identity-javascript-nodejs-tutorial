@@ -1,11 +1,7 @@
 ---
 page_type: sample
 languages:
-  - csharp
   - javascript
-  - typescript
-  - python
-  - java
 products:
   - node.js  
   - azure-active-directory-b2c
@@ -31,12 +27,13 @@ description: "This sample demonstrates a Node.js & Express Web App application c
 
 ## Overview
 
-This sample demonstrates a Node.js & Express Web App application calling a Node.js & Express Web API that is secured using Azure AD B2C.
+This sample demonstrates a Node.js & Express web application calling a Node.js & Express web API protected by Azure AD B2C using the [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it also illustrates various authorization concepts, such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [Dynamic Scopes and Incremental Consent](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent), [Access Token validation](https://docs.microsoft.com/azure/active-directory-b2c/tokens-overview#validation) and more.
 
 ## Scenario
 
-1. The client Node.js & Express Web App application uses MSAL Node to sign-in and obtain a JWT access token from **Azure AD B2C**.
-2. The access token is used as a bearer token to authorize the user to call the Node.js & Express Web API protected  **Azure AD B2C**.
+1. The client application uses the **MSAL Node** to sign-in a user and obtain a JWT **Access Token** from **Azure AD B2C**.
+1. The **Access Token** is used as a *bearer* token to authorize the user to access the **resource** (a Node.js & Express custom web API).
+1. The **resource owner** responds with the resource that the user has access to.
 
 ![Overview](./ReadmeFiles/topology.png)
 
@@ -45,16 +42,20 @@ This sample demonstrates a Node.js & Express Web App application calling a Node.
 | File/folder           | Description                                                   |
 |-----------------------|---------------------------------------------------------------|
 | `AppCreationScripts/` | Contains Powershell scripts to automate app registration.     |
-| `ReadmeFiles/`        | List of changes to the sample.                                |
-| `WebApp/`                | Express application source folder.                            |
-| `WebAPI/`                | Express application source folder.                            |
+| `ReadmeFiles/`        | Contains images and diagrams for the README.                  |
+| `WebApp/auth.json`    | Contains authentication parameters for the web app.           |
+| `WebApp/cache.json`   | Stores MSAL Node token cache.                                 |
+| `WebApp/App/app.js`   | Web application entry point.                                  |
+| `WebApp/App/routes/router.js` | Router configuration where authentication middleware added. |
+| `WebAPI/auth.json`    | Contains authentication parameters for the web API.           |
+| `WebAPI/cache.json`   | Stores MSAL Node token cache.                                 |
+| `WebAPI/index.js`     | Web API entry point.                                          |
 
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/en/download/) must be installed to run this sample.
 - A modern web browser. This sample uses **ES6** conventions and will not run on **Internet Explorer**.
 - [Visual Studio Code](https://code.visualstudio.com/download) is recommended for running and editing this sample.
-- [VS Code Azure Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack) extension is recommended for interacting with Azure through VS Code Interface.
 - An **Azure AD B2C** tenant. For more information see: [How to get an Azure AD B2C tenant](https://docs.microsoft.com/azure/active-directory-b2c/tutorial-create-tenant)
 - A user account in your **Azure AD B2C** tenant.
 
@@ -74,13 +75,13 @@ or download and extract the repository .zip file.
 
 ### Step 2: Install project dependencies
 
-```console
-    cd ExpressWebApi-c3s2
-    npm install
-```
+Locate the root of the sample folder. Then:
 
 ```console
-    cd ExpressWebApp-c3s2
+    cd WebAPI
+    npm install
+    cd ../
+    cd WebApp
     npm install
 ```
 
@@ -103,7 +104,7 @@ Please refer to: [Tutorial: Create user flows in Azure Active Directory B2C](htt
 
 Please refer to: [Tutorial: Add identity providers to your applications in Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/tutorial-add-identity-providers)
 
-### Register the Service app (ExpressWebApi-c3s2)
+### Register the service app
 
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD B2C** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
@@ -113,6 +114,12 @@ Please refer to: [Tutorial: Add identity providers to your applications in Azure
 1. Select **Register** to create the application.
 1. In the app's registration screen, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
 1. Select **Save** to save your changes.
+1. In the app's registration screen, select the **Certificates & secrets** blade in the left to open the page where we can generate secrets and upload certificates.
+1. In the **Client secrets** section, select **New client secret**:
+   - Type a key description (for instance `app secret`),
+   - Select one of the available key durations (**In 1 year**, **In 2 years**, or **Never Expires**) as per your security posture.
+   - The generated key value will be displayed when you select the **Add** button. Copy the generated value for use in the steps later.
+   - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
 1. In the app's registration screen, select the **Expose an API** blade to the left to open the page where you can declare the parameters to expose this app as an Api for which client applications can obtain [access tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for.
 The first thing that we need to do is to declare the unique [resource](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow) URI that the clients will be using to obtain access tokens for this Api. To declare an resource URI, follow the following steps:
    - Select `Set` next to the **Application ID URI** to generate a URI that is unique for this app.
@@ -128,30 +135,31 @@ The first thing that we need to do is to declare the unique [resource](https://d
         - Keep **State** as **Enabled**
         - Select the **Add scope** button on the bottom to save this scope.
 
-#### Configure the Service app (ExpressWebApi-c3s2) to use your app registration
+#### Configure the service app to use your app registration
 
 Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
 
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `WebAPI\auth.json` file.
-1. Find the key `clientId` and replace the existing value with the application ID (clientId) of the `ExpressWebApi-c3s2` application copied from the Azure portal.
+1. Find the key `clientId` and replace the existing value with the application ID (clientId) of the `ExpressWebApi-c3s1` application copied from the Azure portal.
 1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
-
-1. Open the `auth.json` file.
-1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of the application copied from **Azure Portal**.
-1. Find the key `TenantId` and replace the existing value with your Azure AD tenant ID (or tenant name) copied from **Azure Portal**.
-1. Find the key `ClientSecret` and replace the existing value with the key you saved during the creation of the application, on **Azure Portal**.
-1. Find the key `homePageRoute` and replace the existing value with the home page route of your application, e.g. `/home`.
-1. Find the key `redirectUri` and replace the existing value with the redirect URI that you have registered on **Azure Portal**, e.g. `http://localhost:4000/redirect`.
-1. Find the key `postLogoutRedirectUri` and replace the existing value with the URI of the page that you wish to be redirected after signing-out, e.g `http://localhost:4000/`.
-1. Find the key `policies.names` and replace it with the names (IDs) of your policies/user-flows, e.g. `b2c_1_susi`.
+1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of the `ExpressWebApi-c3s1` app, in the Azure portal.
 1. Find the key `policies.authorities` abd replace it with the authority strings of your policies/user-flows, e.g. `https://fabrikamb2c.b2clogin.com/fabrikamb2c.onmicrosoft.com/b2c_1_susi`.
 1. Find the key `policies.authorityDomain` abd replace it with the domain of your authority, e.g. `fabrikamb2c.b2clogin.com`.
-1. 
-<!-- ENTER CONFIGURATION STEPS FOR B2C USER-FLOWS/CUSTOM POLICIES BELOW -->
 
-### Register the Client app (ExpressWebApp-c3s2)
+The rest of the **key-value** pairs are for routes that you would like to require authorization. They are set as **default**, but you can modify them as you wish:
+
+```json
+        "protected": [
+            {
+               "route": "/<route-to-require-access-token-access>",
+               "scopes": [ "<scope-required-for-access>" ]
+            }
+        ]
+```
+
+### Register the client app
 
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD B2C** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
@@ -175,43 +183,41 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
    - In the **Delegated permissions** section, select the **Access 'ExpressWebApi-c3s2'** in the list. Use the search box if necessary.
    - Select the **Add permissions** button at the bottom.
 
-#### Configure the Client app (ExpressWebApp-c3s2) to use your app registration
+#### Configure the client app to use your app registration
 
 Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
 
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `WebApp\auth.json` file.
-1. Find the key `clientId` and replace the existing value with the application ID (clientId) of the `ExpressWebApp-c3s2` application copied from the Azure portal.
-
-<!-- ENTER CONFIGURATION STEPS FOR B2C USER-FLOWS/CUSTOM POLICIES BELOW -->
-
+1. Find the key `clientId` and replace the existing value with the application ID (clientId) of the `ExpressWebApp-c3s1` application copied from the Azure portal.
 1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
+1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of the `ExpressWebApp-c3s1` app, in the Azure portal.
+1. Find the key `redirectUri` and replace the existing value with the Redirect URI for ExpressWebApp-c3s1 app. For example, `http://localhost:4000/`.
+1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of the ExpressWebApp-c3s1 project (by default `http://localhost:4000/`).
+1. Find the key `policies.authorities` abd replace it with the authority strings of your policies/user-flows, e.g. `https://fabrikamb2c.b2clogin.com/fabrikamb2c.onmicrosoft.com/b2c_1_susi`.
+1. Find the key `policies.authorityDomain` abd replace it with the domain of your authority, e.g. `fabrikamb2c.b2clogin.com`.
 
-<!-- ENTER CONFIGURATION STEPS FOR B2C USER-FLOWS/CUSTOM POLICIES BELOW -->
+The rest of the **key-value** pairs are for resources/APIs that you would like to call. They are set as **default**, but you can modify them as you wish:
 
-1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of the `ExpressWebApp-c3s2` app, in the Azure portal.
-
-<!-- ENTER CONFIGURATION STEPS FOR B2C USER-FLOWS/CUSTOM POLICIES BELOW -->
-
-1. Find the key `redirectUri` and replace the existing value with the Redirect URI for ExpressWebApp-c3s2 app. For example, 'http://localhost:4000/' .
-
-<!-- ENTER CONFIGURATION STEPS FOR B2C USER-FLOWS/CUSTOM POLICIES BELOW -->
-
-1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of the ExpressWebApp-c3s2 project (by default `http://localhost:4000/`).
-
-<!-- ENTER CONFIGURATION STEPS FOR B2C USER-FLOWS/CUSTOM POLICIES BELOW -->
+```json
+        "nameOfYourResource": {
+            "callingPageRoute": "/<route_where_this_resource_will_be_called_from>",
+            "endpoint": "<uri_coordinates_of_the_resource>",
+            "scopes": ["scope1_of_the_resource", "scope1_of_the_resource", "..."]
+        },
+```
 
 
 ## Running the sample
 
-```console
-    cd ExpressWebApi-c3s2
-    npm start
-```
+Locate the root of the sample folder. Then:
 
 ```console
-    cd ExpressWebApp-c3s2
+    cd WebAPI
+    npm start
+    cd ../
+    cd WebApp
     npm start
 ```
 
@@ -227,7 +233,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 ## We'd love your feedback!
 
-Were we successful in addressing your learning objective? [Do consider taking a moment to share your experience with us.](Enter_Survey_Form_Link)
+Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUQkRCSVdRSk8wUjdZSkg2NEZGOFFaTkxQVyQlQCN0PWcu).
 
 ## About the code
 

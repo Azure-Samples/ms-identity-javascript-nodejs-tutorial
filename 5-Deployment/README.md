@@ -13,11 +13,13 @@
 
 ## Overview
 
-This sample demonstrates how to deploy a Node.js && Express web application coupled with a Node.js & Express web API to **Azure Cloud** using [Azure Storage](https://docs.microsoft.com/azure/storage/blobs/) and [Azure App Service](https://docs.microsoft.com/azure/app-service/), respectively. To do so, we will use the [same code sample from Chapter 3](../3-Authorization-II/1-call-api).
+This sample demonstrates how to deploy a Node.js & Express web application coupled with a Node.js & Express web API to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). To do so, we will use the [same code sample from Chapter 3](../3-Authorization-II/1-call-api). 
+
+> :information_source: The steps below apply similarly to B2C applications, for instance the [B2C sample from Chapter 3](../3-Authorization-II/2-call-api-b2c)
 
 ## Scenario
 
-1. The client application uses the **MSAL.js** library to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
+1. The client application uses the **MSAL Node** library to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
 1. The **Access Token** is used as a **bearer** token to *authorize* the user to call the protected web API.
 1. The protected web API responds with the claims in the **Access Token**.
 
@@ -35,32 +37,25 @@ This sample demonstrates how to deploy a Node.js && Express web application coup
 
 ## Setup
 
-- Setup the service app:
+Locate the root of the sample folder. Then:
 
 ```console
-    cd ms-identity-javascript-tutorial
-    cd 3-Authorization-II/1-call-api
     cd WebAPI
     npm install
-```
-
-- Setup the client app:
-
-```console
-    cd ..
+    cd ../
     cd WebApp
     npm install
 ```
 
 ## Registration
 
-### Register the service app (Node.js web API)
+### Register the service app
 
-Use the same app registration credentials that you've obtained during [**chapter 3-1**](../3-Authorization-II/1-call-api).
+Use the same app registration credentials that you've obtained during [**chapter 3-1**](../3-Authorization-II/3-1-call-api). You may copy-paste the contents of your `auth.json` file to do so.
 
-### Register the client app (JavaScript SPA)
+### Register the client app
 
-Use the same app registration credentials that you've obtained during [**chapter 3-1**](../3-Authorization-II/1-call-api).
+Use the same app registration credentials that you've obtained during [**chapter 3-1**](../3-Authorization-II/3-1-call-api). You may copy-paste the contents of your `auth.json` file to do so.
 
 ## Deployment
 
@@ -70,25 +65,25 @@ There are basically **3** stages that you will have to go through in order to de
 1. Update **Azure AD** **App Registration** with URIs you have just obtained
 1. Update your configuration files with URIs you have just obtained
 
-### Deploy the service app (Node.js web API)
-
-There are various ways to deploy your applications to **Azure App Service**. Here we provide steps for deployment via **VS Code Azure Tools Extension**. For more alternatives, visit: [Static website hosting in Azure Storage](https://docs.microsoft.com/azure/storage/blobs/storage-blob-static-website#uploading-content).
+There are various ways to upload your files to **Azure App Service**. Here we provide steps for uploading via **VS Code Azure Tools Extension**.
 
 > We recommend watching the [video tutorial](https://docs.microsoft.com/azure/developer/javascript/tutorial-vscode-azure-app-service-node-01) offered by Microsoft Docs for preparation.
 
-#### Step 1: Deploy your app
+### Deploy the client app
 
-1. In the **VS Code** activity bar, select the **Azure** logo to show the **AZURE APP SERVICE** explorer. Select **Sign in to Azure...** and follow the instructions. Once signed in, the explorer should show the name of your **Azure** subscription(s).
+#### Step 1: Deploy your files
+
+1. In the **VS Code** activity bar, select the **Azure** logo to show the **Azure App Service** explorer. Select **Sign in to Azure...** and follow the instructions. Once signed in, the explorer should show the name of your **Azure** subscription(s).
 
 ![api_step1](./ReadmeFiles/api_step1.png)
 
-2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `API` folder to **Azure App Services**.
+2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `WebApp` folder to **Azure App Services** (use "Browse" option if needed, and locate the right folder).
 
 ![api_step2](./ReadmeFiles/api_step2.png)
 
 3. Choose a creation option based on the operating system to which you want to deploy. in this sample, we choose **Linux**.
 4. Select a Node.js version when prompted. An **LTS** version is recommended.
-5. Type a globally unique name for your web app and press Enter. The name must be unique across all of **Azure**.
+5. Type a globally unique name for your web app and press Enter. The name must be unique across all of **Azure**. (e.g. `msal-nodejs-webapp1`)
 6. After you respond to all the prompts, **VS Code** shows the **Azure** resources that are being created for your app in its notification popup.
 7. Select **Yes** when prompted to update your configuration to run npm install on the target Linux server.
 
@@ -96,49 +91,73 @@ There are various ways to deploy your applications to **Azure App Service**. Her
 
 #### Step 2: Disable default authentication
 
-Now you need to navigate to the **Azure App Service** Portal, and locate your project there. Once you do, click on the **Authentication/Authorization** blade. There, make sure that the **App Services Authentication** is switched off (and nothing else is checked), as we are using **our own** authentication logic.  
+Now you need to navigate to the **Azure App Service** Portal, and locate your project there. Once you do, click on the **Authentication/Authorization** blade. There, make sure that the **App Services Authentication** is switched off (and nothing else is checked), as we are using our own **custom** authentication logic.  
 
 ![disable_easy_auth](./ReadmeFiles/disable_easy_auth.png)
 
+### Step 3: Update your authentication configuration
+
+Now we need to obtain authentication parameters. There are 2 things to do:
+
+- Update Azure AD (or Azure AD B2C) **App Registration**
+- Update `WebApp/auth.json`.
+
+First, navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
+
+1. Select the **App Registrations** blade on the left, then find and select the web app that you have registered in the previous tutorial (`ExpressWebApp-c3s1`).
+1. Navigate to the **Authentication** blade. There, in **Redirect URI** section, enter the following redirect URI: `https://msal-nodejs-webapp1.azurewebsites.net/redirect`.
+1. Select **Save** to save your changes.
+
+Now, open the `WebApp/auth.json` that you have deployed to **Azure App Service**.
+
+![deployed_config](./ReadmeFiles/deployed_config.png)
+
+1. Find the key `redirectUri` and replace the existing value with the Redirect URI for ExpressWebApp-c3s1 app. For example, `https://msal-nodejs-webapp1.azurewebsites.net/redirect`.
+1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of the ExpressWebApp-c3s1 project (by default `https://msal-nodejs-webapp1.azurewebsites.net/redirect/`).
+
+At this point, the only field left to update is `resources.webAPI.endpoint`. We will replace this value with the deployed web API's URI (next section).
+
+### Deploy the service app
+
+> :information_source: The steps below are the same with deploying your web app, except for step 3 where we enable CORS.
+
+#### Step 1: Deploy your files
+
+1. In the **VS Code** activity bar, select the **Azure** logo to show the **Azure App Service** explorer. Select **Sign in to Azure...** and follow the instructions. Once signed in, the explorer should show the name of your **Azure** subscription(s).
+2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `WebAPI` folder to **Azure App Services**.
+3. Choose a creation option based on the operating system to which you want to deploy. in this sample, we choose **Linux**.
+4. Select a Node.js version when prompted. An **LTS** version is recommended.
+5. Type a globally unique name for your web API and press Enter. The name must be unique across all of **Azure**. (e.g. `https://msal-nodejs-webapi1.azurewebsites.net/`)
+6. After you respond to all the prompts, **VS Code** shows the **Azure** resources that are being created for your app in its notification popup.
+7. Select **Yes** when prompted to update your configuration to run npm install on the target Linux server.
+
+#### Step 2: Disable default authentication
+
+Now you need to navigate to the **Azure App Service** Portal, and locate your project there. Once you do, click on the **Authentication/Authorization** blade. There, make sure that the **App Services Authentication** is switched off (and nothing else is checked), as we are using our own **custom** authentication logic.
+
 #### Step 3: Enable cross-origin resource sharing (CORS)
+
+We now need to designate from which domains this web API can be called. To do so, we will add the published website URI of the web app project that we just deployed, e.g. `https://msal-nodejs-webapp1.azurewebsites.net/`. Add this URI as shown below:
 
 ![enable_cors](./ReadmeFiles/enable_cors.png)
 
-// setup web app
+#### Step 4. Update your authentication configuration
 
-#### Step 2: Update the client app's authentication parameters
+You are now **going back** to your deployed **web app**'s `auth.json` file. Once you open it:
 
-1. Navigate back to to the [Azure Portal](https://portal.azure.com).
-1. In the left-hand navigation pane, select the **Azure Active Directory** service, and then select **App registrations**.
-1. In the resulting screen, select the name of your application.
-1. From the *Branding* menu, update the **Home page URL**, to the address of your service, for example [https://javascriptspa1.z22.web.core.windows.net/](https://javascriptspa1.z22.web.core.windows.net/). Save the configuration.
-1. Add the same URI in the list of values of the *Authentication -> Redirect URIs* menu. If you have multiple redirect URIs, make sure that there a new entry using the App service's URI for each redirect URI.
-
-#### Step 3: Update the client app's configuration files
-
-Now you need to update your authentication configuration files in the client project. To do so, go to your **Azure Storage Account** explorer via **VS Code** Azure panel. There, click on your project's name > Blob Container > Web as shown below:
-
-![spa_step4](./ReadmeFiles/spa_step4.png)
-
-Open `authConfig.js`. Then:
-
-1. Find the key `redirectUri` and replace the existing value with your static webpage's URI that you have just registered e.g. `https://javascriptspa1.z22.web.core.windows.net/`
-
-Open `apiConfig.js`. Then:
-
-1. Find the key `uri` and replace the existing value with your published web API's endpoint, e.g. `https://node-webapi-1.azurewebsites.net/api`
+1. Find the key `endpoint` (resources.webAPI.endpoint), and replace the existing value with your deployed web API's URI and endpoint, e.g. `https://msal-nodejs-webapi1.azurewebsites.net/api`
 
 ## Explore the sample
 
-1. Open your browser and navigate to your deployed client app's URI, for instance: `https://javascriptspa1.z22.web.core.windows.net/`.
-1. Click the **sign-in** button on the top right corner.
-1. Once you authenticate, click the **Call web API** button at the center.
+1. Open your browser and navigate to your deployed client app's URI, for instance: `https://msal-nodejs-webapp1.azurewebsites.net/`.
+1. Click on the **sign-in** button located on the top right corner.
+1. Once you authenticate, click on the **Call web API** button at the center.
 
 ![Screenshot](./ReadmeFiles/screenshot.png)
 
 ## We'd love your feedback!
 
-Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUNDVHTkg2VVhWMTNYUTZEM05YS1hSN01EOSQlQCN0PWcu).
+Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUQkRCSVdRSk8wUjdZSkg2NEZGOFFaTkxQVyQlQCN0PWcu).
 
 ## More information
 
@@ -161,9 +180,3 @@ To provide a recommendation, visit the following [User Voice page](https://feedb
 If you'd like to contribute to this sample, see [CONTRIBUTING.MD](../../CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information, see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-## Code of Conduct
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
