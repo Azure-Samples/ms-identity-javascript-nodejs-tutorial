@@ -39,7 +39,7 @@
             "Mappings": [
               {
                 "key": "clientId",
-                "value": ".AppId"
+                "value": "Service.AppId"
               },
               {
                 "key": "tenantId",
@@ -52,26 +52,34 @@
             "SettingKind": "JSON",
             "SettingFile": "\\..\\WebApp\\auth.json",
             "Mappings": [
-            {
-                "key": "clientId",
-                "value": ".AppId"
-            },
-            {
-                "key": "tenantId",
-                "value": "$tenantId"
-            },
-            {
-                "key": "clientSecret",
-                "value": ".AppKey"
-            },
-            {
-                "key": "redirectUri",
-                "value": ".ReplyUrls"
-            },
-            {
-                "key": "postLogoutRedirectUri",
-                "value": ".HomePage"
-            }
+                {
+                    "key": "clientId",
+                    "value": ".AppId"
+                },
+                {
+                    "key": "tenantId",
+                    "value": "$tenantId"
+                },
+                {
+                    "key": "clientSecret",
+                    "value": ".AppKey"
+                },
+                {
+                    "key": "redirectUri",
+                    "value": ".ReplyUrls"
+                },
+                {
+                    "key": "postLogoutRedirectUri",
+                    "value": ".HomePage"
+                },
+                {
+                    "key": "endpoint",
+                    "value": "Service.HomePage"
+                },
+                {
+                    "key": "scopes",
+                    "value": "Service.Scope"
+                }
             ]
         }
     ]

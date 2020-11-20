@@ -6,7 +6,7 @@ const MsalExpressMiddleware = require('../../../../../MsalNodeCommons/MsalExpres
 const auth = require('../../auth.json');
 const cache = require('../utils/cachePlugin');
 
-const msal = new MsalExpressMiddleware(auth, cache);
+const msal = new MsalExpressMiddleware(auth);
 
 // initialize router
 const router = express.Router();

@@ -13,7 +13,7 @@
 
 ## Overview
 
-This sample demonstrates how to deploy a Node.js & Express web application coupled with a Node.js & Express web API to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). To do so, we will use the [same code sample from Chapter 3](../3-Authorization-II/1-call-api). 
+This sample demonstrates how to deploy a Node.js & Express web application coupled with a Node.js & Express web API to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). To do so, we will use the [same code sample from Chapter 3](../3-Authorization-II/1-call-api).
 
 > :information_source: The steps below apply similarly to B2C applications, for instance the [B2C sample from Chapter 3](../3-Authorization-II/2-call-api-b2c)
 
@@ -127,7 +127,7 @@ At this point, the only field left to update is `resources.webAPI.endpoint`. We 
 2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `WebAPI` folder to **Azure App Services**.
 3. Choose a creation option based on the operating system to which you want to deploy. in this sample, we choose **Linux**.
 4. Select a Node.js version when prompted. An **LTS** version is recommended.
-5. Type a globally unique name for your web API and press Enter. The name must be unique across all of **Azure**. (e.g. `https://msal-nodejs-webapi1.azurewebsites.net/`)
+5. Type a globally unique name for your web API and press Enter. The name must be unique across all of **Azure**. (e.g. `msal-nodejs-webapi1`)
 6. After you respond to all the prompts, **VS Code** shows the **Azure** resources that are being created for your app in its notification popup.
 7. Select **Yes** when prompted to update your configuration to run npm install on the target Linux server.
 

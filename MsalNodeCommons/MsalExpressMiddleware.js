@@ -82,7 +82,7 @@ class MsalExpressMiddleware {
             auth: {
                 clientId: config.credentials.clientId,
                 authority: config.hasOwnProperty('policies') ? config.policies.signUpSignIn.authority : constants.AuthorityStrings.AAD + config.credentials.tenantId, // single organization
-                clientSecret: config.credentials.hasOwnProperty('clientSecret') ? config.credentials.clientSecret : "",
+                clientSecret: config.credentials.clientSecret,
                 redirectUri: config.hasOwnProperty('configuration') ? config.configuration.redirectUri : null, // defaults to calling page
                 knownAuthorities: config.hasOwnProperty('policies') ? [config.policies.authorityDomain] : [], // 
             },
@@ -154,7 +154,7 @@ class MsalExpressMiddleware {
                     stage: constants.AppStages.RESET_PASSWORD,
                     path: req.route.path,
                     rand: req.session.rand
-                }), 'null');
+                }), null);
     
             // if coming for password reset, set the authority to resetPassword
             this.getAuthCode(
@@ -224,6 +224,7 @@ class MsalExpressMiddleware {
         // check if rand matches
         if (state.rand === req.session.rand) {
             if (state.stage === constants.AppStages.SIGN_IN) {
+
                 // token request should have auth code
                 const tokenRequest = {
                     redirectUri: this.msalConfig.auth.redirectUri,
@@ -357,7 +358,6 @@ class MsalExpressMiddleware {
         // TODO: cache fail safe
         if (!account) {
             throw new Error('account not found');
-            
         }
 
         const silentRequest = {
@@ -415,15 +415,15 @@ class MsalExpressMiddleware {
                         rand: req.session.rand
                     }), null);
 
-                // initiate the first leg of auth code grant to get token
-                this.getAuthCode(
-                    this.msalConfig.auth.authority, 
-                    scopes, 
-                    state, 
-                    this.msalConfig.auth.redirectUri,
-                    req, 
-                    res
-                    );
+                    // initiate the first leg of auth code grant to get token
+                    this.getAuthCode(
+                        this.msalConfig.auth.authority, 
+                        scopes, 
+                        state, 
+                        this.msalConfig.auth.redirectUri,
+                        req, 
+                        res
+                        );
                 }
             });
     };
@@ -539,7 +539,7 @@ class MsalExpressMiddleware {
          * https://docs.microsoft.com/azure/active-directory/develop/id-tokens#validating-an-id_token
          */
         const checkAudience = idTokenClaims["aud"] === this.msalConfig.auth.clientId ? true : false;
-        const checkTimestamp = idTokenClaims["iat"] < now && idTokenClaims["exp"] > now ? true: false;
+        const checkTimestamp = idTokenClaims["iat"] <= now && idTokenClaims["exp"] >= now ? true: false;
 
         // TODO: B2C check tenant
         const checkTenant = (this.rawConfig.hasOwnProperty('policies') && idTokenClaims["tid"] === undefined) || idTokenClaims["tid"] === this.rawConfig.credentials.tenantId ? true : false;
@@ -556,7 +556,6 @@ class MsalExpressMiddleware {
         const now = Math.round((new Date()).getTime() / 1000); // in UNIX format
 
         const authHeader = req.headers.authorization;
-
         const accessToken = authHeader.split(' ')[1];
         
         if (!accessToken) {
@@ -579,7 +578,7 @@ class MsalExpressMiddleware {
              * https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validating-tokens
              */
             const checkIssuer = verifiedToken['iss'].includes(this.rawConfig.credentials.tenantId) ? true : false;
-            const checkTimestamp = verifiedToken["iat"] < now && verifiedToken["exp"] > now ? true : false;
+            const checkTimestamp = verifiedToken["iat"] <= now && verifiedToken["exp"] >= now ? true : false;
             const checkAudience = verifiedToken['aud'] === this.rawConfig.credentials.clientId || verifiedToken['aud'] === 'api://' + this.rawConfig.credentials.clientId ? true : false;
             const checkScope = this.rawConfig.protected.find(item => item.route === req.route.path).scopes
                 .every(scp => verifiedToken['scp'].includes(scp));
