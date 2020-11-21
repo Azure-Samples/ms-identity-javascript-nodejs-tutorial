@@ -49,11 +49,11 @@ Locate the root of the sample folder. Then:
 
 ## Registration
 
-### Register the service app
+### Register the web API
 
 Use the same app registration credentials that you've obtained during [**chapter 3-1**](../3-Authorization-II/3-1-call-api). You may copy-paste the contents of your `auth.json` file to do so.
 
-### Register the client app
+### Register the web app
 
 Use the same app registration credentials that you've obtained during [**chapter 3-1**](../3-Authorization-II/3-1-call-api). You may copy-paste the contents of your `auth.json` file to do so.
 
@@ -69,7 +69,7 @@ There are various ways to upload your files to **Azure App Service**. Here we pr
 
 > We recommend watching the [video tutorial](https://docs.microsoft.com/azure/developer/javascript/tutorial-vscode-azure-app-service-node-01) offered by Microsoft Docs for preparation.
 
-### Deploy the client app
+### Deploy the web API
 
 #### Step 1: Deploy your files
 
@@ -77,13 +77,13 @@ There are various ways to upload your files to **Azure App Service**. Here we pr
 
 ![api_step1](./ReadmeFiles/api_step1.png)
 
-2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `WebApp` folder to **Azure App Services** (use "Browse" option if needed, and locate the right folder).
+2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `WebAPI` folder to **Azure App Services**.
 
 ![api_step2](./ReadmeFiles/api_step2.png)
 
 3. Choose a creation option based on the operating system to which you want to deploy. in this sample, we choose **Linux**.
 4. Select a Node.js version when prompted. An **LTS** version is recommended.
-5. Type a globally unique name for your web app and press Enter. The name must be unique across all of **Azure**. (e.g. `msal-nodejs-webapp1`)
+5. Type a globally unique name for your web API and press Enter. The name must be unique across all of **Azure**. (e.g. `msal-nodejs-webapi1`)
 6. After you respond to all the prompts, **VS Code** shows the **Azure** resources that are being created for your app in its notification popup.
 7. Select **Yes** when prompted to update your configuration to run npm install on the target Linux server.
 
@@ -91,9 +91,33 @@ There are various ways to upload your files to **Azure App Service**. Here we pr
 
 #### Step 2: Disable default authentication
 
-Now you need to navigate to the **Azure App Service** Portal, and locate your project there. Once you do, click on the **Authentication/Authorization** blade. There, make sure that the **App Services Authentication** is switched off (and nothing else is checked), as we are using our own **custom** authentication logic.  
+Now you need to navigate to the **Azure App Service** Portal, and locate your project there. Once you do, click on the **Authentication/Authorization** blade. There, make sure that the **App Services Authentication** is switched off (and nothing else is checked), as we are using our own **custom** authentication logic.
 
 ![disable_easy_auth](./ReadmeFiles/disable_easy_auth.png)
+
+#### Step 3: Enable cross-origin resource sharing (CORS)
+
+We now need to designate from which domains this web API can be called. To do so, we will add the published website URI of the web app project that we just deployed, e.g. `https://msal-nodejs-webapp1.azurewebsites.net/`. Add this URI as shown below:
+
+![enable_cors](./ReadmeFiles/enable_cors.png)
+
+### Deploy the web app
+
+> :information_source: The steps below are the same with deploying your web app, except for step 3 where we reconfigure `auth.json` for the web app.
+
+#### Step 1: Deploy your files
+
+1. In the **VS Code** activity bar, select the **Azure** logo to show the **Azure App Service** explorer. Select **Sign in to Azure...** and follow the instructions. Once signed in, the explorer should show the name of your **Azure** subscription(s).
+2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `WebApp` folder to **Azure App Services** (use "Browse" option if needed, and locate the right folder).
+3. Choose a creation option based on the operating system to which you want to deploy. in this sample, we choose **Linux**.
+4. Select a Node.js version when prompted. An **LTS** version is recommended.
+5. Type a globally unique name for your web app and press Enter. The name must be unique across all of **Azure**. (e.g. `msal-nodejs-webapp1`)
+6. After you respond to all the prompts, **VS Code** shows the **Azure** resources that are being created for your app in its notification popup.
+7. Select **Yes** when prompted to update your configuration to run npm install on the target Linux server.
+
+#### Step 2: Disable default authentication
+
+Now you need to navigate to the **Azure App Service** Portal, and locate your project there. Once you do, click on the **Authentication/Authorization** blade. There, make sure that the **App Services Authentication** is switched off (and nothing else is checked), as we are using our own **custom** authentication logic.
 
 ### Step 3: Update your authentication configuration
 
@@ -114,37 +138,6 @@ Now, open the `WebApp/auth.json` that you have deployed to **Azure App Service**
 
 1. Find the key `redirectUri` and replace the existing value with the Redirect URI for ExpressWebApp-c3s1 app. For example, `https://msal-nodejs-webapp1.azurewebsites.net/redirect`.
 1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of the ExpressWebApp-c3s1 project (by default `https://msal-nodejs-webapp1.azurewebsites.net/redirect/`).
-
-At this point, the only field left to update is `resources.webAPI.endpoint`. We will replace this value with the deployed web API's URI (next section).
-
-### Deploy the service app
-
-> :information_source: The steps below are the same with deploying your web app, except for step 3 where we enable CORS.
-
-#### Step 1: Deploy your files
-
-1. In the **VS Code** activity bar, select the **Azure** logo to show the **Azure App Service** explorer. Select **Sign in to Azure...** and follow the instructions. Once signed in, the explorer should show the name of your **Azure** subscription(s).
-2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `WebAPI` folder to **Azure App Services**.
-3. Choose a creation option based on the operating system to which you want to deploy. in this sample, we choose **Linux**.
-4. Select a Node.js version when prompted. An **LTS** version is recommended.
-5. Type a globally unique name for your web API and press Enter. The name must be unique across all of **Azure**. (e.g. `msal-nodejs-webapi1`)
-6. After you respond to all the prompts, **VS Code** shows the **Azure** resources that are being created for your app in its notification popup.
-7. Select **Yes** when prompted to update your configuration to run npm install on the target Linux server.
-
-#### Step 2: Disable default authentication
-
-Now you need to navigate to the **Azure App Service** Portal, and locate your project there. Once you do, click on the **Authentication/Authorization** blade. There, make sure that the **App Services Authentication** is switched off (and nothing else is checked), as we are using our own **custom** authentication logic.
-
-#### Step 3: Enable cross-origin resource sharing (CORS)
-
-We now need to designate from which domains this web API can be called. To do so, we will add the published website URI of the web app project that we just deployed, e.g. `https://msal-nodejs-webapp1.azurewebsites.net/`. Add this URI as shown below:
-
-![enable_cors](./ReadmeFiles/enable_cors.png)
-
-#### Step 4. Update your authentication configuration
-
-You are now **going back** to your deployed **web app**'s `auth.json` file. Once you open it:
-
 1. Find the key `endpoint` (resources.webAPI.endpoint), and replace the existing value with your deployed web API's URI and endpoint, e.g. `https://msal-nodejs-webapi1.azurewebsites.net/api`
 
 ## Explore the sample

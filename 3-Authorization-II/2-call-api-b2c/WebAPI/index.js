@@ -4,10 +4,10 @@ const SERVER_PORT = process.env.PORT || 5000;
 
 const app = express();
 
-const MsalExpressMiddleware = require('MsalNodeCommons/MsalExpressMiddleware');
+const MsalNodeCommons = require('MsalNodeCommons/MsalNodeCommons');
 const auth = require('./auth.json');
 
-const msal = new MsalExpressMiddleware(auth);
+const msal = new MsalNodeCommons(auth);
 
 // protected resource
 app.get('/api', msal.isAuthorized, (req, res, next) => {

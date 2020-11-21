@@ -27,7 +27,7 @@ description: "This sample demonstrates a Node.js & Express Web App application c
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web application calling a Node.js & Express web API protected by Azure AD using the [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it also illustrates various authorization concepts, such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [Dynamic Scopes and Incremental Consent](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent), [Access Token validation](https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validating-tokens) and more.
+This sample demonstrates a Node.js & Express web application calling a Node.js & Express web API protected by Azure AD using the [Microsoft Authentication Library for Node.js [PREVIEW]](https://aka.ms/msalnode) (MSAL Node [PREVIEW]). In doing so, it also illustrates various authorization concepts, such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [Dynamic Scopes and Incremental Consent](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent), [Access Token validation](https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validating-tokens) and more.
 
 ## Scenario
 
@@ -127,7 +127,7 @@ As a first step you'll need to:
 1. Sign in to the [Azure portal](https://portal.azure.com).
 1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD tenant.
 
-### Register the service app
+### Register the web API
 
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
@@ -158,7 +158,7 @@ The first thing that we need to do is to declare the unique [resource](https://d
         - Keep **State** as **Enabled**
         - Select the **Add scope** button on the bottom to save this scope.
 
-#### Configure the service app to use your app registration
+#### Configure the web API to use your app registration
 
 Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
 
@@ -174,13 +174,13 @@ The rest of the **key-value** pairs are for routes that you would like to requir
 ```json
         "protected": [
             {
-               "route": "/<route-to-require-access-token-access>",
-               "scopes": [ "<scope-required-for-access>" ]
+               "route": "<route which requires a valid access token to be presented, e.g. '/api'>",
+               "scopes": [ "<a scope you declared on the portal, e.g. 'access_as_user'>", "..." ]
             }
         ]
 ```
 
-### Register the client app
+### Register the web app
 
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
@@ -204,7 +204,7 @@ The rest of the **key-value** pairs are for routes that you would like to requir
    - In the **Delegated permissions** section, select the **Access 'ExpressWebApi-c3s1'** in the list. Use the search box if necessary.
    - Select the **Add permissions** button at the bottom.
 
-#### Configure the client app to use your app registration
+#### Configure the web app to use your app registration
 
 Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
 
@@ -220,10 +220,10 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 The rest of the **key-value** pairs are for resources/APIs that you would like to call. They are set as **default**, but you can modify them as you wish:
 
 ```json
-        "nameOfYourResource": {
-            "callingPageRoute": "/<route_where_this_resource_will_be_called_from>",
-            "endpoint": "<uri_coordinates_of_the_resource>",
-            "scopes": ["scope1_of_the_resource", "scope1_of_the_resource", "..."]
+        "<name of your resource>": {
+            "callingPageRoute": "<route where this resource will be called from, e.g. '/webapi'>",
+            "endpoint": "<URI coordinates of the resource, e.g. 'http://localhost:5000/myapi'>",
+            "scopes": ["scope for the resource, e.g. 'api://xxxxxx/access_as_user' ", "..."]
         },
 ```
 

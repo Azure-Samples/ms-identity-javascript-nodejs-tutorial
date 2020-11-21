@@ -27,7 +27,7 @@ description: "This sample demonstrates a Node.js & Express Web App application c
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web application calling a Node.js & Express web API protected by Azure AD B2C using the [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it also illustrates various authorization concepts, such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [Dynamic Scopes and Incremental Consent](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent), [Access Token validation](https://docs.microsoft.com/azure/active-directory-b2c/tokens-overview#validation) and more.
+This sample demonstrates a Node.js & Express web application calling a Node.js & Express web API protected by Azure AD B2C using the [Microsoft Authentication Library for Node.js [PREVIEW]](https://aka.ms/msalnode) (MSAL Node [PREVIEW]). In doing so, it also illustrates various authorization concepts, such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [Dynamic Scopes and Incremental Consent](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent), [Access Token validation](https://docs.microsoft.com/azure/active-directory-b2c/tokens-overview#validation) and more.
 
 ## Scenario
 
@@ -89,7 +89,7 @@ Locate the root of the sample folder. Then:
 
 :warning: This sample comes with a pre-registered application for testing purposes. If you would like to use your own **Azure AD B2C** tenant and application, follow the steps below to register and configure the application in the **Azure portal**. Otherwise, continue with the steps for [Running the sample](#running-the-sample).
 
-### Choose the Azure AD tenant where you want to create your applications
+### Choose the Azure AD B2C tenant where you want to create your applications
 
 As a first step you'll need to:
 
@@ -104,7 +104,7 @@ Please refer to: [Tutorial: Create user flows in Azure Active Directory B2C](htt
 
 Please refer to: [Tutorial: Add identity providers to your applications in Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/tutorial-add-identity-providers)
 
-### Register the service app
+### Register the web API
 
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD B2C** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
@@ -124,18 +124,15 @@ Please refer to: [Tutorial: Add identity providers to your applications in Azure
 The first thing that we need to do is to declare the unique [resource](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow) URI that the clients will be using to obtain access tokens for this Api. To declare an resource URI, follow the following steps:
    - Select `Set` next to the **Application ID URI** to generate a URI that is unique for this app.
    - For this sample, accept the proposed Application ID URI (api://{clientId}) by selecting **Save**.
-1. All Apis have to publish a minimum of one [scope](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow#request-an-authorization-code) for the client's to obtain an access token successfully. To publish a scope, follow the following steps:
+1. All APIs have to publish a minimum of one [scope](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow#request-an-authorization-code) for the client's to obtain an access token successfully. To publish a scope, follow the following steps:
    - Select **Add a scope** button open the **Add a scope** screen and Enter the values as indicated below:
         - For **Scope name**, use `access_as_user`.
-        - Select **Admins and users** options for **Who can consent?**
-        - For **Admin consent display name** type `Access ExpressWebApi-c3s2`
-        - For **Admin consent description** type `Allows the app to access ExpressWebApi-c3s2 as the signed-in user.`
-        - For **User consent display name** type `Access ExpressWebApi-c3s2`
-        - For **User consent description** type `Allow the application to access ExpressWebApi-c3s2 on your behalf.`
+        - For **Consent display name** type `Access ExpressWebApi-c3s2`
+        - For **Consent description** type `Allows the app to access ExpressWebApi-c3s2 as the signed-in user.`
         - Keep **State** as **Enabled**
         - Select the **Add scope** button on the bottom to save this scope.
 
-#### Configure the service app to use your app registration
+#### Configure the web API to use your app registration
 
 Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
 
@@ -143,7 +140,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 1. Open the `WebAPI\auth.json` file.
 1. Find the key `clientId` and replace the existing value with the application ID (clientId) of the `ExpressWebApi-c3s1` application copied from the Azure portal.
-1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
+1. Find the key `tenantId` and replace the existing value with your Azure AD B2C tenant ID.
 1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of the `ExpressWebApi-c3s1` app, in the Azure portal.
 1. Find the key `policies.authorities` abd replace it with the authority strings of your policies/user-flows, e.g. `https://fabrikamb2c.b2clogin.com/fabrikamb2c.onmicrosoft.com/b2c_1_susi`.
 1. Find the key `policies.authorityDomain` abd replace it with the domain of your authority, e.g. `fabrikamb2c.b2clogin.com`.
@@ -153,13 +150,13 @@ The rest of the **key-value** pairs are for routes that you would like to requir
 ```json
         "protected": [
             {
-               "route": "/<route-to-require-access-token-access>",
-               "scopes": [ "<scope-required-for-access>" ]
+               "route": "<route which requires a valid access token to be presented, e.g. '/api'>",
+               "scopes": [ "<a scope you declared on the portal, e.g. 'access_as_user'>", "..." ]
             }
         ]
 ```
 
-### Register the client app
+### Register the web app
 
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD B2C** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
@@ -183,7 +180,7 @@ The rest of the **key-value** pairs are for routes that you would like to requir
    - In the **Delegated permissions** section, select the **Access 'ExpressWebApi-c3s2'** in the list. Use the search box if necessary.
    - Select the **Add permissions** button at the bottom.
 
-#### Configure the client app to use your app registration
+#### Configure the web app to use your app registration
 
 Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
 
@@ -201,13 +198,12 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 The rest of the **key-value** pairs are for resources/APIs that you would like to call. They are set as **default**, but you can modify them as you wish:
 
 ```json
-        "nameOfYourResource": {
-            "callingPageRoute": "/<route_where_this_resource_will_be_called_from>",
-            "endpoint": "<uri_coordinates_of_the_resource>",
-            "scopes": ["scope1_of_the_resource", "scope1_of_the_resource", "..."]
+        "<name of your resource>": {
+            "callingPageRoute": "<route where this resource will be called from, e.g. '/webapi'>",
+            "endpoint": "<URI coordinates of the resource, e.g. 'http://localhost:5000/myapi'>",
+            "scopes": ["scope for the resource, e.g. 'api://xxxxxx/access_as_user' ", "..."]
         },
 ```
-
 
 ## Running the sample
 

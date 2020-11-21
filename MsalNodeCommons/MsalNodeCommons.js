@@ -12,7 +12,7 @@ const constants = require('./constants');
 const CryptoUtilities = require('./CryptoUtilities');
 
 /**
- * MsalExpressMiddleware is a simple wrapper around MSAL Node
+ * MsalNodeCommons is a simple wrapper around MSAL Node
  * ConfidentialClientApplication object. It offers a collection of middleware 
  * and utility methods that automate basic authentication and authorization
  * needs in Express MVC web apps and APIs. 
@@ -32,7 +32,7 @@ const CryptoUtilities = require('./CryptoUtilities');
     * req.session.authCodeRequest => object
     * req.session.tokenRequest => object
  */
-class MsalExpressMiddleware {
+class MsalNodeCommons {
 
     // configuration object passed in constructor
     rawConfig;
@@ -49,12 +49,12 @@ class MsalExpressMiddleware {
      * @param {Object} cache: cachePlugin
      */
     constructor(config, cache = null) {
-        if (!MsalExpressMiddleware.validateConfiguration(config)) {
+        if (!MsalNodeCommons.validateConfiguration(config)) {
             throw new Error("invalid configuration");  
         }
 
         this.rawConfig = config;
-        this.msalConfig = MsalExpressMiddleware.shapeConfiguration(config, cache);
+        this.msalConfig = MsalNodeCommons.shapeConfiguration(config, cache);
         this.msalClient = new msal.ConfidentialClientApplication(this.msalConfig);
     };
 
@@ -680,4 +680,4 @@ class MsalExpressMiddleware {
 
 }
 
-module.exports = MsalExpressMiddleware;
+module.exports = MsalNodeCommons;

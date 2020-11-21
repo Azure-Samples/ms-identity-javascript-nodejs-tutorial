@@ -28,7 +28,7 @@ description: "This sample demonstrates a Node.js & Express Web App authenticatin
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web application that authenticates users against Azure AD, with the help of [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it also illustrates various authentication concepts, such as [OpenID scopes](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes), [ID Tokens](https://docs.microsoft.com/azure/active-directory/develop/id-tokens), [ID Token validation](https://docs.microsoft.com/azure/active-directory/develop/id-tokens#validating-an-id_token) and more.
+This sample demonstrates a Node.js & Express web application that authenticates users against Azure AD, with the help of [Microsoft Authentication Library for Node.js [PREVIEW]](https://aka.ms/msalnode) (MSAL Node [PREVIEW]). In doing so, it also illustrates various authentication concepts, such as [OpenID scopes](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes), [ID Tokens](https://docs.microsoft.com/azure/active-directory/develop/id-tokens), [ID Token validation](https://docs.microsoft.com/azure/active-directory/develop/id-tokens#validating-an-id_token) and more.
 
 ## Scenario
 
