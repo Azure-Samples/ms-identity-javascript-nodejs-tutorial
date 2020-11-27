@@ -11,7 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.17.1",
-    "express-session": "^1.17.1"
+    "express-session": "^1.17.1",
+    "MsalNodeWrapper": "file:../../../MsalNodeWrapper"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"

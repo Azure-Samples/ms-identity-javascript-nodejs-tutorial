@@ -2,11 +2,11 @@ const express = require('express');
 
 const mainController = require('../controllers/mainController');
 
-const MsalNodeCommons = require('../../../../../MsalNodeCommons/MsalNodeCommons');
-const auth = require('../../auth.json');
+const config = require('../../auth.json');
 const cache = require('../utils/cachePlugin');
+const MsalNodeWrapper = require('MsalNodeWrapper/MsalNodeWrapper');
 
-const msal = new MsalNodeCommons(auth, cache);
+const msal = new MsalNodeWrapper(config, cache);
 
 // initialize router
 const router = express.Router();
