@@ -13,7 +13,8 @@
             "Name": "ExpressWebApi-c3s1",
             "Kind": "WebApi",
             "Audience": "AzureADMyOrg",
-            "HomePage": "http://localhost:5000/"
+            "HomePage": "http://localhost:5000/",
+            "PasswordCredentials": "Auto"
         },
         {
             "Id": "Client",
@@ -25,8 +26,8 @@
             "PasswordCredentials": "Auto",
             "RequiredResourcesAccess": [
                 {
-                "Resource": "Service",
-                "DelegatedPermissions": [ "access_as_user" ]
+                    "Resource": "Service",
+                    "DelegatedPermissions": [ "access_as_user" ]
                 }
             ]
         }
@@ -39,11 +40,15 @@
             "Mappings": [
               {
                 "key": "clientId",
-                "value": "Service.AppId"
+                "value": ".AppId"
               },
               {
                 "key": "tenantId",
                 "value": "$tenantId"
+              },
+              {
+                "key": "clientSecret",
+                "value": ".AppKey"
               }
             ]
         },

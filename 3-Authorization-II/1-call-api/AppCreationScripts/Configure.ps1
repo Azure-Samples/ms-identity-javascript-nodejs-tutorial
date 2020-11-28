@@ -229,9 +229,15 @@ Function ConfigureApplications
 
    # Create the Service AAD application
    Write-Host "Creating the AAD application (ExpressWebApi-c3s1)"
+   # Get a 2 years application key for the Service Application
+   $pw = ComputePassword
+   $fromDate = [DateTime]::Now;
+   $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
+   $ServiceAppKey = $pw
    # create the application 
    $ServiceAadApplication = New-AzureADApplication -DisplayName "ExpressWebApi-c3s1" `
                                                    -HomePage "http://localhost:5000/" `
+                                                   -PasswordCredentials $key `
                                                    -PublicClient $False
 
    $ServiceIdentifierUri = 'api://'+$ServiceAadApplication.AppId
@@ -338,13 +344,13 @@ Function ConfigureApplications
    # Update config file for 'Service'
    $configFile = $pwd.Path + "\..\WebAPI\auth.json"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "clientId" = $ServiceAadApplication.AppId;"tenantId" = $tenantId };
+   $dictionary = @{ "clientId" = $ServiceAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $ServiceAppKey };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
 
    # Update config file for 'Client'
    $configFile = $pwd.Path + "\..\WebApp\auth.json"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "clientId" = $ClientAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $ClientAppKey;"redirectUri" = $ClientAadApplication.ReplyUrls;"postLogoutRedirectUri" = $ClientAadApplication.HomePage };
+   $dictionary = @{ "clientId" = $ClientAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $ClientAppKey;"redirectUri" = $ClientAadApplication.ReplyUrls;"postLogoutRedirectUri" = $ClientAadApplication.HomePage;"endpoint" = $ServiceAadApplication.HomePage;"scopes" = ("api://"+$ServiceAadApplication.AppId+"/access_as_user") };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
   
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  

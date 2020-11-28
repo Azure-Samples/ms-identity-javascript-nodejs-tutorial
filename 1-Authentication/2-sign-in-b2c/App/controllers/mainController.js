@@ -5,7 +5,13 @@ exports.getHomePage = (req, res, next) => {
 
 exports.getIdPage = (req, res, next) => {
     const isAuthenticated = req.session.isAuthenticated;
-    const claims = req.session.idTokenClaims;
+
+    const claims = {
+        name: req.session.idTokenClaims.name,
+        preferred_username: req.session.idTokenClaims.preferred_username,
+        oid: req.session.idTokenClaims.oid,
+        sub: req.session.idTokenClaims.sub
+    };
 
     res.render('id', {isAuthenticated: isAuthenticated, claims: claims});
 }
