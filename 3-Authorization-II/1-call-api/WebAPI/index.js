@@ -15,4 +15,4 @@ app.get('/api', msal.isAuthorized, (req, res, next) => {
     res.status(200).json({'name': req.authInfo['name']});
 })
 
-app.listen(SERVER_PORT, () => console.log(`Msal Node Web API listening on port ${SERVER_PORT}!`))
+app.listen(SERVER_PORT, () => console.log(`Msal Node web API listening on port ${SERVER_PORT}!`))

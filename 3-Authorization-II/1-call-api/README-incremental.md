@@ -8,9 +8,9 @@ products:
   - microsoft-identity-platform
 name: A Node.js & Express web app calling a custom web API using MSAL Node
 urlFragment: ms-identity-javascript-nodejs-tutorial
-description: "This sample demonstrates a Node.js & Express Web App application calling a Node.js & Express Web API that is secured using Azure AD"
+description: "This sample demonstrates a Node.js & Express web app application calling a Node.js & Express web API that is secured using Azure AD"
 ---
-# A Node.js & Express Web App calling a custom web API on Azure AD using MSAL Node
+# A Node.js & Express web app calling a custom web API on Azure AD using MSAL Node
 
  1. [Overview](#overview)
  1. [Scenario](#scenario)
@@ -49,7 +49,7 @@ This sample demonstrates a Node.js & Express web application calling a Node.js &
 | `WebApp/App/routes/router.js` | Router configuration where authentication middleware added. |
 | `WebAPI/auth.json`    | Contains authentication parameters for the web API.           |
 | `WebAPI/cache.json`   | Stores MSAL Node token cache.                                 |
-| `WebAPI/index.js`     | Web API entry point.                                          |
+| `WebAPI/index.js`     | web API entry point.                                          |
 
 ## Setup
 

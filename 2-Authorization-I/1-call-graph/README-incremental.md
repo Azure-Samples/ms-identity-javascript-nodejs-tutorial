@@ -7,11 +7,11 @@ products:
   - ms-graph
   - azure-active-directory
   - microsoft-identity-platform  
-name: A Node.js & Express Web App calling Microsoft Graph API using MSAL Node
+name: A Node.js & Express web app calling Microsoft Graph API using MSAL Node
 urlFragment: ms-identity-javascript-nodejs-tutorial
-description: "This sample demonstrates a Node.js Express Web App application that authenticates users against Azure AD and obtains access token to call Microsoft Graph"
+description: "This sample demonstrates a Node.js Express web app application that authenticates users against Azure AD and obtains access token to call Microsoft Graph"
 ---
-# A Node.js & Express Web App calling Microsoft Graph using MSAL Node
+# A Node.js & Express web app calling Microsoft Graph using MSAL Node
 
  1. [Overview](#overview)
  1. [Scenario](#scenario)

@@ -6,11 +6,11 @@ products:
   - node.js
   - microsoft-identity-platform 
   - azure-active-directory-b2c
-name: A Node.js & Express Web App authenticating users against Azure AD B2C with MSAL Node
+name: A Node.js & Express web app authenticating users against Azure AD B2C with MSAL Node
 urlFragment: ms-identity-javascript-nodejs-tutorial
-description: "This sample demonstrates a Node.js Express Web App application that authenticates users against Azure AD B2C"
+description: "This sample demonstrates a Node.js Express web app application that authenticates users against Azure AD B2C"
 ---
-# A Node.js & Express Web App authenticating users against Azure AD B2C with MSAL Node
+# A Node.js & Express web app authenticating users against Azure AD B2C with MSAL Node
 
  1. [Overview](#overview)
  1. [Scenario](#scenario)

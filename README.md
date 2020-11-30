@@ -13,11 +13,11 @@ products:
 - azure-active-directory
 - azure-active-directory-b2c
 - microsoft-identity-platform
-description: "Tutorial: Enable your Node.js Web App to sign-in users and call APIs with the Microsoft identity platform"
+description: "Tutorial: Enable your Node.js web app to sign-in users and call APIs with the Microsoft identity platform"
 urlFragment: "ms-identity-javascript-nodejs-tutorial"
 ---
 
-# Tutorial: Enable your Node.js Web App to sign-in users and call APIs with the Microsoft identity platform
+# Tutorial: Enable your Node.js web app to sign-in users and call APIs with the Microsoft identity platform
 
 The [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview), along with [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and [Azure Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/overview) (Azure AD B2C) are central to the **Azure** cloud ecosystem. This tutorial aims to take you through the fundamentals of modern authentication with Node.js, using the [Microsoft Authentication Library for Node.js [PREVIEW]](https://github.com/AzureAD/microsoft-authentication-library-for-js) (MSAL Node [PREVIEW]).
 

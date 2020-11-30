@@ -16,7 +16,7 @@ class CryptoUtilities {
      * @param {String} str: string to encode
      * @param {String} encoding: encoding format
      */
-    static base64Encode(str, encoding) {
+    static base64Encode(str, encoding = "utf8") {
         return Buffer.from(str, encoding).toString("base64");
     }
     
@@ -25,7 +25,7 @@ class CryptoUtilities {
      * @param {String} str: string to encode
      * @param {String} encoding: encoding format
      */
-    static base64EncodeUrl(str, encoding) {
+    static base64EncodeUrl(str, encoding = "utf8") {
         return this.base64Encode(str, encoding)
             .replace(/=/g, "")
             .replace(/\+/g, "-")

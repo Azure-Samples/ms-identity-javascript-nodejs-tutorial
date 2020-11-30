@@ -6,12 +6,12 @@ products:
   - node.js
   - microsoft-identity-platform
   - azure-active-directory  
-name: A Node.js & Express Web App authenticating users against Azure AD with MSAL Node
+name: A Node.js & Express web app authenticating users against Azure AD with MSAL Node
 urlFragment: ms-identity-javascript-nodejs-tutorial
-description: "This sample demonstrates a Node.js & Express Web App authenticating users against Azure AD with MSAL Node"
+description: "This sample demonstrates a Node.js & Express web app authenticating users against Azure AD with MSAL Node"
 ---
 
-# A Node.js & Express Web App authenticating users against Azure AD with MSAL Node
+# A Node.js & Express web app authenticating users against Azure AD with MSAL Node
 
  1. [Overview](#overview)
  1. [Scenario](#scenario)
