@@ -15,9 +15,9 @@ const CryptoUtilities = require('./CryptoUtilities');
  * MsalNodeWrapper is a simple wrapper around MSAL Node
  * ConfidentialClientApplication object. It offers a collection of middleware 
  * and utility methods that automate basic authentication and authorization
- * needs in Express MVC web apps and APIs. 
+ * tasks in Express MVC web apps and APIs. 
  * 
- * You must have express & express-sessions packages installed. Middleware here 
+ * You must have express and express-sessions packages installed. Middleware here 
  * can be used with express sessions in route controllers.
  * 
  * Session variables accessible are as follows:
@@ -226,6 +226,7 @@ class MsalNodeWrapper {
      * @param {Function} next: express next 
      */
     handleRedirect = async(req, res, next) => {
+
         const state = JSON.parse(CryptoUtilities.base64DecodeUrl(req.query.state));
 
         // check if nonce matches
@@ -285,11 +286,6 @@ class MsalNodeWrapper {
                             return res.redirect(state.path);
                         } 
                     }
-                    
-                    if (JSON.stringify(error.errorMessage).includes("AADB2C90088")) {
-                        console.log('profile has been edited. Please sign-in again.')
-                        // TODO: sign-out
-                    }
 
                     res.status(500).send(error);
                 }
@@ -306,8 +302,9 @@ class MsalNodeWrapper {
                 };
 
                 try {
-                    const tokenResponse = this.msalClient.acquireTokenByCode(tokenRequest);
+                    const tokenResponse = await this.msalClient.acquireTokenByCode(tokenRequest);
                     console.log("\nResponse: \n:", tokenResponse);
+
                     req.session[resourceName].accessToken = tokenResponse.accessToken;
 
                     try {
@@ -316,6 +313,7 @@ class MsalNodeWrapper {
                         return res.status(200).redirect(state.path);
                     } catch (error) {
                         console.log(error);
+                        res.status(500).send(error);
                     }
 
                 } catch (error) {
@@ -337,10 +335,11 @@ class MsalNodeWrapper {
 
                 res.redirect(state.path);
             } else {
-                res.status(500).send("Unknown app stage");
+                res.status(500).send('Unknown app stage');
             }
         } else {
-            res.status(401).send("Not Permitted");
+            console.log('Nonce does not match')
+            res.status(401).send('Not Permitted');
         }
     };
 
@@ -365,12 +364,19 @@ class MsalNodeWrapper {
             };
         }
 
-        // find account using homeAccountId built after receiving token response
-        let account = await this.msalClient.getTokenCache().getAccountByHomeId(req.session.homeAccountId);
-
         try {
-            // TODO: cache fail safe
-            if (!account) {
+
+            let account;
+
+            try {
+                account = await this.msalClient.getTokenCache().getAccountByHomeId(req.session.homeAccountId);
+                            
+                if (!account) {
+                    throw new Error("interaction_required");
+                }
+
+            } catch (error) {
+                console.log(error);
                 throw new msal.InteractionRequiredAuthError("interaction_required");
             }
 
@@ -381,30 +387,14 @@ class MsalNodeWrapper {
 
             // acquire token silently to be used in resource call
             const tokenResponse = await this.msalClient.acquireTokenSilent(silentRequest)
-            console.log("\nSuccessful silent token acquisition:\nResponse: \n:", tokenResponse);
+            console.log("\nSuccessful silent token acquisition:\n Response: \n:", tokenResponse);
 
             // TODO: In B2C scenarios, sometimes an access token is returned empty
             // due to improper refresh tokens in cache. In that case, we will acquire token
             // interactively instead.
             if (tokenResponse.accessToken.length === 0) {
                 console.log('No access token found, falling back to interactive token acquisition');
-
-                let state = CryptoUtilities.base64EncodeUrl(
-                    JSON.stringify({
-                        stage: constants.AppStages.ACQUIRE_TOKEN,
-                        path: req.route.path,
-                        nonce: req.session.nonce
-                    }));
-
-                // initiate the first leg of auth code grant to get token
-                this.getAuthCode(
-                    this.msalConfig.auth.authority, 
-                    scopes, 
-                    state, 
-                    this.msalConfig.auth.redirectUri,
-                    req, 
-                    res
-                    );
+                throw new msal.InteractionRequiredAuthError("interaction_required");
             }
             
             req.session[resourceName].accessToken = tokenResponse.accessToken;
@@ -412,7 +402,6 @@ class MsalNodeWrapper {
             try {
                 // call the web API
                 const resourceResponse = await this.callAPI(this.rawConfig.resources[resourceName].endpoint, tokenResponse.accessToken)
-                console.log('resource responded: ', resourceResponse);
                 req.session[resourceName].resourceResponse = resourceResponse;
 
                 return next();
@@ -454,26 +443,37 @@ class MsalNodeWrapper {
     getTokenOnBehalf = async(req, res, next) => {
         const authHeader = req.headers.authorization;
 
+        let scopes = Object.values(this.rawConfig.resources)
+            .find(resource => resource.callingPageRoute === req.route.path).scopes;
+
         const oboRequest = {
             oboAssertion: authHeader.split(' ')[1],
-            scopes: ["user.read"],
+            scopes: scopes,
         }
+
 
         // get the resource name for attaching resource response to req
         const resourceName = this.getResourceName(req.route.path);
-    
-        this.msalClient.acquireTokenOnBehalfOf(oboRequest)
-            .then((response) => {
-                console.log("\nResponse: \n:", response);
+        
+        try {
+            const tokenResponse = await this.msalClient.acquireTokenOnBehalfOf(oboRequest);
 
-                this.callAPI(this.rawConfig.resources[resourceName].endpoint, response.accessToken, (resourceResponse) => {
+            if (tokenResponse) {
+                try {
+                    const resourceResponse = await this.callAPI(this.rawConfig.resources[resourceName].endpoint, tokenResponse.accessToken);
                     req[resourceName].resourceResponse = resourceResponse;
-                    return next();
-                });
-
-            }).catch((error) => {
-                res.status(500).send(error);
-            });
+                    return next();        
+                } catch (error) {
+                    console.log(error)
+                    res.send('Error: Cannot acquire token OBO')
+                }
+            } else {
+                res.status(500).send('No response OBO');
+            }
+            
+        } catch (error) {
+            res.status(500).send(error);
+        }
     }
 
     /**
@@ -501,6 +501,7 @@ class MsalNodeWrapper {
      * @param {Function} next: express next 
      */
     isAuthorized = async(req, res, next) => {
+
         if (req.headers.authorization) {
             if (!(await this.validateAccessToken(req))) {
                 return res.status(401).send("Not Permitted");
@@ -555,10 +556,7 @@ class MsalNodeWrapper {
          */
         const checkAudience = idTokenClaims["aud"] === this.msalConfig.auth.clientId ? true : false;
         const checkTimestamp = idTokenClaims["iat"] <= now && idTokenClaims["exp"] >= now ? true : false;
-
-        // TODO: B2C check tenant
         const checkTenant = (this.rawConfig.hasOwnProperty('policies') && !idTokenClaims["tid"]) || idTokenClaims["tid"] === this.rawConfig.credentials.tenantId ? true : false;
-        console.log('checkTenant', checkTenant);
 
         return checkAudience && checkTimestamp && checkTenant;
     };
@@ -574,42 +572,54 @@ class MsalNodeWrapper {
         const authHeader = req.headers.authorization;
         const accessToken = authHeader.split(' ')[1];
         
-        if (!accessToken) {
+        if (!accessToken || accessToken === "" || accessToken === "undefined") {
+            console.log('No tokens found');
             return false;
         }
 
         // we will first decode to get kid in header
         const decodedToken = jwt.decode(accessToken, {complete: true});
+        
+        if (!decodedToken) {
+            throw new Error('Token cannot be decoded')
+        }
 
         // obtains signing keys from discovery endpoint
-        const keys = await this.getSigningKeys(decodedToken.header);
+        let keys;
 
         try {
-            // verify the signature at header section using keys
-            const verifiedToken = jwt.verify(accessToken, keys);
-
-            /**
-             * Validate the token with respect to issuer, audience, scope
-             * and timestamp, though implementation and extent vary. For more information, visit:
-             * https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validating-tokens
-             */
-            const checkIssuer = verifiedToken['iss'].includes(this.rawConfig.credentials.tenantId) ? true : false;
-            const checkTimestamp = verifiedToken["iat"] <= now && verifiedToken["exp"] >= now ? true : false;
-            const checkAudience = verifiedToken['aud'] === this.rawConfig.credentials.clientId || verifiedToken['aud'] === 'api://' + this.rawConfig.credentials.clientId ? true : false;
-            const checkScope = this.rawConfig.protected.find(item => item.route === req.route.path).scopes
-                .every(scp => verifiedToken['scp'].includes(scp));
-
-            if (checkAudience && checkIssuer && checkTimestamp && checkScope) {
-
-                // token claims will be available in the request for the controller
-                req.authInfo = verifiedToken;
-                return true;
-            }
-            return false;
-        } catch(err) {
-            console.log(err);
-            return false;
+            keys = await this.getSigningKeys(decodedToken.header);        
+        } catch (error) {
+            console.log('Signing keys cannot be obtained');
+            console.log(error);
         }
+
+   
+        // verify the signature at header section using keys
+        const verifiedToken = jwt.verify(accessToken, keys);
+
+        if (!verifiedToken) {
+            throw new Error('Token cannot be verified');
+        }
+
+        /**
+         * Validate the token with respect to issuer, audience, scope
+         * and timestamp, though implementation and extent vary. For more information, visit:
+         * https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validating-tokens
+         */
+        const checkIssuer = verifiedToken['iss'].includes(this.rawConfig.credentials.tenantId) ? true : false;
+        const checkTimestamp = verifiedToken["iat"] <= now && verifiedToken["exp"] >= now ? true : false;
+        const checkAudience = verifiedToken['aud'] === this.rawConfig.credentials.clientId || verifiedToken['aud'] === 'api://' + this.rawConfig.credentials.clientId ? true : false;
+        const checkScope = this.rawConfig.protected.find(item => item.route === req.route.path).scopes
+            .every(scp => verifiedToken['scp'].includes(scp));
+
+        if (checkAudience && checkIssuer && checkTimestamp && checkScope) {
+
+            // token claims will be available in the request for the controller
+            req.authInfo = verifiedToken;
+            return true;
+        }
+        return false;
     };
     
     /**
@@ -641,6 +651,11 @@ class MsalNodeWrapper {
      * @param {String} accessToken: raw token
      */
     callAPI = async(endpoint, accessToken) => {
+
+        if (!accessToken || accessToken === "") {
+            throw new Error('No tokens found')
+        }
+        
         const options = {
             headers: {
                 Authorization: `Bearer ${accessToken}`
@@ -651,7 +666,6 @@ class MsalNodeWrapper {
 
         try {
             const response = await axios.default.get(endpoint, options);
-            console.log(response.data);
             return response.data;
         } catch(error) {
             console.log(error)

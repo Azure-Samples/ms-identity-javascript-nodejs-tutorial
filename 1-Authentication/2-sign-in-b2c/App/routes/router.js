@@ -22,7 +22,6 @@ router.get('/redirect', msal.handleRedirect);
 
 // protected routes
 router.get('/id', msal.isAuthenticated, mainController.getIdPage); // get token for this route to call web API
-router.get('/edit', msal.isAuthenticated, msal.editProfile);
 
 // 404
 router.get('*', (req, res) => res.status(404).redirect('/404.html'));

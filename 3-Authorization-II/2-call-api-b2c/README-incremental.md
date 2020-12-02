@@ -191,7 +191,7 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ## Next Tutorial
 
-Continue with the next tutorial: [Deploy your apps to Azure](../../5-Deployment/README-incremental.md).
+Continue with the next tutorial: [Deploy your apps to Azure](../../4-Deployment/README-incremental.md).
 
 ## More information
 

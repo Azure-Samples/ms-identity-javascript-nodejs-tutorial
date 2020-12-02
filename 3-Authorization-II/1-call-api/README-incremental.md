@@ -221,7 +221,7 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ## Next Tutorial
 
-Continue with the next tutorial: [Call a web API that calls another web API](../../4-AdvancedGrants/1-call-api-graph/README-incremental.md).
+Continue with the next tutorial: [Deploy your apps to Azure](../../4-Deployment/README-incremental.md).
 
 ## More information
 
