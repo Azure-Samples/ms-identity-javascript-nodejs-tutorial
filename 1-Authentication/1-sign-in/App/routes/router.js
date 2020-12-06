@@ -20,7 +20,7 @@ router.get('/signin', msal.signIn);
 router.get('/signout', msal.signOut);
 router.get('/redirect', msal.handleRedirect);
 
-// protected routes
+// authenticated routes
 router.get('/id', msal.isAuthenticated, mainController.getIdPage);
 
 // 404

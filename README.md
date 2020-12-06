@@ -21,6 +21,8 @@ urlFragment: "ms-identity-javascript-nodejs-tutorial"
 
 The [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview), along with [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and [Azure Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/overview) (Azure AD B2C) are central to the **Azure** cloud ecosystem. This tutorial aims to take you through the fundamentals of modern authentication with Node.js, using the [Microsoft Authentication Library for Node.js [PREVIEW]](https://github.com/AzureAD/microsoft-authentication-library-for-js) (MSAL Node [PREVIEW]).
 
+This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) in order to automate routine authentication tasks such as login, logout, get a token etc., as well as utility methods to validate tokens and call APIs. You can find the wrapper under the [MsalNodeWrapper](./MsalNodeWrapper) folder.
+
 We recommend following the chapters in successive order. However, the code samples are self-contained, so feel free to pick samples by topics that you may need at the moment.
 
 > :warning: This is a *work in progress*. Come back frequently to discover more samples.

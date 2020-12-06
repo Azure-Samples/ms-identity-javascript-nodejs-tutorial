@@ -170,15 +170,164 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ## About the code
 
-### Configuration
+## Initialization
+
+`MsalNodeWrapper` class is initialized in the [routes/router.js](./App/routes/router.js). It expects two parameters, a JSON configuration object (see [auth.json](./auth.json)), and an optional cache plug-in (see [cachePlugin.js](./App/utils/cachePlugin.js)) if you wish to save your cache to disk. Otherwise, in-memory only cache is used.
+
+Once initialized, `MsalNodeWrapper` middleware can be used in routes:
+
+```javascript
+    const express = require('express');
+
+    const msal = new MsalNodeWrapper(config, cache);
+
+    // initialize router
+    const router = express.Router();
+
+    router.get('/signin', msal.signIn);
+    router.get('/signout', msal.signOut);
+    router.get('/redirect', msal.handleRedirect);
+```
+
+Under the hood, the wrapper creates an **MSAL Node** [configuration object](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/configuration.md) and initializes [msal.ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) by passing it.
+
+```javascript
+    constructor(config, cache = null) {
+        MsalNodeWrapper.validateConfiguration(config);
+        
+        this.rawConfig = config;
+        this.msalConfig = MsalNodeWrapper.shapeConfiguration(config, cache);
+        this.msalClient = new msal.ConfidentialClientApplication(this.msalConfig);
+    };
+```
 
 ### Sign-in
 
-### ID Token validation
+The user clicks on the **sign-in** button and routes to `/signin`. `msal.signIn` middleware takes over. First it creates session variables:
+
+```javascript
+        signIn = (req, res, next) => {     
+
+        if (!req.session['authCodeRequest']) {
+            req.session.authCodeRequest = {
+                authority: "",
+                scopes: [],
+                state: {},
+                redirectUri: ""
+            };
+        }
+
+        if (!req.session['tokenRequest']) {
+            req.session.tokenRequest = {
+                authority: "",
+                scopes: [],
+                state: {},
+                redirectUri: ""
+            };
+        }
+
+        // current account id
+        req.session.homeAccountId = "";
+```
+
+Then, creates and encodes a state object to pass with an authorization code request. The object is passed to the `state` parameter as a means of controlling the application flow. For more information, see [Pass custom state in authentication requests using MSAL.js](https://docs.microsoft.com/azure/active-directory/develop/msal-js-pass-custom-state-authentication-request).
+
+```javascript
+      // sign-in as usual
+      let state = CryptoUtilities.base64EncodeUrl(
+        JSON.stringify({
+            stage: constants.AppStages.SIGN_IN,
+            path: req.route.path,
+            nonce: req.session.nonce
+        }));
+
+      // get url to sign user in (and consent to scopes needed for application)
+      this.getAuthCode(
+          this.msalConfig.auth.authority, 
+          Object.values(constants.OIDCScopes), // pass standard openid scopes as permissions
+          state, 
+          this.msalConfig.auth.redirectUri,
+          req, // express request object
+          res // express response object
+      );
+```
+
+Under the hood, `getAuthCode()` assigns request parameters to session, and calls the **MSAL Node** `getAuthCodeUrl()` API
+
+```javascript
+    const response = await this.msalClient.getAuthCodeUrl(req.session.authCodeRequest);
+```
+
+### Get a token
+
+After making an authorization code URL request, the user is redirected to the redirect route defined in the **Azure AD** app registration. Once redirected, the `handleRedirect` middleware takes over. It first checks for `nonce` parameter in state against *cross-site resource forgery* (csrf) attacks, and then for the current app stage. Then, using the `code` in query parameters, tokens are requested using the **MSAL Node** `acquireTokenByCode()` API, and the response is appended to the *express-session** variable.
+
+```javascript
+    handleRedirect = async(req, res, next) => {
+        //...
+
+        if (state.nonce === req.session.nonce) {
+            if (state.stage === constants.AppStages.SIGN_IN) {
+        
+                // token request should have auth code
+                const tokenRequest = {
+                    redirectUri: this.msalConfig.auth.redirectUri,
+                    scopes: Object.keys(constants.OIDCScopes),
+                    code: req.query.code,
+                };
+        
+                try {
+                    // exchange auth code for tokens
+                    const tokenResponse = await this.msalClient.acquireTokenByCode(tokenRequest)
+                    console.log("\nResponse: \n:", tokenResponse);
+        
+                    if (this.validateIdToken(tokenResponse.idTokenClaims)) {
+                                
+                        req.session.homeAccountId = tokenResponse.account.homeAccountId;
+        
+                        // assign session variables
+                        req.session.idTokenClaims = tokenResponse.idTokenClaims;
+                        req.session.isAuthenticated = true;
+        
+                        return res.status(200).redirect(this.rawConfig.configuration.homePageRoute);
+                    } else {
+                        console.log('invalid token');
+                        return res.status(401).send("Not Permitted");
+                }
+
+            //...
+    }
+```
+
+### ID token validation
+
+Web apps (and confidential client apps in general) should validate ID Tokens. **MSAL Node** decodes the ID token. In `MsalNodeWrapper`, we add the ID token to session, and then validate it:
+
+```javascript
+    const checkAudience = idTokenClaims["aud"] === this.msalConfig.auth.clientId ? true : false;
+    const checkTimestamp = idTokenClaims["iat"] <= now && idTokenClaims["exp"] >= now ? true : false;
+    const checkTenant = (this.rawConfig.hasOwnProperty('policies') && !idTokenClaims["tid"]) || idTokenClaims["tid"] === this.rawConfig.credentials.tenantId ? true : false;
+
+    return checkAudience && checkTimestamp && checkTenant;
+```
+
+ID token validation should be validated according to the guide [ID Token validation](https://docs.microsoft.com/azure/active-directory/develop/id-tokens#validating-an-id_token). Implementation can vary, and it is the app developers responsibility.
 
 ### Sign-out
 
-### National Clouds
+We construct a logout URL following the [guide here](https://docs.microsoft.com/azure/active-directory/develop/v2-protocols-oidc#send-a-sign-out-request). Then, we destroy the current **express-session** and redirect the user to **sign-out endpoint**.
+
+```javascript
+    signOut = (req, res, next) => {
+        const logoutURI = '<your-tenanted-logout-url>';
+
+        req.session.isAuthenticated = false;
+        
+        req.session.destroy(() => {
+            res.redirect(logoutURI);
+        });
+    };
+```
 
 ## Next Tutorial
 

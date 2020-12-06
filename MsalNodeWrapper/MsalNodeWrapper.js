@@ -219,7 +219,7 @@ class MsalNodeWrapper {
     
     /**
      * Middleware that handles redirect depending on request state
-     * There are basically 3 states: sign-in, acquire token
+     * There are basically 3 stages: sign-in, acquire token
      * and password reset user-flows for B2C scenarios
      * @param {Object} req: express request object
      * @param {Object} res: express response object

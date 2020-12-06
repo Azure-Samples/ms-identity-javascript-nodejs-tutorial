@@ -21,7 +21,7 @@ router.get('/signin', msal.signIn);
 router.get('/signout', msal.signOut);
 router.get('/redirect', msal.handleRedirect); 
 
-// protected routes
+// authorized routes
 router.get('/id', msal.isAuthenticated, mainController.getIdPage);
 router.get('/profile', msal.isAuthenticated, msal.getToken, mainController.getProfilePage); // get token for this route to call web API
 router.get('/tenant', msal.isAuthenticated, msal.getToken, mainController.getTenantPage) // get token for this route to call web API
