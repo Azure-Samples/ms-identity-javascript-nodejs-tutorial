@@ -63,7 +63,6 @@ class MsalNodeWrapper {
     static validateConfiguration = (config) => {
 
         // TODO: expand validation logic
-
         if (!config.credentials.clientId) {
             throw new Error("error: no clientId provided");
         }
@@ -219,7 +218,7 @@ class MsalNodeWrapper {
     
     /**
      * Middleware that handles redirect depending on request state
-     * There are basically 3 states: sign-in, acquire token
+     * There are basically 3 stages: sign-in, acquire token
      * and password reset user-flows for B2C scenarios
      * @param {Object} req: express request object
      * @param {Object} res: express response object
@@ -231,111 +230,118 @@ class MsalNodeWrapper {
 
         // check if nonce matches
         if (state.nonce === req.session.nonce) {
-            if (state.stage === constants.AppStages.SIGN_IN) {
+            
+            let tokenRequest;
+            
+            switch (state.stage) {
 
-                // token request should have auth code
-                const tokenRequest = {
-                    redirectUri: this.msalConfig.auth.redirectUri,
-                    scopes: Object.keys(constants.OIDCScopes),
-                    code: req.query.code,
-                };
-
-                try {
-                    // exchange auth code for tokens
-                    const tokenResponse = await this.msalClient.acquireTokenByCode(tokenRequest)
-                    console.log("\nResponse: \n:", tokenResponse);
-
-                    if (this.validateIdToken(tokenResponse.idTokenClaims)) {
-                                
-                        req.session.homeAccountId = tokenResponse.account.homeAccountId;
-
-                        // assign session variables
-                        req.session.idTokenClaims = tokenResponse.idTokenClaims;
-                        req.session.isAuthenticated = true;
-
-                        return res.status(200).redirect(this.rawConfig.configuration.homePageRoute);
-                    } else {
-                        console.log('invalid token');
-                        return res.status(401).send("Not Permitted");
-                    }  
-                } catch (error) {
-                    console.log(error);
-
-                    if (req.query.error) {
-
-                        /**
-                         * When the user selects "forgot my password" on the sign-in page, B2C service will throw an error.
-                         * We are to catch this error and redirect the user to login again with the resetPassword authority.
-                         * For more information, visit: https://docs.microsoft.com/azure/active-directory-b2c/user-flow-overview#linking-user-flows
-                         */
-                        if (JSON.stringify(req.query.error_description).includes("AADB2C90118")) {
-
-                            req.session.nonce = CryptoUtilities.generateGuid();
-
-                            let newState = CryptoUtilities.base64EncodeUrl(
-                                JSON.stringify({
-                                    stage: constants.AppStages.RESET_PASSWORD,
-                                    path: req.route.path,
-                                    nonce: req.session.nonce
-                                }));
-
-                            req.session.authCodeRequest.state = newState;
-                            req.session.authCodeRequest.authority = this.rawConfig.policies.resetPassword.authority;
-
-                            // redirect to sign in page again with resetPassword authority
-                            return res.redirect(state.path);
-                        } 
-                    }
-
-                    res.status(500).send(error);
-                }
-
-            } else if (state.stage === constants.AppStages.ACQUIRE_TOKEN) {
-
-                // get the name of the resource associated with scope
-                let resourceName = this.getResourceName(state.path);
-
-                const tokenRequest = {
-                    code: req.query.code,
-                    scopes: this.rawConfig.resources[resourceName].scopes, // scopes for resourceName
-                    redirectUri: this.rawConfig.configuration.redirectUri,
-                };
-
-                try {
-                    const tokenResponse = await this.msalClient.acquireTokenByCode(tokenRequest);
-                    console.log("\nResponse: \n:", tokenResponse);
-
-                    req.session[resourceName].accessToken = tokenResponse.accessToken;
+                case constants.AppStages.SIGN_IN:
+                    // token request should have auth code
+                    tokenRequest = {
+                        redirectUri: this.msalConfig.auth.redirectUri,
+                        scopes: Object.keys(constants.OIDCScopes),
+                        code: req.query.code,
+                    };
 
                     try {
-                        const resourceResponse = await this.callAPI(this.rawConfig.resources[resourceName].endpoint, tokenResponse.accessToken);
-                        req.session[resourceName].resourceResponse = resourceResponse;
-                        return res.status(200).redirect(state.path);
+                        // exchange auth code for tokens
+                        const tokenResponse = await this.msalClient.acquireTokenByCode(tokenRequest)
+                        console.log("\nResponse: \n:", tokenResponse);
+
+                        if (this.validateIdToken(tokenResponse.idTokenClaims)) {
+                                    
+                            req.session.homeAccountId = tokenResponse.account.homeAccountId;
+
+                            // assign session variables
+                            req.session.idTokenClaims = tokenResponse.idTokenClaims;
+                            req.session.isAuthenticated = true;
+
+                            return res.status(200).redirect(this.rawConfig.configuration.homePageRoute);
+                        } else {
+                            console.log('invalid token');
+                            return res.status(401).send("Not Permitted");
+                        }  
+                    } catch (error) {
+                        console.log(error);
+
+                        if (req.query.error) {
+
+                            /**
+                             * When the user selects "forgot my password" on the sign-in page, B2C service will throw an error.
+                             * We are to catch this error and redirect the user to login again with the resetPassword authority.
+                             * For more information, visit: https://docs.microsoft.com/azure/active-directory-b2c/user-flow-overview#linking-user-flows
+                             */
+                            if (JSON.stringify(req.query.error_description).includes("AADB2C90118")) {
+
+                                req.session.nonce = CryptoUtilities.generateGuid();
+
+                                let newState = CryptoUtilities.base64EncodeUrl(
+                                    JSON.stringify({
+                                        stage: constants.AppStages.RESET_PASSWORD,
+                                        path: req.route.path,
+                                        nonce: req.session.nonce
+                                    }));
+
+                                req.session.authCodeRequest.state = newState;
+                                req.session.authCodeRequest.authority = this.rawConfig.policies.resetPassword.authority;
+
+                                // redirect to sign in page again with resetPassword authority
+                                return res.redirect(state.path);
+                            } 
+                        }
+                        res.status(500).send(error);
+                    }
+                    break;
+
+                case constants.AppStages.ACQUIRE_TOKEN:
+                    // get the name of the resource associated with scope
+                    let resourceName = this.getResourceName(state.path);
+
+                    tokenRequest = {
+                        code: req.query.code,
+                        scopes: this.rawConfig.resources[resourceName].scopes, // scopes for resourceName
+                        redirectUri: this.rawConfig.configuration.redirectUri,
+                    };
+
+                    try {
+                        const tokenResponse = await this.msalClient.acquireTokenByCode(tokenRequest);
+                        console.log("\nResponse: \n:", tokenResponse);
+
+                        req.session[resourceName].accessToken = tokenResponse.accessToken;
+
+                        try {
+                            const resourceResponse = await this.callAPI(this.rawConfig.resources[resourceName].endpoint, tokenResponse.accessToken);
+                            req.session[resourceName].resourceResponse = resourceResponse;
+                            return res.status(200).redirect(state.path);
+                        } catch (error) {
+                            console.log(error);
+                            res.status(500).send(error);
+                        }
+
                     } catch (error) {
                         console.log(error);
                         res.status(500).send(error);
                     }
+                    break;
 
-                } catch (error) {
-                    console.log(error);
-                    res.status(500).send(error);
-                }
-            } else if (state.stage === constants.AppStages.RESET_PASSWORD) {
-                // once the password is reset, redirect the user to login again with the new password
-                req.session.nonce = CryptoUtilities.generateGuid();
-                
-                let newState = CryptoUtilities.base64EncodeUrl(
-                    JSON.stringify({
-                        stage: constants.AppStages.SIGN_IN,
-                        path: req.route.path,
-                        nonce: req.session.nonce
-                    }));
+                case constants.AppStages.RESET_PASSWORD:
+                    // once the password is reset, redirect the user to login again with the new password
+                    req.session.nonce = CryptoUtilities.generateGuid();
+                    
+                    let newState = CryptoUtilities.base64EncodeUrl(
+                        JSON.stringify({
+                            stage: constants.AppStages.SIGN_IN,
+                            path: req.route.path,
+                            nonce: req.session.nonce
+                        }));
 
-                req.session.authCodeRequest.state = newState;
+                    req.session.authCodeRequest.state = newState;
 
-                res.redirect(state.path);
-            } else {
-                res.status(500).send('Unknown app stage');
+                    res.redirect(state.path);
+                    break;
+                default:
+                    res.status(500).send('Error: cannot determine application stage');
+                    break;
             }
         } else {
             console.log('Nonce does not match')
@@ -610,8 +616,7 @@ class MsalNodeWrapper {
         const checkIssuer = verifiedToken['iss'].includes(this.rawConfig.credentials.tenantId) ? true : false;
         const checkTimestamp = verifiedToken["iat"] <= now && verifiedToken["exp"] >= now ? true : false;
         const checkAudience = verifiedToken['aud'] === this.rawConfig.credentials.clientId || verifiedToken['aud'] === 'api://' + this.rawConfig.credentials.clientId ? true : false;
-        const checkScope = this.rawConfig.protected.find(item => item.route === req.route.path).scopes
-            .every(scp => verifiedToken['scp'].includes(scp));
+        const checkScope = this.rawConfig.protected.find(item => item.route === req.route.path).scopes.every(scp => verifiedToken['scp'].includes(scp));
 
         if (checkAudience && checkIssuer && checkTimestamp && checkScope) {
 
