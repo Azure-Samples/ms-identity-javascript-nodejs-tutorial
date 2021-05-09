@@ -4,13 +4,14 @@ exports.getHomePage = (req, res, next) => {
 }
 
 exports.getIdPage = (req, res, next) => {
+    console.log(req.session.account);
     const isAuthenticated = req.session.isAuthenticated;
 
     const claims = {
-        name: req.session.idTokenClaims.name,
-        preferred_username: req.session.idTokenClaims.preferred_username,
-        oid: req.session.idTokenClaims.oid,
-        sub: req.session.idTokenClaims.sub
+        name: req.session.account.idTokenClaims.name,
+        preferred_username: req.session.account.idTokenClaims.preferred_username,
+        oid: req.session.account.idTokenClaims.oid,
+        sub: req.session.account.idTokenClaims.sub
     };
 
     res.render('id', {isAuthenticated: isAuthenticated, claims: claims});

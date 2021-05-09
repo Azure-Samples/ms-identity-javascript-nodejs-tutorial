@@ -4,9 +4,10 @@ const mainController = require('../controllers/mainController');
 
 const config = require('../../auth.json');
 const cache = require('../utils/cachePlugin');
-const MsalNodeWrapper = require('MsalNodeWrapper/MsalNodeWrapper');
+const msalWrapper = require('msal-express-wrapper');
 
-const msal = new MsalNodeWrapper(config, cache);
+// initialize wrapper
+const authProvider = new msalWrapper.AuthProvider(config, cache);
 
 // initialize router
 const router = express.Router();
@@ -15,13 +16,13 @@ const router = express.Router();
 router.get('/', (req, res, next) => res.redirect('/home'));
 router.get('/home', mainController.getHomePage);
 
-// authentication routes
-router.get('/signin', msal.signIn);
-router.get('/signout', msal.signOut);
-router.get('/redirect', msal.handleRedirect);
+// // authentication routes
+router.get('/signin', authProvider.signIn);
+router.get('/signout', authProvider.signOut);
+router.get('/redirect', authProvider.handleRedirect);
 
 // authenticated routes
-router.get('/id', msal.isAuthenticated, mainController.getIdPage);
+router.get('/id', authProvider.isAuthenticated, mainController.getIdPage);
 
 // 404
 router.get('*', (req, res) => res.status(404).redirect('/404.html'));
