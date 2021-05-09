@@ -1,29 +1,42 @@
+const fetchManager = require('../utils/fetchManager');
+const appSettings = require('../../appSettings.json');
+
 exports.getHomePage = (req, res, next) => {
-    const isAuthenticated = req.session.isAuthenticated;
-    res.render('home', { isAuthenticated: isAuthenticated });
+    res.render('home', { isAuthenticated: req.session.isAuthenticated });
 }
 
 exports.getIdPage = (req, res, next) => {
-    const isAuthenticated = req.session.isAuthenticated;
-    
     const claims = {
         name: req.session.idTokenClaims.name,
         preferred_username: req.session.idTokenClaims.preferred_username,
         oid: req.session.idTokenClaims.oid,
         sub: req.session.idTokenClaims.sub
     };
-    
-    res.render('id', {isAuthenticated: isAuthenticated, claims: claims});
+
+    res.render('id', { isAuthenticated: req.session.isAuthenticated, claims: claims });
 }
 
-exports.getProfilePage = (req, res, next) => {
-    const isAuthenticated = req.session.isAuthenticated;
-    const profile = req.session.graphAPI["resourceResponse"]; // the name of your web API in auth.json
-    res.render('profile', {isAuthenticated: isAuthenticated, profile: profile});
+exports.getProfilePage = async(req, res, next) => {
+    console.log(req.app);
+    let profile;
+
+    try {
+        profile = await fetchManager.callAPI(appSettings.resources.graphAPI.endpoint, req.session["graphAPI"].accessToken);        
+    } catch (error) {
+        console.log(error)
+    }
+
+    res.render('profile', { isAuthenticated: req.session.isAuthenticated, profile: profile });
 }
 
-exports.getTenantPage = (req, res, next) => {
-    const isAuthenticated = req.session.isAuthenticated;
-    const tenant = req.session.armAPI["resourceResponse"]; // the name of your web API in auth.json
-    res.render('tenant', {isAuthenticated: isAuthenticated, tenant: tenant.value[0]});
+exports.getTenantPage = async(req, res, next) => {
+    let tenant;
+
+    try {
+        tenant = await fetchManager.callAPI(appSettings.resources.armAPI.endpoint, req.session["armAPI"].accessToken);   
+    } catch (error) {
+        console.log(error)
+    }
+
+    res.render('tenant', { isAuthenticated: req.session.isAuthenticated, tenant: tenant.value[0] });
 }

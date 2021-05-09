@@ -2,12 +2,15 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License.
  */
+
 const express = require('express');
 const session = require('express-session');
-const bodyParser = require('body-parser');
 const path = require('path');
 
 const router = require('./routes/router');
+const config = require('../appSettings.json');
+const cache = require('./utils/cachePlugin');
+const msalWrapper = require('msal-express-wrapper');
 
 const SERVER_PORT = process.env.PORT || 4000;
 
@@ -19,11 +22,23 @@ app.set('view engine', 'ejs');
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, './public')));
 
-app.use(session({secret: 'your-secret', resave: false, saveUninitialized: false}));
+/**
+ * Using express-session middleware. Be sure to familiarize yourself with available options
+ * and set as desired. Visit: https://www.npmjs.com/package/express-session
+ */
+app.use(session({ 
+    secret: 'ENTER_YOUR_SECRET_HERE', 
+    resave: false, 
+    saveUninitialized: false 
+}));
+
+// initialize wrapper
+const authProvider = new msalWrapper.AuthProvider(config, cache);
+app.locals.authProvider = authProvider;
 
 app.use(router);
 

@@ -5,7 +5,7 @@
 
 import { 
     UrlString,
-    Constants 
+    Constants,
 } from '@azure/msal-common';
 
 import { 
@@ -71,7 +71,7 @@ export class ConfigurationUtils {
             },
             system: {
                 loggerOptions: {
-                    loggerCallback(message) {
+                    loggerCallback: (logLevel, message, containsPii) => {
                         console.log(message);
                     },
                     piiLoggingEnabled: false, 

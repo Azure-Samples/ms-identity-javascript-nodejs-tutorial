@@ -1,5 +1,5 @@
 const fs = require("fs");
-const cachePath = './cache.json' // replace this string with the path to your valid cache file.
+const cachePath = './App/data/cache.json' // replace this string with the path to your valid cache file.
 
 const beforeCacheAccess = async (cacheContext) => {
     return new Promise(async (resolve, reject) => {
@@ -13,7 +13,7 @@ const beforeCacheAccess = async (cacheContext) => {
                 }
             });
         } else {
-        fs.writeFile(cachePath, cacheContext.tokenCache.serialize(), (err) => {
+            fs.writeFile(cachePath, cacheContext.tokenCache.serialize(), (err) => {
                 if (err) {
                     reject();
                 }
@@ -23,7 +23,7 @@ const beforeCacheAccess = async (cacheContext) => {
 };
 
 const afterCacheAccess = async (cacheContext) => {
-    if(cacheContext.cacheHasChanged){
+    if (cacheContext.cacheHasChanged) {
         await fs.writeFile(cachePath, cacheContext.tokenCache.serialize(), (err) => {
             if (err) {
                 console.log(err);
