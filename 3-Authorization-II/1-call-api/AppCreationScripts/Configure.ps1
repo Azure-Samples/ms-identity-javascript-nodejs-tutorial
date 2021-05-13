@@ -35,9 +35,9 @@ Function ComputePassword
 
 # Create an application key
 # See https://www.sabin.io/blog/adding-an-azure-active-directory-application-and-key-using-powershell/
-Function CreateAppKey([DateTime] $fromDate, [double] $durationInYears, [string]$pw)
+Function CreateAppKey([DateTime] $fromDate, [double] $durationInMonths, [string]$pw)
 {
-    $endDate = $fromDate.AddYears($durationInYears) 
+    $endDate = $fromDate.AddMonths($durationInMonths);
     $keyId = (New-Guid).ToString();
     $key = New-Object Microsoft.Open.AzureAD.Model.PasswordCredential
     $key.StartDate = $fromDate
@@ -227,132 +227,139 @@ Function ConfigureApplications
     # Get the user running the script to add the user as the app owner
     $user = Get-AzureADUser -ObjectId $creds.Account.Id
 
-   # Create the Service AAD application
-   Write-Host "Creating the AAD application (ExpressWebApi-c3s1)"
-   # Get a 2 years application key for the Service Application
+   # Create the service AAD application
+   Write-Host "Creating the AAD application (msal-node-webapi)"
+   # Get a 6 months application key for the service Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
-   $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
-   $ServiceAppKey = $pw
+   $key = CreateAppKey -fromDate $fromDate -durationInMonths 6 -pw $pw
+   $serviceAppKey = $pw
    # create the application 
-   $ServiceAadApplication = New-AzureADApplication -DisplayName "ExpressWebApi-c3s1" `
+   $serviceAadApplication = New-AzureADApplication -DisplayName "msal-node-webapi" `
                                                    -HomePage "http://localhost:5000/" `
                                                    -PasswordCredentials $key `
                                                    -PublicClient $False
 
-   $ServiceIdentifierUri = 'api://'+$ServiceAadApplication.AppId
-   Set-AzureADApplication -ObjectId $ServiceAadApplication.ObjectId -IdentifierUris $ServiceIdentifierUri
+   $serviceIdentifierUri = 'api://'+$serviceAadApplication.AppId
+   Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -IdentifierUris $serviceIdentifierUri
 
    # create the service principal of the newly created application 
-   $currentAppId = $ServiceAadApplication.AppId
-   $ServiceServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
+   $currentAppId = $serviceAadApplication.AppId
+   $serviceServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
 
    # add the user running the script as an app owner if needed
-   $owner = Get-AzureADApplicationOwner -ObjectId $ServiceAadApplication.ObjectId
+   $owner = Get-AzureADApplicationOwner -ObjectId $serviceAadApplication.ObjectId
    if ($owner -eq $null)
    { 
-        Add-AzureADApplicationOwner -ObjectId $ServiceAadApplication.ObjectId -RefObjectId $user.ObjectId
-        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($ServiceServicePrincipal.DisplayName)'"
+        Add-AzureADApplicationOwner -ObjectId $serviceAadApplication.ObjectId -RefObjectId $user.ObjectId
+        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($serviceServicePrincipal.DisplayName)'"
    }
 
     # rename the user_impersonation scope if it exists to match the readme steps or add a new scope
     $scopes = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.OAuth2Permission]
    
+    # delete default scope i.e. User_impersonation
+    $scope = $serviceAadApplication.Oauth2Permissions | Where-Object { $_.Value -eq "User_impersonation" }
+    if($scope -ne $null)
+    {
+       # disable the scope
+       $scope.IsEnabled = $false
+       $scopes.Add($scope)
+       Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -Oauth2Permissions $scopes
+
+       # clear the scope
+       $scopes.Clear()
+       Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -Oauth2Permissions $scopes
+    }
+
     if ($scopes.Count -ge 0) 
     {
-        # add all existing scopes first
-        $serviceAadApplication.Oauth2Permissions | foreach-object { $scopes.Add($_) }
-
-        $scope = $serviceAadApplication.Oauth2Permissions | Where-Object { $_.Value -eq "User_impersonation" }
-
-        if ($scope -ne $null) 
-        {
-            $scope.Value = "access_as_user"
-        }
-        else 
-        {
-            # Add scope
-            $scope = CreateScope -value "access_as_user"  `
-                -userConsentDisplayName "Access ExpressWebApi-c3s1"  `
-                -userConsentDescription "Allow the application to access ExpressWebApi-c3s1 on your behalf."  `
-                -adminConsentDisplayName "Access ExpressWebApi-c3s1"  `
+             $scope = CreateScope -value access_as_user  `
+                -userConsentDisplayName "Access msal-node-webapi"  `
+                -userConsentDescription "Allow the application to access msal-node-webapi on your behalf."  `
+                -adminConsentDisplayName "Access msal-node-webapi"  `
                 -adminConsentDescription "Allows the app to have the same access to information in the directory on behalf of the signed-in user."
             
-            $scopes.Add($scope)
-        }        
+                $scopes.Add($scope)
+    
     }
      
     # add/update scopes
     Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -OAuth2Permission $scopes
 
-   Write-Host "Done creating the Service application (ExpressWebApi-c3s1)"
+   Write-Host "Done creating the service application (msal-node-webapi)"
 
    # URL of the AAD application in the Azure portal
-   # Future? $ServicePortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$ServiceAadApplication.AppId+"/objectId/"+$ServiceAadApplication.ObjectId+"/isMSAApp/"
-   $ServicePortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$ServiceAadApplication.AppId+"/objectId/"+$ServiceAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>Service</td><td>$currentAppId</td><td><a href='$ServicePortalUrl'>ExpressWebApi-c3s1</a></td></tr>" -Path createdApps.html
+   # Future? $servicePortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.ObjectId+"/isMSAApp/"
+   $servicePortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.ObjectId+"/isMSAApp/"
+   Add-Content -Value "<tr><td>service</td><td>$currentAppId</td><td><a href='$servicePortalUrl'>msal-node-webapi</a></td></tr>" -Path createdApps.html
 
 
-   # Create the Client AAD application
-   Write-Host "Creating the AAD application (ExpressWebApp-c3s1)"
-   # Get a 2 years application key for the Client Application
+   # Create the client AAD application
+   Write-Host "Creating the AAD application (msal-node-webapp)"
+   # Get a 6 months application key for the client Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
-   $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
-   $ClientAppKey = $pw
+   $key = CreateAppKey -fromDate $fromDate -durationInMonths 6 -pw $pw
+   $clientAppKey = $pw
    # create the application 
-   $ClientAadApplication = New-AzureADApplication -DisplayName "ExpressWebApp-c3s1" `
+   $clientAadApplication = New-AzureADApplication -DisplayName "msal-node-webapp" `
                                                   -HomePage "http://localhost:4000/" `
                                                   -ReplyUrls "http://localhost:4000/redirect" `
-                                                  -IdentifierUris "https://$tenantName/ExpressWebApp-c3s1" `
                                                   -PasswordCredentials $key `
                                                   -PublicClient $False
 
    # create the service principal of the newly created application 
-   $currentAppId = $ClientAadApplication.AppId
-   $ClientServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
+   $currentAppId = $clientAadApplication.AppId
+   $clientServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
 
    # add the user running the script as an app owner if needed
-   $owner = Get-AzureADApplicationOwner -ObjectId $ClientAadApplication.ObjectId
+   $owner = Get-AzureADApplicationOwner -ObjectId $clientAadApplication.ObjectId
    if ($owner -eq $null)
    { 
-        Add-AzureADApplicationOwner -ObjectId $ClientAadApplication.ObjectId -RefObjectId $user.ObjectId
-        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($ClientServicePrincipal.DisplayName)'"
+        Add-AzureADApplicationOwner -ObjectId $clientAadApplication.ObjectId -RefObjectId $user.ObjectId
+        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($clientServicePrincipal.DisplayName)'"
    }
 
 
-   Write-Host "Done creating the Client application (ExpressWebApp-c3s1)"
+   Write-Host "Done creating the client application (msal-node-webapp)"
 
    # URL of the AAD application in the Azure portal
-   # Future? $ClientPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$ClientAadApplication.AppId+"/objectId/"+$ClientAadApplication.ObjectId+"/isMSAApp/"
-   $ClientPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$ClientAadApplication.AppId+"/objectId/"+$ClientAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>Client</td><td>$currentAppId</td><td><a href='$ClientPortalUrl'>ExpressWebApp-c3s1</a></td></tr>" -Path createdApps.html
+   # Future? $clientPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$clientAadApplication.AppId+"/objectId/"+$clientAadApplication.ObjectId+"/isMSAApp/"
+   $clientPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$clientAadApplication.AppId+"/objectId/"+$clientAadApplication.ObjectId+"/isMSAApp/"
+   Add-Content -Value "<tr><td>client</td><td>$currentAppId</td><td><a href='$clientPortalUrl'>msal-node-webapp</a></td></tr>" -Path createdApps.html
 
    $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
 
-   # Add Required Resources Access (from 'Client' to 'Service')
-   Write-Host "Getting access from 'Client' to 'Service'"
-   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "ExpressWebApi-c3s1" `
+   # Add Required Resources Access (from 'client' to 'service')
+   Write-Host "Getting access from 'client' to 'service'"
+   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "msal-node-webapi" `
                                                 -requiredDelegatedPermissions "access_as_user" `
 
    $requiredResourcesAccess.Add($requiredPermissions)
 
 
-   Set-AzureADApplication -ObjectId $ClientAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
+   Set-AzureADApplication -ObjectId $clientAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
    Write-Host "Granted permissions."
 
-   # Update config file for 'Service'
-   $configFile = $pwd.Path + "\..\WebAPI\auth.json"
+   # Update config file for 'service'
+   $configFile = $pwd.Path + "\..\WebAPI\config.json"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "clientId" = $ServiceAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $ServiceAppKey };
+   $dictionary = @{ "clientId" = $serviceAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $serviceAppKey };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
 
-   # Update config file for 'Client'
-   $configFile = $pwd.Path + "\..\WebApp\auth.json"
+   # Update config file for 'client'
+   $configFile = $pwd.Path + "\..\WebApp\appSettings.json"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "clientId" = $ClientAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $ClientAppKey;"redirectUri" = $ClientAadApplication.ReplyUrls;"postLogoutRedirectUri" = $ClientAadApplication.HomePage;"endpoint" = $ServiceAadApplication.HomePage;"scopes" = ("api://"+$ServiceAadApplication.AppId+"/access_as_user") };
+   $dictionary = @{ "clientId" = $clientAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $clientAppKey;"redirectUri" = $clientAadApplication.ReplyUrls;"postLogoutRedirectUri" = $clientAadApplication.HomePage;"endpoint" = $serviceAadApplication.HomePage;"scopes" = ("api://"+$serviceAadApplication.AppId+"/access_as_user") };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
-  
+   if($isOpenSSL -eq 'Y')
+   {
+        Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+        Write-Host "You have generated certificate using OpenSSL so follow below steps: "
+        Write-Host "Install the certificate on your system from current folder."
+        Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+   }
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  
 }
 

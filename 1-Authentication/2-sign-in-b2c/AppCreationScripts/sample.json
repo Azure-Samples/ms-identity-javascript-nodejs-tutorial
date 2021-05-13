@@ -1,31 +1,21 @@
 {
     "Sample": {
-        "Title": "A Node.js & Express web app calling Microsoft Graph API using MSAL Node and Graph SDK",
-        "Level": 200,
+        "Title": "A Node.js & Express web app authenticating users against Azure AD B2C with MSAL Node",
+        "Level": 100,
         "Client": "Node.js & Express web app",
-        "Service": "Microsoft Graph",
         "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
-        "Endpoint": "AAD v2.0"
+        "Endpoint": "AAD v2.0",
+        "Provider": "B2C"
     },
     "AADApps": [
       {
         "Id": "client",
         "Name": "msal-node-webapp",
         "Kind": "WebApp",
-        "Audience": "AzureADMyOrg",
-        "HomePage": "http://localhost:4000/",
+        "Audience": "AzureADandPersonalMicrosoftAccount",
+        "HomePage": "http://localhost:4000",
         "ReplyUrls": "http://localhost:4000/redirect",
-        "PasswordCredentials": "Auto",
-        "RequiredResourcesAccess": [
-          {
-            "Resource": "Microsoft Graph",
-            "DelegatedPermissions": [ "User.Read" ]
-          },
-          {
-            "Resource": "Windows Azure Service Management API",
-            "DelegatedPermissions": [ "user_impersonation" ]
-          }
-        ]
+        "PasswordCredentials": "Auto"
       }
     ],
     "CodeConfiguration": [

@@ -1,23 +1,26 @@
 exports.getHomePage = (req, res, next) => {
-    const isAuthenticated = req.session.isAuthenticated;
-    res.render('home', { isAuthenticated: isAuthenticated });
+    res.render('home', { isAuthenticated: req.session.isAuthenticated });
 }
 
 exports.getIdPage = (req, res, next) => {
-    const isAuthenticated = req.session.isAuthenticated;
-    
     const claims = {
-        name: req.session.idTokenClaims.name,
-        preferred_username: req.session.idTokenClaims.preferred_username,
-        oid: req.session.idTokenClaims.oid,
-        sub: req.session.idTokenClaims.sub
+        name: req.session.account.idTokenClaims.name,
+        preferred_username: req.session.account.idTokenClaims.preferred_username,
+        oid: req.session.account.idTokenClaims.oid,
+        sub: req.session.account.idTokenClaims.sub
     };
     
-    res.render('id', {isAuthenticated: isAuthenticated, claims: claims});
+    res.render('id', {isAuthenticated: req.session.isAuthenticated, claims: claims});
 }
 
-exports.getWebAPI = (req, res, next) => {
-    const isAuthenticated = req.session.isAuthenticated;
-    const response = req.session.webAPI["resourceResponse"];
-    res.render('webapi', {isAuthenticated: isAuthenticated, response: response});
+exports.getWebAPI = async (req, res, next) => {
+    let apiResponse;
+
+    try {
+        apiResponse = await fetchManager.callAPI(appSettings.resources.webAPI.endpoint, req.session["webAPI"].accessToken);
+    } catch (error) {
+        console.log(error)
+    }
+
+    res.render('webapi', {isAuthenticated: req.session.isAuthenticated, response: apiResponse});
 }

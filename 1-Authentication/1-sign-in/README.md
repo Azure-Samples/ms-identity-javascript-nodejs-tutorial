@@ -1,16 +1,3 @@
----
-page_type: sample
-languages:
-  - javascript
-products:
-  - node.js
-  - microsoft-identity-platform
-  - azure-active-directory  
-name: A Node.js & Express web app authenticating users against Azure AD with MSAL Node
-urlFragment: ms-identity-javascript-nodejs-tutorial
-description: "This sample demonstrates a Node.js & Express web app authenticating users against Azure AD with MSAL Node"
----
-
 # A Node.js & Express web app authenticating users against Azure AD with MSAL Node
 
  1. [Overview](#overview)
@@ -28,7 +15,7 @@ description: "This sample demonstrates a Node.js & Express web app authenticatin
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web application that authenticates users against Azure AD, with the help of [Microsoft Authentication Library for Node.js [PREVIEW]](https://aka.ms/msalnode) (MSAL Node [PREVIEW]). In doing so, it also illustrates various authentication concepts, such as [OpenID scopes](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes), [ID Tokens](https://docs.microsoft.com/azure/active-directory/develop/id-tokens), [ID Token validation](https://docs.microsoft.com/azure/active-directory/develop/id-tokens#validating-an-id_token) and more.
+This sample demonstrates a Node.js & Express web application that authenticates users against Azure AD, with the help of [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it also illustrates various authentication concepts, such as [OpenID scopes](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes), [ID Tokens](https://docs.microsoft.com/azure/active-directory/develop/id-tokens), [ID Token validation](https://docs.microsoft.com/azure/active-directory/develop/id-tokens#validating-an-id_token) and more.
 
 ## Scenario
 
@@ -43,8 +30,7 @@ This sample demonstrates a Node.js & Express web application that authenticates 
 |-----------------------|---------------------------------------------------------------|
 | `AppCreationScripts/` | Contains Powershell scripts to automate app registration.     |
 | `ReadmeFiles/`        | List of changes to the sample.                                |
-| `App/`                | Express application source folder.                            |
-| `app.js`              | Application entry point.                                      |
+| `App/app.js`          | Application entry point.                                      |
 
 ## Prerequisites
 
@@ -119,37 +105,37 @@ As a first step you'll need to:
 1. Sign in to the [Azure portal](https://portal.azure.com).
 1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD tenant.
 
-### Register the app
+### Register the client app (msal-node-webapp)
 
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
 1. In the **Register an application page** that appears, enter your application's registration information:
-   - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `ms-identity-nodejs-webapp`.
+   - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `msal-node-webapp`.
    - Under **Supported account types**, select **Accounts in this organizational directory only**.
    - In the **Redirect URI (optional)** section, select **Web** in the combo-box and enter the following redirect URI: `http://localhost:4000/redirect`.
 1. Select **Register** to create the application.
 1. In the app's registration screen, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
 1. Select **Save** to save your changes.
-1. In the app's registration screen, select the **Certificates & secrets** blade in the left to open the page where we can generate secrets and upload certificates.
+1. In the app's registration screen, select the **Certificates & secrets** blade in the left to open the page where you can generate secrets and upload certificates.
 1. In the **Client secrets** section, select **New client secret**:
    - Type a key description (for instance `app secret`),
-   - Select one of the available key durations (**In 1 year**, **In 2 years**, or **Never Expires**) as per your security posture.
-   - The generated key value will be displayed when you select the **Add** button. Copy the generated value for use in the steps later.
+   - Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
+   - The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
    - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
+    > :bulb: For enhanced security, consider [using certificates](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/certificate-credentials.md) instead of client secrets.
 
-#### Configure the app to use your app registration
+#### Configure the client app (msal-node-webapp) to use your app registration
 
 Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
 
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `auth.json` file.
-1. Find the key `ClientId` and replace the existing value with the application ID (clientId) of the application copied from the **Azure Portal**.
-1. Find the key `TenantId` and replace the existing value with your Azure AD tenant ID copied from the **Azure Portal**.
-1. Find the key `ClientSecret` and replace the existing value with the key you saved during the creation of the application copied from the **Azure Portal**.
-1. Find the key `homePageRoute` and replace the existing value with the home page route of your application, e.g. `/home`.
-1. Find the key `redirectUri` and replace the existing value with the redirect URI that you have registered on **Azure Portal**, e.g. `http://localhost:4000/redirect`.
-1. Find the key `postLogoutRedirectUri` and replace the existing value with the URI of the page that you wish to be redirected after signing-out, e.g `http://localhost:4000/`.
+1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
+1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
+1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
+1. Find the key `redirectUri` and replace the existing value with the Redirect URI for `msal-node-webapp`. (by default `http://localhost:4000`).
+1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of `msal-node-webapp` (by default `http://localhost:4000`).
 
 ## Running the sample
 
@@ -162,7 +148,7 @@ Locate the root of the sample folder. Then:
 ## Explore the sample
 
 1. Open your browser and navigate to `http://localhost:4000`.
-1. Click the sign-in button on the top right corner.
+1. Select the **sign-in** button on the top right corner.
 
 ![Screenshot](./ReadmeFiles/screenshot.png)
 
@@ -193,7 +179,7 @@ Once initialized, `MsalNodeWrapper` middleware can be used in routes:
     router.get('/redirect', msal.handleRedirect);
 ```
 
-Under the hood, the wrapper creates an **MSAL Node** [configuration object](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/configuration.md) and initializes [msal.ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) by passing it.
+Under the hood, the wrapper creates an **MSAL Node** [configuration object](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/configuration.md) and initializes a [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) instance by passing it.
 
 ```javascript
     constructor(config, cache = null) {
@@ -207,7 +193,7 @@ Under the hood, the wrapper creates an **MSAL Node** [configuration object](http
 
 ### Sign-in
 
-The user clicks on the **sign-in** button and routes to `/signin`. `msal.signIn` middleware takes over. First it creates session variables:
+The user clicks on the **sign-in** button and routes to `/signin`. From there, the `signIn` middleware takes over. First, it creates session variables:
 
 ```javascript
         signIn = (req, res, next) => {     
@@ -234,7 +220,7 @@ The user clicks on the **sign-in** button and routes to `/signin`. `msal.signIn`
         req.session.homeAccountId = "";
 ```
 
-Then, creates and encodes a state object to pass with an authorization code request. The object is passed to the `state` parameter as a means of controlling the application flow. For more information, see [Pass custom state in authentication requests using MSAL.js](https://docs.microsoft.com/azure/active-directory/develop/msal-js-pass-custom-state-authentication-request).
+Then, it creates and encodes a state object to pass with an authorization code request. The object is passed to the `state` parameter as a means of controlling the application flow. For more information, see [Pass custom state in authentication requests using MSAL](https://docs.microsoft.com/azure/active-directory/develop/msal-js-pass-custom-state-authentication-request).
 
 ```javascript
       // sign-in as usual
@@ -256,7 +242,7 @@ Then, creates and encodes a state object to pass with an authorization code requ
       );
 ```
 
-Under the hood, `getAuthCode()` assigns request parameters to session, and calls the **MSAL Node** `getAuthCodeUrl()` API
+Under the hood, `getAuthCode()` assigns request parameters to session, and calls the **MSAL Node** `getAuthCodeUrl()` API:
 
 ```javascript
     const response = await this.msalClient.getAuthCodeUrl(req.session.authCodeRequest);
@@ -305,7 +291,7 @@ After making an authorization code URL request, the user is redirected to the re
 
 ### ID token validation
 
-Web apps (and confidential client apps in general) should validate ID Tokens. **MSAL Node** decodes the ID token. In `MsalNodeWrapper`, we add the ID token to session, and then validate it:
+Web apps (and confidential client apps in general) should validate ID Tokens. **MSAL Node** decodes the ID token and verifies the signature. In `MsalNodeWrapper`, we add the ID token to session, and then validate it:
 
 ```javascript
     const checkAudience = idTokenClaims["aud"] === this.msalConfig.auth.clientId ? true : false;

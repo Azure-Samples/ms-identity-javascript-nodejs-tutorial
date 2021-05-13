@@ -9,16 +9,16 @@
     },
     "AADApps": [
         {
-            "Id": "Service",
-            "Name": "ExpressWebApi-c3s1",
+            "Id": "service",
+            "Name": "msal-node-webapi",
             "Kind": "WebApi",
             "Audience": "AzureADMyOrg",
             "HomePage": "http://localhost:5000/",
             "PasswordCredentials": "Auto"
         },
         {
-            "Id": "Client",
-            "Name": "ExpressWebApp-c3s1",
+            "Id": "client",
+            "Name": "msal-node-webapp",
             "Kind": "WebApp",
             "Audience": "AzureADMyOrg",
             "HomePage": "http://localhost:4000/",
@@ -26,36 +26,38 @@
             "PasswordCredentials": "Auto",
             "RequiredResourcesAccess": [
                 {
-                    "Resource": "Service",
-                    "DelegatedPermissions": [ "access_as_user" ]
+                    "Resource": "service",
+                    "DelegatedPermissions": [
+                        "access_as_user"
+                    ]
                 }
             ]
         }
     ],
     "CodeConfiguration": [
         {
-            "App": "Service",
+            "App": "service",
             "SettingKind": "JSON",
-            "SettingFile": "\\..\\WebAPI\\auth.json",
+            "SettingFile": "\\..\\WebAPI\\config.json",
             "Mappings": [
-              {
-                "key": "clientId",
-                "value": ".AppId"
-              },
-              {
-                "key": "tenantId",
-                "value": "$tenantId"
-              },
-              {
-                "key": "clientSecret",
-                "value": ".AppKey"
-              }
+                {
+                    "key": "clientId",
+                    "value": ".AppId"
+                },
+                {
+                    "key": "tenantId",
+                    "value": "$tenantId"
+                },
+                {
+                    "key": "clientSecret",
+                    "value": ".AppKey"
+                }
             ]
         },
         {
-            "App": "Client",
+            "App": "client",
             "SettingKind": "JSON",
-            "SettingFile": "\\..\\WebApp\\auth.json",
+            "SettingFile": "\\..\\WebApp\\appSettings.json",
             "Mappings": [
                 {
                     "key": "clientId",
@@ -79,13 +81,13 @@
                 },
                 {
                     "key": "endpoint",
-                    "value": "Service.HomePage"
+                    "value": "service.HomePage"
                 },
                 {
                     "key": "scopes",
-                    "value": "Service.Scope"
+                    "value": "service.Scope"
                 }
             ]
         }
     ]
-  }
+}

@@ -2,13 +2,13 @@
 page_type: sample
 languages:
 - javascript
+- typescript
 products:
-- node.js
+- node-js
 - ms-graph
-- azure-app-services
-- azure-storage
+- msal-node
+- azure-app-service
 - azure-key-vault
-- azure-functions
 - azure-resource-manager
 - azure-active-directory
 - azure-active-directory-b2c
@@ -21,7 +21,7 @@ urlFragment: "ms-identity-javascript-nodejs-tutorial"
 
 The [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview), along with [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and [Azure Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/overview) (Azure AD B2C) are central to the **Azure** cloud ecosystem. This tutorial aims to take you through the fundamentals of modern authentication with Node.js, using the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js) (MSAL Node).
 
-This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) in order to automate routine authentication tasks such as login, logout, get a token etc., as well as utility methods to validate tokens and call APIs. You can find the wrapper under the [msal-express-wrapper](./msal-express-wrapper) folder. Suggestions and contributions are welcome!
+This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) in order to automate routine authentication tasks such as login, logout, get a token etc., as well as utility methods to validate tokens and etc. You can find the wrapper under the [msal-express-wrapper](./msal-express-wrapper) folder. Suggestions and contributions are welcome!
 
 We recommend following the chapters in successive order. However, the code samples are self-contained, so feel free to pick samples by topics that you may need at the moment.
 
@@ -32,7 +32,7 @@ We recommend following the chapters in successive order. However, the code sampl
 - [Node.js](https://nodejs.org/en/download/)
 - [Visual Studio Code](https://code.visualstudio.com/download)
 - [VS Code Azure Tools Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack)
-- A modern web browser -while **MSAL.js** fully supports **IE11**, samples here use **ES6** conventions and will not run on **Internet Explorer**
+- A modern web browser
 
 Please refer to each chapter's README for sample-specific prerequisites.
 
@@ -40,6 +40,7 @@ Please refer to each chapter's README for sample-specific prerequisites.
 
 - [jwt.ms](https://jwt.ms) for inspecting your tokens
 - [Fiddler](https://www.telerik.com/fiddler) for monitoring your network activity and troubleshooting
+- Check [MSAL Node FAQ](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/faq.md) first for your questions
 - Follow the [Azure AD Blog](https://techcommunity.microsoft.com/t5/azure-active-directory-identity/bg-p/Identity) to stay up-to-date with the latest developments
 
 Please refer to each chapter's README for sample-specific recommendations.

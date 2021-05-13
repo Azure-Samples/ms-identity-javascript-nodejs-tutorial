@@ -1,16 +1,3 @@
----
-page_type: sample
-languages:
-  - javascript
-products:
-  - node.js
-  - ms-graph
-  - azure-active-directory
-  - microsoft-identity-platform  
-name: A Node.js & Express web app calling Microsoft Graph API using MSAL Node
-urlFragment: ms-identity-javascript-nodejs-tutorial
-description: "This sample demonstrates a Node.js Express web app application that authenticates users against Azure AD and obtains access token to call Microsoft Graph"
----
 # A Node.js & Express web app calling Microsoft Graph using MSAL Node
 
  1. [Overview](#overview)
@@ -28,12 +15,14 @@ description: "This sample demonstrates a Node.js Express web app application tha
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web application that authenticates users against [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and obtains [Access Tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) to call [Microsoft Graph API](https://docs.microsoft.com/graph/overview) (Graph API) and [Azure Resource Manager API](https://docs.microsoft.com/azure/azure-resource-manager/management/overview) (ARM API), with the help of [Microsoft Authentication Library for Node.js [PREVIEW]](https://aka.ms/msalnode) (MSAL Node [PREVIEW]). In doing so, it also illustrates various authorization concepts, such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [Dynamic Scopes and Incremental Consent](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent), **working with multiple resources** and more.
+This sample demonstrates a Node.js & Express web application that authenticates users against [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and obtains [access tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) to call [Microsoft Graph](https://docs.microsoft.com/graph/overview) (MS Graph) and [Azure Resource Manager API](https://docs.microsoft.com/azure/azure-resource-manager/management/overview) (ARM API), with the help of [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it also illustrates various authorization concepts, such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [dynamic scopes and incremental consent](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent), **working with multiple resources** and more.
+
+> :information_source: Check out the community call: [An introduction to Microsoft Graph for developers](https://www.youtube.com/watch?v=EBbnpFdB92A)
 
 ## Scenario
 
 1. The client application uses the **MSAL Node** to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
-1. The **Access Token** is used as a *bearer* token to authorize the user to access the **resource** (Graph API or ARM API).
+1. The **Access Token** is used as a *bearer* token to authorize the user to access the **resource** (MS Graph or ARM API).
 1. The **resource owner** responds with the resource that the user has access to.
 
 ![Overview](./ReadmeFiles/topology.png)
@@ -44,18 +33,17 @@ This sample demonstrates a Node.js & Express web application that authenticates 
 |-----------------------|---------------------------------------------------------------|
 | `AppCreationScripts/` | Contains Powershell scripts to automate app registration.     |
 | `ReadmeFiles/`        | List of changes to the sample.                                |
-| `App/`                | Express application source folder.                            |
-| `App/utils`           | Contains msal-node helper classes.                            |
-| `app.js`              | Application entry point.                                      |
+| `App/app.js`          | Application entry point.                                      |
 | `App/routes/router.js`| Controllers and msal-node helper middleware.                  |
 
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/en/download/) must be installed to run this sample.
-- A modern web browser. This sample uses **ES6** conventions and will not run on **Internet Explorer**.
 - [Visual Studio Code](https://code.visualstudio.com/download) is recommended for running and editing this sample.
+- [VS Code Azure Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack) extension is recommended for interacting with Azure through VS Code Interface.
+- A modern web browser. This sample uses **ES6** conventions and will not run on **Internet Explorer**.
 - An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://docs.microsoft.com/azure/active-directory/develop/quickstart-create-new-tenant)
-- A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**. Therefore, if you signed in to the [Azure portal](https://portal.azure.com) with a personal account and have never created a user account in your directory before, you need to do that now.
+- A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**.  If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
 
 ## Setup
 
@@ -121,49 +109,50 @@ As a first step you'll need to:
 1. Sign in to the [Azure portal](https://portal.azure.com).
 1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD tenant.
 
-### Register the web app
+### Register the client app (msal-node-webapp)
 
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
 1. In the **Register an application page** that appears, enter your application's registration information:
-   - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `ExpressWebApp`.
+   - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `msal-node-webapp`.
    - Under **Supported account types**, select **Accounts in this organizational directory only**.
    - In the **Redirect URI (optional)** section, select **Web** in the combo-box and enter the following redirect URI: `http://localhost:4000/redirect`.
 1. Select **Register** to create the application.
 1. In the app's registration screen, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
 1. Select **Save** to save your changes.
-1. In the app's registration screen, select the **Certificates & secrets** blade in the left to open the page where we can generate secrets and upload certificates.
+1. In the app's registration screen, select the **Certificates & secrets** blade in the left to open the page where you can generate secrets and upload certificates.
 1. In the **Client secrets** section, select **New client secret**:
    - Type a key description (for instance `app secret`),
-   - Select one of the available key durations (**In 1 year**, **In 2 years**, or **Never Expires**) as per your security posture.
-   - The generated key value will be displayed when you select the **Add** button. Copy the generated value for use in the steps later.
+   - Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
+   - The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
    - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
+    > :bulb: For enhanced security, consider [using certificates](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/certificate-credentials.md) instead of client secrets.
 1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs.
-   - Select the **Add a permission** button and then,
+   - Select the **Add a permission** button and then:
+
    - Ensure that the **Microsoft APIs** tab is selected.
    - In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
    - In the **Delegated permissions** section, select the **User.Read** in the list. Use the search box if necessary.
    - Select the **Add permissions** button at the bottom.
-1. Still in the **API permissions** blade,
-   - Select the **Add a permission** button and then,
+   - Select the **Add a permission** button and then:
+
    - Ensure that the **Microsoft APIs** tab is selected.
-   - In the *Commonly used Microsoft APIs* section, select **Azure Service Management**
+   - In the list of APIs, select the API `Windows Azure Service Management API`.
    - In the **Delegated permissions** section, select the **user_impersonation** in the list. Use the search box if necessary.
    - Select the **Add permissions** button at the bottom.
 
-#### Configure the web app to use your app registration
+#### Configure the client app (msal-node-webapp) to use your app registration
 
 Open the project in your IDE (like Visual Studio or Visual Studio Code) to configure the code.
 
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
-1. Open the `auth.json` file.
-1. Find the key `clientId` and replace the existing value with the **application ID** (clientId) of the `ExpressWebApp` application copied from the Azure Portal.
-1. Find the key `tenantId` and replace the existing value with your Azure AD **tenant ID**.
-1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of the `ExpressWebApp` app, in the Azure Portal.
-1. Find the key `homePageRoute` and replace the existing value with the route that you wish to be redirected after sign-in, e.g. `/home`.
-1. Find the key `redirectUri` and replace the existing value with the **Redirect URI** for `ExpressWebApp` app. For example, `http://localhost:4000/redirect`.
-1. Find the `postLogoutRedirectUri` and replace the existing value with the URI that you wish to be redirected after sign-out, e.g. `http://localhost:4000/`
+1. Open the `appSettings.json` file.
+1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
+1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
+1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
+1. Find the key `redirectUri` and replace the existing value with the Redirect URI for `msal-node-webapp`. (by default `http://localhost:4000/`).
+1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of `msal-node-webapp` (by default `http://localhost:4000/`).
 
 The rest of the **key-value** pairs are for resources/APIs that you would like to call. They are set as **default**, but you can modify them as you wish:
 
@@ -260,9 +249,9 @@ For more information about how OAuth 2.0 protocols work in this scenario and oth
 
 Use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) to get support from the community.
 Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
-Make sure that your questions or comments are tagged with [`azure-active-directory` `azure-ad-b2c` `ms-identity` `adal` `msal`].
+Make sure that your questions or comments are tagged with [`azure-active-directory` `node.js` `ms-identity` `adal` `msal`].
 
-If you find a bug in the sample, raise the issue on [GitHub Issues](../../issues).
+If you find a bug in the sample, raise the issue on [GitHub Issues](../../../../issues).
 
 To provide feedback on or suggest features for Azure Active Directory, visit [User Voice page](https://feedback.azure.com/forums/169401-azure-active-directory).
 

@@ -61,10 +61,10 @@ export class ConfigurationUtils {
         return {
             auth: {
                 clientId: config.credentials.clientId,
-                authority: config.policies ? Object.entries(config.policies)[0]['authority'] : `https://${Constants.DEFAULT_AUTHORITY_HOST}/${config.credentials.tenantId}`, // single tenant
+                authority: config.policies ? Object.entries(config.policies)[0][1]['authority'] : `https://${Constants.DEFAULT_AUTHORITY_HOST}/${config.credentials.tenantId}`,
                 clientSecret: config.credentials.clientSecret,
                 redirectUri: config.settings ? config.settings.redirectUri : "", // defaults to calling page
-                knownAuthorities: config.policies ? [UrlString.getDomainFromUrl(Object.entries(config.policies)[0]['authority'])] : [], // in B2C scenarios
+                knownAuthorities: config.policies ? [UrlString.getDomainFromUrl(Object.entries(config.policies)[0][1]['authority'])] : [], // in B2C scenarios
             },
             cache: {
                 cachePlugin,

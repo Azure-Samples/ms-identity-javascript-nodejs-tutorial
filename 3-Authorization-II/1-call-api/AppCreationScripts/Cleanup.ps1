@@ -11,7 +11,7 @@ param(
 
 
 if ($null -eq (Get-Module -ListAvailable -Name "AzureAD")) { 
-    Install-Module "AzureAD" -Scope CurrentUser 
+    Install-Module "AzureAD" -Scope CurrentUser                                            
 } 
 Import-Module AzureAD
 $ErrorActionPreference = "Stop"
@@ -59,9 +59,16 @@ Function Cleanup
     # Removes the applications
     Write-Host "Cleaning-up applications from tenant '$tenantName'"
 
-    Write-Host "Removing 'Service' (ExpressWebApi-c3s1) if needed"
-    Get-AzureADApplication -Filter "DisplayName eq 'ExpressWebApi-c3s1'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
-    $apps = Get-AzureADApplication -Filter "DisplayName eq 'ExpressWebApi-c3s1'"
+    Write-Host "Removing 'service' (msal-node-webapi) if needed"
+    try
+    {
+        Get-AzureADApplication -Filter "DisplayName eq 'msal-node-webapi'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
+    }
+    catch
+    {
+	    Write-Host "Unable to remove the 'msal-node-webapi' . Try deleting manually." -ForegroundColor White -BackgroundColor Red
+    }
+    $apps = Get-AzureADApplication -Filter "DisplayName eq 'msal-node-webapi'"
     if ($apps)
     {
         Remove-AzureADApplication -ObjectId $apps.ObjectId
@@ -70,14 +77,27 @@ Function Cleanup
     foreach ($app in $apps) 
     {
         Remove-AzureADApplication -ObjectId $app.ObjectId
-        Write-Host "Removed ExpressWebApi-c3s1.."
+        Write-Host "Removed msal-node-webapi.."
     }
     # also remove service principals of this app
-    Get-AzureADServicePrincipal -filter "DisplayName eq 'ExpressWebApi-c3s1'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
-    
-    Write-Host "Removing 'Client' (ExpressWebApp-c3s1) if needed"
-    Get-AzureADApplication -Filter "DisplayName eq 'ExpressWebApp-c3s1'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
-    $apps = Get-AzureADApplication -Filter "DisplayName eq 'ExpressWebApp-c3s1'"
+    try
+    {
+        Get-AzureADServicePrincipal -filter "DisplayName eq 'msal-node-webapi'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
+    }
+    catch
+    {
+	    Write-Host "Unable to remove ServicePrincipal 'msal-node-webapi' . Try deleting manually from Enterprise applications." -ForegroundColor White -BackgroundColor Red
+    }
+    Write-Host "Removing 'client' (msal-node-webapp) if needed"
+    try
+    {
+        Get-AzureADApplication -Filter "DisplayName eq 'msal-node-webapp'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
+    }
+    catch
+    {
+	    Write-Host "Unable to remove the 'msal-node-webapp' . Try deleting manually." -ForegroundColor White -BackgroundColor Red
+    }
+    $apps = Get-AzureADApplication -Filter "DisplayName eq 'msal-node-webapp'"
     if ($apps)
     {
         Remove-AzureADApplication -ObjectId $apps.ObjectId
@@ -86,11 +106,18 @@ Function Cleanup
     foreach ($app in $apps) 
     {
         Remove-AzureADApplication -ObjectId $app.ObjectId
-        Write-Host "Removed ExpressWebApp-c3s1.."
+        Write-Host "Removed msal-node-webapp.."
     }
     # also remove service principals of this app
-    Get-AzureADServicePrincipal -filter "DisplayName eq 'ExpressWebApp-c3s1'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
-    
+    try
+    {
+        Get-AzureADServicePrincipal -filter "DisplayName eq 'msal-node-webapp'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
+    }
+    catch
+    {
+	    Write-Host "Unable to remove ServicePrincipal 'msal-node-webapp' . Try deleting manually from Enterprise applications." -ForegroundColor White -BackgroundColor Red
+    }
 }
 
 Cleanup -Credential $Credential -tenantId $TenantId
+

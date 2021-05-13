@@ -3,6 +3,17 @@
  * Licensed under the MIT License.
  */
 
+import { AccountInfo } from "@azure/msal-common"
+
+export type AuthCodeParams = {
+    authority: string,
+    scopes: string[],
+    state: string,
+    redirect: string,
+    prompt?: string,
+    account?: AccountInfo
+}
+
 export type ValidationOptions = {
     audience: string,
     issuer: string,
@@ -42,10 +53,10 @@ export type AppSettings = {
     credentials: Credentials,
     settings: Settings,
     resources: {
-        [resource:string]: Resource
+        [resource: string]: Resource
     },
     policies: {
-        [policy:string]: Policy,
+        [policy: string]: Policy,
     },
     protected: any,
 }

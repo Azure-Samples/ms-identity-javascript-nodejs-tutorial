@@ -8,13 +8,10 @@ const session = require('express-session');
 const path = require('path');
 
 const router = require('./routes/router');
-const config = require('../appSettings.json');
-const cache = require('./utils/cachePlugin');
-const msalWrapper = require('msal-express-wrapper');
-
 const SERVER_PORT = process.env.PORT || 4000;
 
-const app = express();
+// initialize express
+const app = express(); 
 
 app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'ejs');
@@ -26,6 +23,8 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, './public')));
 
+app.use(express.json());
+
 /**
  * Using express-session middleware. Be sure to familiarize yourself with available options
  * and set as desired. Visit: https://www.npmjs.com/package/express-session
@@ -35,10 +34,6 @@ app.use(session({
     resave: false, 
     saveUninitialized: false 
 }));
-
-// initialize wrapper
-const authProvider = new msalWrapper.AuthProvider(config, cache);
-app.locals.authProvider = authProvider;
 
 app.use(router);
 

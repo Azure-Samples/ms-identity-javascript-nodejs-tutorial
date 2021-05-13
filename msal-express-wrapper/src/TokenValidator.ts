@@ -108,14 +108,14 @@ export class TokenValidator {
      * from the authority discovery endpoint
      * @param {string} header
      */
-    private getSigningKeys = async(header): Promise<string> => {
+    private getSigningKeys = async (header): Promise<string> => {
         let jwksUri;
 
         // Check if a B2C application i.e. app has policies
         if (this.appSettings.policies) {
             jwksUri = `${this.msalConfig.auth.authority}/discovery/v2.0/keys`
         } else {
-            jwksUri =`https://${Constants.DEFAULT_AUTHORITY_HOST}/${this.appSettings.credentials.tenantId}/discovery/v2.0/keys`
+            jwksUri = `https://${Constants.DEFAULT_AUTHORITY_HOST}/${this.appSettings.credentials.tenantId}/discovery/v2.0/keys`
         }
 
         const client = jwksClient({

@@ -2,7 +2,7 @@ const express = require('express');
 
 const mainController = require('../controllers/mainController');
 
-const config = require('../../auth.json');
+const config = require('../../appSettings.json');
 const cache = require('../utils/cachePlugin');
 const msalWrapper = require('msal-express-wrapper');
 
@@ -16,12 +16,12 @@ const router = express.Router();
 router.get('/', (req, res, next) => res.redirect('/home'));
 router.get('/home', mainController.getHomePage);
 
-// // authentication routes
+// authentication routes
 router.get('/signin', authProvider.signIn);
 router.get('/signout', authProvider.signOut);
 router.get('/redirect', authProvider.handleRedirect);
 
-// authenticated routes
+// secure routes
 router.get('/id', authProvider.isAuthenticated, mainController.getIdPage);
 
 // 404

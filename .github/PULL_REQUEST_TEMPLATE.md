@@ -40,14 +40,6 @@ What kind of change does this Pull Request introduce?
     npm install
 ```
 
-* Test the code
-
-<!-- Add steps to run the tests suite and/or manually test -->
-
-```console
-
-```
-
 ## What to check
 
 ex: verify that the following are valid:

@@ -36,7 +36,8 @@ export const ErrorMessages = {
     TOKEN_NOT_FOUND: "No token found",
     TOKEN_NOT_DECODED: "Token cannot be decoded",
     TOKEN_NOT_VERIFIED: "Token cannot be verified",
-    KEYS_NOT_OBTAINED: "Signing keys cannot be obtained"
+    KEYS_NOT_OBTAINED: "Signing keys cannot be obtained",
+    STATE_NOT_FOUND: "State not found"
 }
 
 /**

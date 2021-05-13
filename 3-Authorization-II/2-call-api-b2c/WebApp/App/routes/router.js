@@ -1,12 +1,13 @@
 const express = require('express');
+const msalWrapper = require('msal-express-wrapper');
 
 const mainController = require('../controllers/mainController');
 
-const config = require('../../auth.json');
+const config = require('../../appSettings.json');
 const cache = require('../utils/cachePlugin');
-const MsalNodeWrapper = require('MsalNodeWrapper/MsalNodeWrapper');
 
-const msal = new MsalNodeWrapper(config, cache);
+// initialize wrapper
+const authProvider = new msalWrapper.AuthProvider(config, cache);
 
 // initialize router
 const router = express.Router();
@@ -16,13 +17,13 @@ router.get('/', (req, res, next) => res.redirect('/home'));
 router.get('/home', mainController.getHomePage);
 
 // authentication routes
-router.get('/signin', msal.signIn);
-router.get('/signout', msal.signOut);
-router.get('/redirect', msal.handleRedirect); 
+router.get('/signin', authProvider.signIn);
+router.get('/signout', authProvider.signOut);
+router.get('/redirect', authProvider.handleRedirect);
 
-// authorized routes
-router.get('/id', msal.isAuthenticated, mainController.getIdPage);
-router.get('/webapi', msal.isAuthenticated, msal.getToken, mainController.getWebAPI) // get token for this route to call web API
+// secure routes
+router.get('/id', authProvider.isAuthenticated, mainController.getIdPage);
+router.get('/webapi', authProvider.isAuthenticated, authProvider.getToken, mainController.getWebAPI); // get token for this route to call web API
 
 // 404
 router.get('*', (req, res) => res.status(404).redirect('/404.html'));

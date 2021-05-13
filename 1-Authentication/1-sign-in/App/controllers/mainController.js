@@ -4,7 +4,6 @@ exports.getHomePage = (req, res, next) => {
 }
 
 exports.getIdPage = (req, res, next) => {
-    console.log(req.session.account);
     const isAuthenticated = req.session.isAuthenticated;
 
     const claims = {

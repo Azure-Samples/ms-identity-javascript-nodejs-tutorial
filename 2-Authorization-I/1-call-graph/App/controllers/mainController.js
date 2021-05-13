@@ -1,5 +1,6 @@
-const fetchManager = require('../utils/fetchManager');
 const appSettings = require('../../appSettings.json');
+const fetchManager = require('../utils/fetchManager');
+const graphManager = require('../utils/graphManager');
 
 exports.getHomePage = (req, res, next) => {
     res.render('home', { isAuthenticated: req.session.isAuthenticated });
@@ -7,21 +8,25 @@ exports.getHomePage = (req, res, next) => {
 
 exports.getIdPage = (req, res, next) => {
     const claims = {
-        name: req.session.idTokenClaims.name,
-        preferred_username: req.session.idTokenClaims.preferred_username,
-        oid: req.session.idTokenClaims.oid,
-        sub: req.session.idTokenClaims.sub
+        name: req.session.account.idTokenClaims.name,
+        preferred_username: req.session.account.idTokenClaims.preferred_username,
+        oid: req.session.account.idTokenClaims.oid,
+        sub: req.session.account.idTokenClaims.sub
     };
 
     res.render('id', { isAuthenticated: req.session.isAuthenticated, claims: claims });
 }
 
-exports.getProfilePage = async(req, res, next) => {
-    console.log(req.app);
+exports.getProfilePage = async (req, res, next) => {
     let profile;
 
     try {
-        profile = await fetchManager.callAPI(appSettings.resources.graphAPI.endpoint, req.session["graphAPI"].accessToken);        
+        const graphClient = graphManager.getAuthenticatedClient(req.session["graphAPI"].accessToken);
+
+        profile = await graphClient
+            .api('/me')
+            .get();
+
     } catch (error) {
         console.log(error)
     }
@@ -29,11 +34,11 @@ exports.getProfilePage = async(req, res, next) => {
     res.render('profile', { isAuthenticated: req.session.isAuthenticated, profile: profile });
 }
 
-exports.getTenantPage = async(req, res, next) => {
+exports.getTenantPage = async (req, res, next) => {
     let tenant;
 
     try {
-        tenant = await fetchManager.callAPI(appSettings.resources.armAPI.endpoint, req.session["armAPI"].accessToken);   
+        tenant = await fetchManager.callAPI(appSettings.resources.armAPI.endpoint, req.session["armAPI"].accessToken);
     } catch (error) {
         console.log(error)
     }

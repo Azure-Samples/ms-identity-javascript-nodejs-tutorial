@@ -1,6 +1,11 @@
 const fs = require("fs");
 const cachePath = './App/data/cache.json' // replace this string with the path to your valid cache file.
 
+/**
+ * This implements ICachePlugin for persistent caching. For more information, visit: 
+ * https://azuread.github.io/microsoft-authentication-library-for-js/ref/interfaces/_azure_msal_common.icacheplugin.html
+ */
+
 const beforeCacheAccess = async (cacheContext) => {
     return new Promise(async (resolve, reject) => {
         if (fs.existsSync(cachePath)) {
