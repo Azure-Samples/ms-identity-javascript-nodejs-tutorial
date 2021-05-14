@@ -14,7 +14,7 @@ const options = {
     validateIssuer: config.settings.validateIssuer,
     loggingLevel: config.settings.loggingLevel,
     passReqToCallback: config.settings.passReqToCallback,
-    scope: config.protectedRoutes.hello.scopes
+    scope: config.protectedRoutes.api.scopes
 }
 
 const bearerStrategy = new BearerStrategy(options, (token, done) => {
@@ -32,7 +32,7 @@ app.use(passport.initialize());
 passport.use(bearerStrategy);
 
 // exposed API endpoint
-app.get('/hello',
+app.get('/api',
     passport.authenticate('oauth-bearer', {session: false}),
     (req, res) => {
         console.log('Validated claims: ', req.authInfo);

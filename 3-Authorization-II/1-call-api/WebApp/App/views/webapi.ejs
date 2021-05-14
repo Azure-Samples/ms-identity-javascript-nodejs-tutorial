@@ -13,6 +13,15 @@
         <%- include('includes/navbar', {isAuthenticated: isAuthenticated}); %>
 
         <div class="table-area-div">
+            <p>Calling <strong>custom Express web API</strong>...</p>
+            <ul>
+                <li><strong>endpoint:</strong> <mark>http://localhost:5000/api</mark></li>
+                <li><strong>scope:</strong> <mark>access_as_user</mark></li>
+            </ul>
+            <p>Contents of the <strong>response</strong> is below:</p>
+        </div>
+
+        <div class="table-area-div">
             <table class="table">
                 <thead class="thead-dark">
                     <tr>

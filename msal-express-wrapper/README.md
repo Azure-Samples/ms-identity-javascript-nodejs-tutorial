@@ -1,103 +1,122 @@
-# TSDX User Guide
+# MSAL Express Wrapper
 
-Congrats! You just saved yourself hours of work by bootstrapping this project with TSDX. Let’s get you oriented with what’s here and how to use it.
+This project illustrates a simple wrapper around **MSAL Node** to handle login, logout, and token acquisition. The wrapper is implemented in **TypeScript** and located under the `src/` folder. The wrapper handles authentication with both **Azure AD** and **Azure AD B2C**.
 
-> This TSDX setup is meant for developing libraries (not apps!) that can be published to NPM. If you’re looking to build a Node app, you could use `ts-node-dev`, plain `ts-node`, or simple `tsc`.
+## Usage
 
-> If you’re new to TypeScript, checkout [this handy cheatsheet](https://devhints.io/typescript)
+1. Start by installing the wrapper:
 
-## Commands
-
-TSDX scaffolds your new library inside `/src`.
-
-To run TSDX, use:
-
-```bash
-npm start # or yarn start
+```console
+  npm install
 ```
 
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
+2. Once installed, build the project:
 
-To do a one-off build, use `npm run build` or `yarn build`.
-
-To run tests, use `npm test` or `yarn test`.
-
-## Configuration
-
-Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
-
-### Jest
-
-Jest tests are set up to run with `npm test` or `yarn test`.
-
-### Bundle Analysis
-
-[`size-limit`](https://github.com/ai/size-limit) is set up to calculate the real cost of your library with `npm run size` and visualize the bundle with `npm run analyze`.
-
-#### Setup Files
-
-This is the folder structure we set up for you:
-
-```txt
-/src
-  index.tsx       # EDIT THIS
-/test
-  blah.test.tsx   # EDIT THIS
-.gitignore
-package.json
-README.md         # EDIT THIS
-tsconfig.json
+```console
+  npm run build
 ```
 
-### Rollup
+3. Then, initialize the wrapper in your app by providing a settings file in JSON. The file looks like the following:
 
-TSDX uses [Rollup](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
+    ```JSON
+    {
+        "credentials": {
+            "clientId": "CLIENT_ID",
+            "tenantId": "TENANT_ID",
+            "clientSecret": "CLIENT_SECRET"
+        },
+        "settings": {
+            "homePageRoute": "/home",
+            "redirectUri": "http://localhost:4000/redirect",
+            "postLogoutRedirectUri": "http://localhost:4000"
+        }
+    }
+    ```
 
-### TypeScript
+4. Add the web API endpoints you would like to call under **resources**:
 
-`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
+    ```JSON
+    {
+        // ...
+        "resources": {
+            "graphAPI": {
+                "callingPageRoute": "/profile",
+                "endpoint": "https://graph.microsoft.com/v1.0/me",
+                "scopes": ["user.read"]
+            },
+        }
+    }
+    ```
 
-## Continuous Integration
+5. If you are authenticating with **Azure AD B2C**, user-flows and/or policies should be provided as well:
 
-### GitHub Actions
-
-Two actions are added by default:
-
-- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
-- `size` which comments cost comparison of your library on every pull request using [`size-limit`](https://github.com/ai/size-limit)
-
-## Optimizations
-
-Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
-
-```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
-
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
+```JSON
+{
+    // ...
+    "policies": {
+        "signUpSignIn": {
+            "authority": "https://fabrikamb2c.b2clogin.com/fabrikamb2c.onmicrosoft.com/B2C_1_susi"
+        }, 
+    }
 }
 ```
 
-You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
+## Integration with the Express.js authentication wrapper
 
-## Module Formats
+To initialize the wrapper, import it and supply the settings file and an (optional) persistent cache as below:
 
-CJS, ESModules, and UMD module formats are supported.
+```javascript
+const settings = require('../../appSettings.json');
+const cache = require('../utils/cachePlugin');
 
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
+const msalWrapper = require('msal-express-wrapper/dist/AuthProvider');
 
-## Named Exports
+const authProvider = new msalWrapper.AuthProvider(settings, cache);
+```
 
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
+Once the wrapper is initialized, you can use it as below:
 
-## Including Styles
+### Authentication
 
-There are many ways to ship styles, including with CSS-in-JS. TSDX has no opinion on this, configure how you like.
+These routes are dedicated to the wrapper for handing authorization and token requests. They do not serve any page.
 
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
+```javascript
+// authentication routes
+app.get('/signin', authProvider.signIn);
+app.get('/signout', authProvider.signOut);
+app.get('/redirect', authProvider.handleRedirect);
+```
 
-## Publishing to NPM
+### Securing routes
 
-We recommend using [np](https://github.com/sindresorhus/np).
+Simply add the `isAuthenticated` middleware before the controller that serves the page you would like to secure:
+
+```javascript
+// secure routes
+app.get('/id', authProvider.isAuthenticated, mainController.getIdPage);
+```
+
+### Acquiring tokens
+
+Simply add the `getToken` middleware before the controller that makes a call to the web API that you would like to access. The access token will be available as a *session variable*:
+
+```javascript
+// secure routes that call protected resources
+app.get('/profile', authProvider.isAuthenticated, authProvider.getToken, mainController.getProfilePage); // get token for this route to call web API
+```
+
+## Remarks
+
+### Session support
+
+Session support in this sample is provided by the [express-session](https://www.npmjs.com/package/express-session) package. **express-session** is considered unfit for production, and you should either implement your own session solution or use a more suitable 3rd party library.
+
+### Persistent caching
+
+MSAL Node has an in-memory cache by default. This sample also features a persistent cache plugin in order to save the cache to disk. This plugin is not meant to be production-ready. As such, you might want to implement persistent caching using a 3rd party library like [redis](https://redis.io/).
+
+## More information
+
+* [Initializing a confidential client app with MSAL Node](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/initialize-confidential-client-application.md)
+* [MSAL Node Configuration options](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/configuration.md)
+* [Scenario: A web app that calls web APIs](https://docs.microsoft.com/azure/active-directory/develop/scenario-web-app-call-api-overview)

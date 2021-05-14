@@ -21,7 +21,7 @@ urlFragment: "ms-identity-javascript-nodejs-tutorial"
 
 The [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview), along with [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and [Azure Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/overview) (Azure AD B2C) are central to the **Azure** cloud ecosystem. This tutorial aims to take you through the fundamentals of modern authentication with Node.js, using the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js) (MSAL Node).
 
-This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) in order to automate routine authentication tasks such as login, logout, get a token etc., as well as utility methods to validate tokens and etc. You can find the wrapper under the [msal-express-wrapper](./msal-express-wrapper) folder. Suggestions and contributions are welcome!
+This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) class in order to automate routine authentication tasks such as login, logout, token acquisition etc., as well as utility methods to validate tokens and etc. You can find the wrapper under the [msal-express-wrapper](./msal-express-wrapper/README.md) folder. Suggestions and contributions are welcome!
 
 We recommend following the chapters in successive order. However, the code samples are self-contained, so feel free to pick samples by topics that you may need at the moment.
 
@@ -40,7 +40,7 @@ Please refer to each chapter's README for sample-specific prerequisites.
 
 - [jwt.ms](https://jwt.ms) for inspecting your tokens
 - [Fiddler](https://www.telerik.com/fiddler) for monitoring your network activity and troubleshooting
-- Check [MSAL Node FAQ](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/faq.md) first for your questions
+- Check the [MSAL Node FAQ](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/faq.md) for your questions first
 - Follow the [Azure AD Blog](https://techcommunity.microsoft.com/t5/azure-active-directory-identity/bg-p/Identity) to stay up-to-date with the latest developments
 
 Please refer to each chapter's README for sample-specific recommendations.
@@ -56,7 +56,7 @@ Alternatively, choose below the sample you want to review.
 
 |               |               |
 |---------------|---------------|
-| <img src="./1-Authentication/1-sign-in/ReadmeFiles/topology.png" width="200"> | [**Sign-in with Azure AD**](./1-Authentication/1-sign-in/README.md) </br> Sign-in your users with  **Azure AD** and learn to work with **ID Tokens**. Learn how **single sign-on (SSO)** works. |
+| <img src="./1-Authentication/1-sign-in/ReadmeFiles/topology.png" width="200"> | [**Sign-in with Azure AD**](./1-Authentication/1-sign-in/README.md) </br> Sign-in your users with  **Azure AD** and learn to work with **ID Tokens**. |
 | <img src="./1-Authentication/2-sign-in-b2c/ReadmeFiles/topology.png" width="200"> | [**Sign-in with Azure AD B2C**](./1-Authentication/2-sign-in-b2c/README.md) </br> Sign-in your customers with **Azure AD B2C**. Learn to integrate with **external social identity providers**. Learn how to use **user-flows** and **custom policies**. |
 
 ### Chapter 2: Sign-in a user and get an Access Token for Microsoft Graph

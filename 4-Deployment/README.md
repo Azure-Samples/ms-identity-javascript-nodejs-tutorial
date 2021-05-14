@@ -1,4 +1,4 @@
-# Deploy your Node.js & Express Applications to Azure Cloud and use Azure Services to manage your operations
+# Deploy your Node.js & Express web app to Azure Cloud
 
  1. [Overview](#overview)
  1. [Scenario](#scenario)
@@ -13,9 +13,7 @@
 
 ## Overview
 
-This sample demonstrates how to deploy a Node.js & Express web application coupled with a Node.js & Express web API to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). To do so, we will use the [same code sample from Chapter 3](../3-Authorization-II/1-call-api).
-
-> :information_source: The steps below apply similarly to B2C applications, for instance the [B2C sample from Chapter 3](../3-Authorization-II/2-call-api-b2c)
+This sample demonstrates how to deploy a Node.js & Express web application coupled with a Node.js & Express web API to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). To do so, we will use the [same code sample from Chapter 2](../2-Authorization-I/1-call-graph).
 
 ## Scenario
 
@@ -30,7 +28,7 @@ This sample demonstrates how to deploy a Node.js & Express web application coupl
 - [VS Code Azure Tools Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack) extension is recommended for interacting with **Azure** through VS Code interface.
 - An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://azure.microsoft.com/documentation/articles/active-directory-howto-tenant/)
 - A user account in your **Azure AD** tenant.
-- An **Azure subscription**. This sample uses **Azure Storage** and **Azure App Service**.
+- An **Azure subscription**. This sample uses **Azure App Service**.
 
 ## Setup
 
@@ -48,11 +46,11 @@ Locate the root of the sample folder. Then:
 
 ### Register the web API
 
-Use the same app registration credentials that you've obtained during [**chapter 3-1**](../3-Authorization-II/3-1-call-api). You may copy-paste the contents of your `auth.json` file to do so.
+Use the same app registration credentials that you've obtained during [**chapter 2-1**](../2-Authorization-I/1-call-graph). You may copy-paste the contents of your `config.json` file to do so.
 
 ### Register the web app
 
-Use the same app registration credentials that you've obtained during [**chapter 3-1**](../3-Authorization-II/3-1-call-api). You may copy-paste the contents of your `auth.json` file to do so.
+Use the same app registration credentials that you've obtained during [**chapter 2-1**](../2-Authorization-I/1-call-graph). You may copy-paste the contents of your `appSettings.json` file to do so.
 
 ## Deployment
 
@@ -100,7 +98,7 @@ We now need to designate from which domains this web API can be called. To do so
 
 ### Deploy the web app
 
-> :information_source: The steps below are the same with deploying your web app, except for step 3 where we reconfigure `auth.json` for the web app.
+> :information_source: The steps below are the same with deploying your web app, except for step 3 where we reconfigure `appSettings.json` for the web app.
 
 #### Step 1: Deploy your files
 
@@ -121,21 +119,21 @@ Now you need to navigate to the **Azure App Service** Portal, and locate your pr
 Now we need to obtain authentication parameters. There are 2 things to do:
 
 - Update Azure AD (or Azure AD B2C) **App Registration**
-- Update `WebApp/auth.json`.
+- Update `WebApp/appSettings.json`.
 
 First, navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
 
-1. Select the **App Registrations** blade on the left, then find and select the web app that you have registered in the previous tutorial (`ExpressWebApp-c3s1`).
-1. Navigate to the **Authentication** blade. There, in **Redirect URI** section, enter the following redirect URI: `https://msal-nodejs-webapp1.azurewebsites.net/redirect`.
+1. Select the **App Registrations** blade on the left, then find and select the web app that you have registered in the previous tutorial (`msal-node-webapp`).
+1. Navigate to the **Authentication** blade. There, in **Redirect URI** section, enter the following redirect URI: `https://msal-node-webapp1.azurewebsites.net/redirect`.
 1. Select **Save** to save your changes.
 
-Now, open the `WebApp/auth.json` that you have deployed to **Azure App Service**.
+Now, open the `WebApp/appSettings.json` that you have deployed to **Azure App Service**.
 
 ![deployed_config](./ReadmeFiles/deployed_config.png)
 
-1. Find the key `redirectUri` and replace the existing value with the Redirect URI for ExpressWebApp-c3s1 app. For example, `https://msal-nodejs-webapp1.azurewebsites.net/redirect`.
-1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of the ExpressWebApp-c3s1 project (by default `https://msal-nodejs-webapp1.azurewebsites.net/redirect/`).
-1. Find the key `endpoint` (resources.webAPI.endpoint), and replace the existing value with your deployed web API's URI and endpoint, e.g. `https://msal-nodejs-webapi1.azurewebsites.net/api`
+1. Find the key `redirectUri` and replace the existing value with the Redirect URI for ExpressWebApp-c3s1 app. For example, `https://msal-node-webapp1.azurewebsites.net/redirect`.
+1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of the ExpressWebApp-c3s1 project (by default `https://msal-node-webapp1.azurewebsites.net/redirect/`).
+1. Find the key `endpoint` (resources.webAPI.endpoint), and replace the existing value with your deployed web API's URI and endpoint, e.g. `https://msal-node-webapi1.azurewebsites.net/api`
 
 ## Explore the sample
 
@@ -161,7 +159,7 @@ Use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) to get supp
 Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
 Make sure that your questions or comments are tagged with [`azure-ad` `azure-ad-b2c` `ms-identity` `msal`].
 
-If you find a bug in the sample, please raise the issue on [GitHub Issues](../../issues).
+If you find a bug in the sample, please raise the issue on [GitHub Issues](../../../../issues).
 
 To provide a recommendation, visit the following [User Voice page](https://feedback.azure.com/forums/169401-azure-active-directory).
 

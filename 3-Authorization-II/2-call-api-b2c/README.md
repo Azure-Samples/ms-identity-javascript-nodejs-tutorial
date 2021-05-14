@@ -27,17 +27,16 @@ This sample demonstrates a Node.js & Express web application calling a Node.js &
 
 ## Contents
 
-| File/folder           | Description                                                   |
-|-----------------------|---------------------------------------------------------------|
-| `AppCreationScripts/` | Contains Powershell scripts to automate app registration.     |
-| `ReadmeFiles/`        | Contains images and diagrams for the README.                  |
-| `WebApp/auth.json`    | Contains authentication parameters for the web app.           |
-| `WebApp/cache.json`   | Stores MSAL Node token cache.                                 |
-| `WebApp/App/app.js`   | Web application entry point.                                  |
-| `WebApp/App/routes/router.js` | Router configuration where authentication middleware added. |
-| `WebAPI/auth.json`    | Contains authentication parameters for the web API.           |
-| `WebAPI/cache.json`   | Stores MSAL Node token cache.                                 |
-| `WebAPI/index.js`     | web API entry point.                                          |
+| File/folder                   | Description                                                   |
+|-------------------------------|---------------------------------------------------------------|
+| `AppCreationScripts/`         | Contains Powershell scripts to automate app registration.     |
+| `ReadmeFiles/`                | Contains images and diagrams for the README.                  |
+| `WebApp/appSettings.json`     | Contains authentication parameters for the web app.           |
+| `WebApp/data/cache.json`      | Stores MSAL Node token cache data.                            |
+| `WebApp/App/app.js`           | Web application entry point.                                  |
+| `WebApp/App/routes/router.js` | Router configuration where authentication middleware added.   |
+| `WebAPI/config.json`          | Contains authentication parameters for the web API.           |
+| `WebAPI/index.js`             | web API entry point.                                          |
 
 ## Prerequisites
 
@@ -73,13 +72,11 @@ Locate the root of the sample folder. Then:
     npm install
 ```
 
-### Register the sample application(s) with your Azure Active Directory tenant
+### Registration
 
-:warning: This sample comes with a pre-registered application for testing purposes. If you would like to use your own **Azure AD B2C** tenant and application, follow the steps below to register and configure the application in the **Azure portal**. Otherwise, continue with the steps for [Running the sample](#running-the-sample).
+:warning: This sample comes with a pre-registered application for demo purposes. If you would like to use your own **Azure AD B2C** tenant and application, follow the steps below to register and configure the application on **Azure portal**. Otherwise, continue with the steps for [Running the sample](#running-the-sample).
 
-### Choose the Azure AD B2C tenant where you want to create your applications
-
-As a first step you'll need to:
+### Choose the Azure AD tenant where you want to create your applications
 
 1. Sign in to the [Azure portal](https://portal.azure.com).
 1. If your account is present in more than one Azure AD B2C tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD B2C tenant.
@@ -133,7 +130,6 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 1. Open the `WebAPI\config.json` file.
 1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapi` app copied from the Azure portal.
 1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
-1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapi` copied from the Azure portal.
 
 ### Register the client app (msal-node-webapp)
 
@@ -174,7 +170,6 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of `msal-node-webapp` (by default `http://localhost:4000/`).
 1. Find the key `endpoint` and replace the existing value with the base address of `msal-node-webapi` (by default `http://localhost:5000/`).
 1. Find the key `policies.authorities` abd replace it with the authority strings of your policies/user-flows, e.g. `https://fabrikamb2c.b2clogin.com/fabrikamb2c.onmicrosoft.com/b2c_1_susi`.
-1. Find the key `policies.authorityDomain` abd replace it with the domain of your authority, e.g. `fabrikamb2c.b2clogin.com`.
 
 The rest of the **key-value** pairs are for resources/APIs that you would like to call. They are set as **default**, but you can modify them as you wish:
 
@@ -242,7 +237,7 @@ Use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) to get supp
 Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
 Make sure that your questions or comments are tagged with [`azure-active-directory` `azure-ad-b2c` `ms-identity` `adal` `msal`].
 
-If you find a bug in the sample, raise the issue on [GitHub Issues](../../issues).
+If you find a bug in the sample, raise the issue on [GitHub Issues](../../../../issues).
 
 To provide feedback on or suggest features for Azure Active Directory, visit [User Voice page](https://feedback.azure.com/forums/169401-azure-active-directory).
 

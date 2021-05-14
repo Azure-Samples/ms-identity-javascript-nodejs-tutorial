@@ -1,5 +1,5 @@
 {
-  "name": "msal-node-tutorial-call-api",
+  "name": "msal-node-tutorial-call-api-b2c",
   "version": "1.0.0",
   "description": "A Node.js & Express web app calling a custom web API using MSAL Node",
   "main": "app.js",
@@ -17,7 +17,7 @@
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
-    "MsalNodeWrapper": "file:../../../MsalNodeWrapper"
+    "msal-express-wrapper": "file:../../../msal-express-wrapper"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"
