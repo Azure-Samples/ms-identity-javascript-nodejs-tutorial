@@ -1,7 +1,7 @@
 {
     "Sample": {
-        "Title": "A Node.js & Express web app calling a custom web API on Azure AD using MSAL Node",
-        "Level": 200,
+        "Title": "Deploying A Node.js & Express web app to Azure Cloud",
+        "Level": 300,
         "Client": "Node.js & Express web app",
         "Service": "Node.js & Express web API",
         "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",

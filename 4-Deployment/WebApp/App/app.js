@@ -11,7 +11,7 @@ const router = require('./routes/router');
 const SERVER_PORT = process.env.PORT || 4000;
 
 // initialize express
-const app = express(); 
+const app = express();
 
 app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'ejs');
@@ -29,10 +29,10 @@ app.use(express.json());
  * Using express-session middleware. Be sure to familiarize yourself with available options
  * and set as desired. Visit: https://www.npmjs.com/package/express-session
  */
-app.use(session({ 
-    secret: 'ENTER_YOUR_SECRET_HERE', 
-    resave: false, 
-    saveUninitialized: false 
+app.use(session({
+    secret: 'ENTER_YOUR_SECRET_HERE',
+    resave: false,
+    saveUninitialized: false
 }));
 
 app.use(router);

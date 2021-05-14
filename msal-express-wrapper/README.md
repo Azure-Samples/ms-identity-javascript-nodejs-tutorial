@@ -69,7 +69,7 @@ To initialize the wrapper, import it and supply the settings file and an (option
 const settings = require('../../appSettings.json');
 const cache = require('../utils/cachePlugin');
 
-const msalWrapper = require('msal-express-wrapper/dist/AuthProvider');
+const msalWrapper = require('msal-express-wrapper');
 
 const authProvider = new msalWrapper.AuthProvider(settings, cache);
 ```
