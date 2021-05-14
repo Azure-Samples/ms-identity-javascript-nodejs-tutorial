@@ -15,7 +15,7 @@
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web application calling a Node.js & Express web API protected by Azure AD using the [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it also illustrates various authorization concepts, such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [dynamic scopes and incremental consent](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent), [access token validation](https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validating-tokens) and more.
+This sample demonstrates a Node.js & Express web application calling a Node.js & Express web API protected by Azure AD using the [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it illustrates authorization concepts such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [access token validation](https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validating-tokens) and more.
 
 ## Scenario
 
@@ -73,7 +73,7 @@ Locate the root of the sample folder. Then:
     npm install
 ```
 
-### Register the sample application(s) with your Azure Active Directory tenant
+### Registration
 
 There are two projects in this sample. Each needs to be separately registered in your Azure AD tenant. To register these projects, you can:
 
@@ -131,7 +131,6 @@ As a first step you'll need to:
    - Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
    - The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
    - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
-    > :bulb: For enhanced security, consider [using certificates](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/certificate-credentials.md) instead of client secrets.
 1. In the app's registration screen, select the **Expose an API** blade to the left to open the page where you can declare the parameters to expose this app as an API for which client applications can obtain [access tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for.
 The first thing that we need to do is to declare the unique [resource](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow) URI that the clients will be using to obtain access tokens for this API. To declare an resource URI, follow the following steps:
    - Select `Set` next to the **Application ID URI** to generate a URI that is unique for this app.
@@ -178,7 +177,6 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
    - Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
    - The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
    - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
-    > :bulb: For enhanced security, consider [using certificates](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/certificate-credentials.md) instead of client secrets.
 1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs.
    - Select the **Add a permission** button and then,
    - Ensure that the **My APIs** tab is selected.
@@ -202,11 +200,11 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 The rest of the **key-value** pairs are for resources/APIs that you would like to call. They are set as **default**, but you can modify them as you wish:
 
 ```json
-        "<name of your resource>": {
-            "callingPageRoute": "<route where this resource will be called from, e.g. '/webapi'>",
-            "endpoint": "<URI coordinates of the resource, e.g. 'http://localhost:5000/myapi'>",
-            "scopes": ["scope for the resource, e.g. 'api://xxxxxx/access_as_user' ", "..."]
-        },
+   "<name of your resource>": {
+      "callingPageRoute": "<route where this resource will be called from, e.g. '/webapi'>",
+      "endpoint": "<URI coordinates of the resource, e.g. 'http://localhost:5000/myapi'>",
+      "scopes": ["scope for the resource, e.g. 'api://xxxxxx/access_as_user' ", "..."]
+   },
 ```
 
 ## Running the sample
@@ -244,7 +242,9 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ### Configuration
 
-### Protected resources
+### Acquiring an access token
+
+### Calling a web API
 
 ### Access Token validation
 

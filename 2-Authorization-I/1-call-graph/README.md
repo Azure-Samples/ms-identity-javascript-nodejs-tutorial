@@ -15,7 +15,9 @@
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web application that authenticates users against [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and obtains [access tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) to call [Microsoft Graph](https://docs.microsoft.com/graph/overview) (MS Graph) and [Azure Resource Manager API](https://docs.microsoft.com/azure/azure-resource-manager/management/overview) (ARM API), with the help of [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node). In doing so, it also illustrates various authorization concepts, such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [dynamic scopes and incremental consent](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent), **working with multiple resources** and more.
+This sample demonstrates a Node.js & Express web application that authenticates users against [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and obtains [access tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) to call [Microsoft Graph](https://docs.microsoft.com/graph/overview) (MS Graph) and [Azure Resource Manager API](https://docs.microsoft.com/azure/azure-resource-manager/management/overview) (ARM API), with the help of [Microsoft Authentication Library for Node.js](https://aka.ms/msalnode) (MSAL Node).  In doing so, it illustrates authorization concepts such as [OAuth 2.0 Authorization Code Grant](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow), [dynamic scopes and incremental consent](https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent), **working with multiple resources** and more.
+
+This sample also demonstrates how to use the [Microsoft Graph JavaScript SDK](https://github.com/microsoftgraph/msgraph-sdk-javascript) for working with the Microsoft Graph API.
 
 > :information_source: Check out the community call: [An introduction to Microsoft Graph for developers](https://www.youtube.com/watch?v=EBbnpFdB92A)
 
@@ -32,9 +34,10 @@ This sample demonstrates a Node.js & Express web application that authenticates 
 | File/folder           | Description                                                   |
 |-----------------------|---------------------------------------------------------------|
 | `AppCreationScripts/` | Contains Powershell scripts to automate app registration.     |
-| `ReadmeFiles/`        | List of changes to the sample.                                |
+| `ReadmeFiles/`        | Contains illustrations and screenshots.                       |
+| `App/appSettings.json`| Authentication parameters and settings                        |
+| `App/cache.json`      | Stores MSAL Node token cache data.                            |
 | `App/app.js`          | Application entry point.                                      |
-| `App/routes/router.js`| Controllers and msal-node helper middleware.                  |
 
 ## Prerequisites
 
@@ -64,6 +67,7 @@ or download and extract the repository .zip file.
 Locate the root of the sample folder. Then:
 
 ```console
+    cd 2-Authorization-I/1-call-graph
     npm install
 ```
 
@@ -104,8 +108,6 @@ There is one project in this sample. To register it, you can:
 
 ### Choose the Azure AD tenant where you want to create your applications
 
-As a first step you'll need to:
-
 1. Sign in to the [Azure portal](https://portal.azure.com).
 1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD tenant.
 
@@ -126,20 +128,17 @@ As a first step you'll need to:
    - Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
    - The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
    - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
-    > :bulb: For enhanced security, consider [using certificates](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/certificate-credentials.md) instead of client secrets.
 1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs.
    - Select the **Add a permission** button and then:
-
-   - Ensure that the **Microsoft APIs** tab is selected.
-   - In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
-   - In the **Delegated permissions** section, select the **User.Read** in the list. Use the search box if necessary.
-   - Select the **Add permissions** button at the bottom.
+       - Ensure that the **Microsoft APIs** tab is selected.
+       - In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
+       - In the **Delegated permissions** section, select the **User.Read** in the list. Use the search box if necessary.
+       - Select the **Add permissions** button at the bottom.
    - Select the **Add a permission** button and then:
-
-   - Ensure that the **Microsoft APIs** tab is selected.
-   - In the list of APIs, select the API `Windows Azure Service Management API`.
-   - In the **Delegated permissions** section, select the **user_impersonation** in the list. Use the search box if necessary.
-   - Select the **Add permissions** button at the bottom.
+       - Ensure that the **Microsoft APIs** tab is selected.
+       - In the list of APIs, select the API `Windows Azure Service Management API`.
+       - In the **Delegated permissions** section, select the **user_impersonation** in the list. Use the search box if necessary.
+       - Select the **Add permissions** button at the bottom.
 
 #### Configure the client app (msal-node-webapp) to use your app registration
 
@@ -151,17 +150,17 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
 1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
 1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
-1. Find the key `redirectUri` and replace the existing value with the Redirect URI for `msal-node-webapp`. (by default `http://localhost:4000/`).
+1. Find the key `redirectUri` and replace the existing value with the Redirect URI for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
 1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of `msal-node-webapp` (by default `http://localhost:4000/`).
 
 The rest of the **key-value** pairs are for resources/APIs that you would like to call. They are set as **default**, but you can modify them as you wish:
 
 ```json
-        "nameOfYourResource": {
-            "callingPageRoute": "/<route_where_this_resource_will_be_called_from>",
-            "endpoint": "<uri_coordinates_of_the_resource>",
-            "scopes": ["scope1_of_the_resource", "scope1_of_the_resource", "..."]
-        },
+    "nameOfYourResource": {
+        "callingPageRoute": "/<route_where_this_resource_will_be_called_from>",
+        "endpoint": "<uri_coordinates_of_the_resource>",
+        "scopes": ["scope1_of_the_resource", "scope1_of_the_resource", "..."]
+    },
 ```
 
 ## Running the sample
@@ -176,8 +175,8 @@ Locate the root of the sample folder. Then:
 
 1. Open your browser and navigate to `http://localhost:4000`.
 1. Click the **Sign-in** button on the top right corner.
-1. Once you sign-in, click on the **See my profile** button to call **Microsoft Graph**.
-1. Once you sign-in, click on the **Get my tenant** button to call **Azure Resource Manager**.
+1. Once you sign in, click on the **See my profile** button to call **Microsoft Graph**.
+1. Once you sign in, click on the **Get my tenant** button to call **Azure Resource Manager**.
 
 ![Screenshot](./ReadmeFiles/screenshot.png)
 
@@ -201,27 +200,167 @@ Scopes can come in various forms so it pays off to be familiar with them. The fo
 - `https://management.azure.com/user_impersonation` - https expression of a multi-tenant resource scope
 - `api://9k8521c1-bab5-1256-a87b-574f83c463z6/access_as_user` - expression of a single-tenant resource (e.g. custom web API) scope
 
-### Dynamic scopes and incremental consent
+### Acquiring an access token
 
+```javascript
+const express = require('express');
+const msalWrapper = require('msal-express-wrapper');
 
+// ...
 
-In the code snippet above, the user will be prompted for consent once they authenticate and receive an **ID Token** and an **Access Token** with scope `User.Read`. Later, if they request an **Access Token** for `User.Read`, they will not be asked for consent again (in other words, they can acquire a token *silently*). On the other hand, the user did not consented to `Mail.Read` at the authentication stage. As such, they will be asked for consent when requesting an **Access Token** for that scope. The token received will contain all the previously consented scopes, hence the term *incremental consent*.
+// initialize wrapper
+const authProvider = new msalWrapper.AuthProvider(config, cache);
 
-### Working with multiple resources
+// initialize router
+const router = express.Router();
 
-When you have to access different resources (for instance, Microsoft Graph API *and* Azure Resource Manager API), initiate a separate token request for each:
+// ...
 
-Bear in mind that you can request multiple scopes for the same resource (e.g. `User.Read`, `User.Write` and `Calendar.Read` for Graph API).
+router.get('/profile', authProvider.isAuthenticated, authProvider.getToken, mainController.getProfilePage); // get token for this route to call web API
+router.get('/tenant', authProvider.isAuthenticated, authProvider.getToken, mainController.getTenantPage) // get token for this route to call web API
+```
 
+Under the hood, `getToken()` middleware
 
+```typescript
+    /**
+     * Middleware that gets tokens and calls web APIs
+     * @param {Object} req: express request object
+     * @param {Object} res: express response object
+     * @param {Function} next: express next 
+     */
+    getToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 
-In case you erroneously pass multiple resources in your token request, the token you will receive will only be issued for the first resource.
+        // get scopes for token request
+        const scopes = (<Resource>Object.values(this.appSettings.resources)
+            .find((resource: Resource) => resource.callingPageRoute === req.route.path)).scopes;
 
+        const resourceName = this.getResourceName(req.route.path);
 
+        if (!req.session[resourceName]) {
+            req.session[resourceName] = {
+                accessToken: null
+            };
+        }
+
+        try {
+            const silentRequest: SilentFlowRequest = {
+                account: req.session.account,
+                scopes: scopes,
+            };
+
+            // acquire token silently to be used in resource call
+            const tokenResponse = await this.msalClient.acquireTokenSilent(silentRequest);
+            console.log("\nSuccessful silent token acquisition:\n Response: \n:", tokenResponse);
+
+            // In B2C scenarios, sometimes an access token is returned empty.
+            // In that case, we will acquire token interactively instead.
+            if (tokenResponse.accessToken.length === 0) {
+                console.log(ErrorMessages.TOKEN_NOT_FOUND);
+                throw new InteractionRequiredAuthError(ErrorMessages.INTERACTION_REQUIRED);
+            }
+
+            req.session[resourceName].accessToken = tokenResponse.accessToken;
+            next();
+
+        } catch (error) {
+            // in case there are no cached tokens, initiate an interactive call
+            if (error instanceof InteractionRequiredAuthError) {
+
+                const state = this.cryptoProvider.base64Encode(
+                    JSON.stringify({
+                        stage: AppStages.ACQUIRE_TOKEN,
+                        path: req.route.path,
+                        nonce: req.session.nonce
+                    })
+                );
+
+                const params: AuthCodeParams = {
+                    authority: this.msalConfig.auth.authority,
+                    scopes: scopes,
+                    state: state,
+                    redirect: this.appSettings.settings.redirectUri,
+                    account: req.session.account
+                };
+
+                // initiate the first leg of auth code grant to get token
+                this.getAuthCode(req, res, next, params);
+            }
+        }
+    }
+```
+
+```typescript
+    /**
+     * Middleware that handles redirect depending on request state
+     * There are basically 2 stages: sign-in and acquire token
+     * @param {Request} req: express request object
+     * @param {Response} res: express response object
+     * @param {NextFunction} next: express next function
+     */
+    handleRedirect = async (req: Request | any, res: Response, next: NextFunction): Promise<void> => {
+
+        if (req.query.state) {
+            const state = JSON.parse(this.cryptoProvider.base64Decode(req.query.state));
+
+            // check if nonce matches
+            if (state.nonce === req.session.nonce) {
+
+                switch (state.stage) {
+                    
+                    // ...
+
+                    case AppStages.ACQUIRE_TOKEN: {
+                        // get the name of the resource associated with scope
+                        const resourceName = this.getResourceName(state.path);
+
+                        const tokenRequest: AuthorizationCodeRequest = {
+                            code: req.query.code,
+                            scopes: this.appSettings.resources[resourceName].scopes, // scopes for resourceName
+                            redirectUri: this.appSettings.settings.redirectUri,
+                        };
+
+                        try {
+                            const tokenResponse = await this.msalClient.acquireTokenByCode(tokenRequest);
+                            console.log("\nResponse: \n:", tokenResponse);
+
+                            req.session.resources[resourceName].accessToken = tokenResponse.accessToken;
+                            res.status(200).redirect(state.path);
+
+                        } catch (error) {
+                            console.log(error);
+                            res.status(500).send(error);
+                        }
+                        break;
+                    }
+
+                    default:
+                        res.status(500).send(ErrorMessages.CANNOT_DETERMINE_APP_STAGE);
+                        break;
+                }
+            } else {
+                console.log(ErrorMessages.NONCE_MISMATCH)
+                res.status(401).send(ErrorMessages.NOT_PERMITTED);
+            }
+        } else {
+            res.status(500).send(ErrorMessages.STATE_NOT_FOUND)
+        }
+    };
+```
 
 ### Access Token validation
 
 Clients should treat access tokens as opaque strings, as the contents of the token are intended for the **resource only** (such as a web API or Microsoft Graph). For validation and debugging purposes, developers can decode **JWT**s (*JSON Web Tokens*) using a site like [jwt.ms](https://jwt.ms).
+
+### Calling a Microsoft Graph via Graph SDK
+
+```javascript
+```
+
+### Calling an Azure API
+
+```javascript
+```
 
 ## More information
 

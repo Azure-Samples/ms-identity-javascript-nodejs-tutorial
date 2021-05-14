@@ -63,7 +63,7 @@ export class AuthProvider {
 
     /**
      * @param {JSON} appSettings 
-     * @param {Object} cache: cachePlugin
+     * @param {ICachePlugin} cache: cachePlugin
      */
     constructor(appSettings: AppSettings, cache?: ICachePlugin) {
         ConfigurationUtils.validateAppSettings(appSettings);

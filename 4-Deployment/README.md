@@ -13,7 +13,9 @@
 
 ## Overview
 
-This sample demonstrates how to deploy a Node.js & Express web application coupled with a Node.js & Express web API to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). To do so, we will use the [same code sample from Chapter 2](../2-Authorization-I/1-call-graph).
+This sample demonstrates how to deploy a Node.js & Express web application coupled with a Node.js & Express web API to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). To do so, we will use the [same code sample from Chapter 3](../3-Authorization-II/1-call-api).
+
+> :information_source: The steps below apply similarly to B2C applications, for instance the [B2C sample from Chapter 3](../3-Authorization-II/2-call-api-b2c)
 
 ## Scenario
 
@@ -32,7 +34,7 @@ This sample demonstrates how to deploy a Node.js & Express web application coupl
 
 ## Setup
 
-Locate the root of the sample folder. Then:
+Locate the root of the [sample folder](../3-Authorization-II/1-call-api). Then:
 
 ```console
     cd WebAPI
@@ -46,11 +48,11 @@ Locate the root of the sample folder. Then:
 
 ### Register the web API
 
-Use the same app registration credentials that you've obtained during [**chapter 2-1**](../2-Authorization-I/1-call-graph). You may copy-paste the contents of your `config.json` file to do so.
+Use the same app registration credentials that you've obtained during [**chapter 3-1**](../3-Authorization-II/3-1-call-api). You may copy-paste the contents of your `config.json` file to do so.
 
 ### Register the web app
 
-Use the same app registration credentials that you've obtained during [**chapter 2-1**](../2-Authorization-I/1-call-graph). You may copy-paste the contents of your `appSettings.json` file to do so.
+Use the same app registration credentials that you've obtained during [**chapter 3-1**](../3-Authorization-II/3-1-call-api). You may copy-paste the contents of your `appSettings.json` file to do so.
 
 ## Deployment
 
@@ -90,15 +92,9 @@ Now you need to navigate to the **Azure App Service** Portal, and locate your pr
 
 ![disable_easy_auth](./ReadmeFiles/disable_easy_auth.png)
 
-#### Step 3: Enable cross-origin resource sharing (CORS)
-
-We now need to designate from which domains this web API can be called. To do so, we will add the published website URI of the web app project that we just deployed, e.g. `https://msal-nodejs-webapp1.azurewebsites.net/`. Add this URI as shown below:
-
-![enable_cors](./ReadmeFiles/enable_cors.png)
-
 ### Deploy the web app
 
-> :information_source: The steps below are the same with deploying your web app, except for step 3 where we reconfigure `appSettings.json` for the web app.
+> :information_source: The steps below are the same with deploying your web API, except for step 3 where we reconfigure `appSettings.json` for the web app.
 
 #### Step 1: Deploy your files
 
@@ -114,7 +110,7 @@ We now need to designate from which domains this web API can be called. To do so
 
 Now you need to navigate to the **Azure App Service** Portal, and locate your project there. Once you do, click on the **Authentication/Authorization** blade. There, make sure that the **App Services Authentication** is switched off (and nothing else is checked), as we are using our own **custom** authentication logic.
 
-### Step 3: Update your authentication configuration
+#### Step 3: Update your authentication configuration
 
 Now we need to obtain authentication parameters. There are 2 things to do:
 
@@ -133,11 +129,11 @@ Now, open the `WebApp/appSettings.json` that you have deployed to **Azure App Se
 
 1. Find the key `redirectUri` and replace the existing value with the Redirect URI for ExpressWebApp-c3s1 app. For example, `https://msal-node-webapp1.azurewebsites.net/redirect`.
 1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of the ExpressWebApp-c3s1 project (by default `https://msal-node-webapp1.azurewebsites.net/redirect/`).
-1. Find the key `endpoint` (resources.webAPI.endpoint), and replace the existing value with your deployed web API's URI and endpoint, e.g. `https://msal-node-webapi1.azurewebsites.net/api`
+1. Find the key `resources.webAPI.endpoint` and replace the existing value with your deployed web API's URI and endpoint, e.g. `https://msal-node-webapi1.azurewebsites.net/api`
 
 ## Explore the sample
 
-1. Open your browser and navigate to your deployed client app's URI, for instance: `https://msal-nodejs-webapp1.azurewebsites.net/`.
+1. Open your browser and navigate to your deployed client app's URI, for instance: `https://msal-node-webapp1.azurewebsites.net/`.
 1. Click on the **sign-in** button located on the top right corner.
 1. Once you authenticate, click on the **Call web API** button at the center.
 
