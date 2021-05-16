@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { 
+import {
     UrlString,
     Constants,
 } from '@azure/msal-common';
@@ -24,7 +24,7 @@ export class ConfigurationUtils {
      * Validates the fields in the custom JSON configuration file
      * @param {JSON} config: configuration file
      */
-    static validateAppSettings = (config: AppSettings) => {
+    static validateAppSettings = (config: AppSettings): void => {
 
         if (!config.credentials.clientId || config.credentials.clientId === "Enter_the_Application_Id_Here") {
             throw new Error("No clientId provided!");
@@ -57,13 +57,12 @@ export class ConfigurationUtils {
      * @param {JSON} config: configuration file
      * @param {Object} cachePlugin: passed during initialization
      */
-    static getMsalConfiguration = (config: AppSettings, cachePlugin: ICachePlugin = null) => {
+    static getMsalConfiguration = (config: AppSettings, cachePlugin: ICachePlugin = null): Configuration => {
         return {
             auth: {
                 clientId: config.credentials.clientId,
                 authority: config.policies ? Object.entries(config.policies)[0][1]['authority'] : `https://${Constants.DEFAULT_AUTHORITY_HOST}/${config.credentials.tenantId}`,
                 clientSecret: config.credentials.clientSecret,
-                redirectUri: config.settings ? config.settings.redirectUri : "", // defaults to calling page
                 knownAuthorities: config.policies ? [UrlString.getDomainFromUrl(Object.entries(config.policies)[0][1]['authority'])] : [], // in B2C scenarios
             },
             cache: {
@@ -78,6 +77,6 @@ export class ConfigurationUtils {
                     logLevel: LogLevel.Verbose,
                 }
             }
-        } as Configuration
+        }
     };
 }

@@ -4,7 +4,8 @@ const express = require('express');
 const identity = require("@azure/identity");
 const keyvaultSecret = require('@azure/keyvault-secrets');
 
-const msalWrapper = require('msal-express-wrapper');
+// importing from Packages folder
+const msalWrapper = require('../../Package/index');
 
 const mainController = require('../controllers/mainController');
 

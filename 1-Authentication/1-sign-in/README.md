@@ -150,6 +150,7 @@ Locate the root of the sample folder. Then:
 
 1. Open your browser and navigate to `http://localhost:4000`.
 1. Select the **sign-in** button on the top right corner.
+1. Once signed in, select the **ID** button to see some of the claims in your ID token.
 
 ![Screenshot](./ReadmeFiles/screenshot.png)
 

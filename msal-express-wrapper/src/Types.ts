@@ -3,7 +3,24 @@
  * Licensed under the MIT License.
  */
 
-import { AccountInfo } from "@azure/msal-common"
+import {
+    AccountInfo,
+    AuthorizationUrlRequest,
+    AuthorizationCodeRequest,
+} from '@azure/msal-node';
+
+declare module 'express-session' {
+    interface SessionData {
+        authCodeRequest: AuthorizationUrlRequest,
+        tokenRequest: AuthorizationCodeRequest,
+        account: AccountInfo,
+        nonce: string,
+        isAuthenticated: boolean
+        resources: {
+            [resource: string]: Resource
+        },
+    }
+}
 
 export type AuthCodeParams = {
     authority: string,
@@ -28,7 +45,8 @@ export type State = {
 export type Resource = {
     callingPageRoute: string,
     endpoint: string,
-    scopes: string[]
+    scopes: string[],
+    accessToken?: string,
 }
 
 export type Credentials = {

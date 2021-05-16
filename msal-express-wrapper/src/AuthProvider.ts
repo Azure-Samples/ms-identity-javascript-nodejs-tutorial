@@ -12,6 +12,7 @@ import {
     InteractionRequiredAuthError,
     OIDC_DEFAULT_SCOPES,
     PromptValue,
+    StringUtils
 } from '@azure/msal-common';
 
 import {
@@ -27,10 +28,11 @@ import {
 
 import { ConfigurationUtils } from './ConfigurationUtils';
 import { TokenValidator } from './TokenValidator';
+import { UrlUtils } from './UrlUtils';
 
 import {
-    AppSettings,
     Resource,
+    AppSettings,
     AuthCodeParams,
 } from './Types';
 
@@ -48,15 +50,16 @@ import {
  * here can be used with express sessions in route controllers.
  * 
  * Session variables accessible are as follows:
-    * req.session.isAuthenticated => boolean
-    * req.session.isAuthorized => boolean
-    * req.session.userAccount => object
-    * req.session.<resourceName>.accessToken => string
+    * req.session.isAuthenticated: boolean
+    * req.session.isAuthorized: boolean
+    * req.session.account: AccountInfo
+    * req.session.<resourceName>.accessToken: string
  */
 export class AuthProvider {
 
     appSettings: AppSettings;
     msalConfig: Configuration;
+    urlUtils: UrlUtils;
     cryptoProvider: CryptoProvider;
     tokenValidator: TokenValidator;
     msalClient: ConfidentialClientApplication;
@@ -69,6 +72,7 @@ export class AuthProvider {
         ConfigurationUtils.validateAppSettings(appSettings);
 
         this.cryptoProvider = new CryptoProvider();
+        this.urlUtils = new UrlUtils();
 
         this.appSettings = appSettings;
         this.msalConfig = ConfigurationUtils.getMsalConfiguration(appSettings, cache);
@@ -84,7 +88,7 @@ export class AuthProvider {
      * @param {Response} res: express response object
      * @param {NextFunction} next: express next function
      */
-    signIn = (req: Request | any, res: Response, next: NextFunction): void => {
+    signIn = (req: Request, res: Response, next: NextFunction): void => {
 
         /** 
          * Request Configuration
@@ -104,10 +108,13 @@ export class AuthProvider {
             req.session.tokenRequest = {
                 authority: "",
                 scopes: [],
-                redirectUri: ""
+                redirectUri: "",
+                code: ""
             } as AuthorizationCodeRequest;
         }
 
+
+        // signed-in user's account
         if (!req.session['account']) {
             req.session.account = {
                 homeAccountId: "",
@@ -147,15 +154,17 @@ export class AuthProvider {
      * @param {Response} res: express response object
      * @param {NextFunction} next: express next function
      */
-    signOut = (req: Request | any, res: Response, next: NextFunction): void => {
+    signOut = (req: Request, res: Response, next: NextFunction): void => {
 
+        const postLogoutRedirectUri = this.urlUtils.ensureAbsoluteUrl(req, this.appSettings.settings.postLogoutRedirectUri)
+        
         /**
          * Construct a logout URI and redirect the user to end the 
          * session with Azure AD/B2C. For more information, visit: 
          * (AAD) https://docs.microsoft.com/azure/active-directory/develop/v2-protocols-oidc#send-a-sign-out-request
          * (B2C) https://docs.microsoft.com/azure/active-directory-b2c/openid-connect#send-a-sign-out-request
          */
-        const logoutURI = `${this.msalConfig.auth.authority}/oauth2/v2.0/logout?post_logout_redirect_uri=${this.appSettings.settings.postLogoutRedirectUri}`;
+        const logoutURI = `${this.msalConfig.auth.authority}/oauth2/v2.0/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`;
 
         req.session.isAuthenticated = false;
 
@@ -171,10 +180,10 @@ export class AuthProvider {
      * @param {Response} res: express response object
      * @param {NextFunction} next: express next function
      */
-    handleRedirect = async (req: Request | any, res: Response, next: NextFunction): Promise<void> => {
+    handleRedirect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 
         if (req.query.state) {
-            const state = JSON.parse(this.cryptoProvider.base64Decode(req.query.state));
+            const state = JSON.parse(this.cryptoProvider.base64Decode(<string>req.query.state));
 
             // check if nonce matches
             if (state.nonce === req.session.nonce) {
@@ -184,9 +193,9 @@ export class AuthProvider {
                     case AppStages.SIGN_IN: {
                         // token request should have auth code
                         const tokenRequest: AuthorizationCodeRequest = {
-                            redirectUri: this.appSettings.settings.redirectUri,
+                            redirectUri: this.urlUtils.ensureAbsoluteUrl(req, this.appSettings.settings.redirectUri),
                             scopes: OIDC_DEFAULT_SCOPES,
-                            code: req.query.code,
+                            code: <string>req.query.code,
                         };
 
                         try {
@@ -217,9 +226,9 @@ export class AuthProvider {
                         const resourceName = this.getResourceName(state.path);
 
                         const tokenRequest: AuthorizationCodeRequest = {
-                            code: req.query.code,
+                            code: <string>req.query.code,
                             scopes: this.appSettings.resources[resourceName].scopes, // scopes for resourceName
-                            redirectUri: this.appSettings.settings.redirectUri,
+                            redirectUri: this.urlUtils.ensureAbsoluteUrl(req, this.appSettings.settings.redirectUri),
                         };
 
                         try {
@@ -255,7 +264,7 @@ export class AuthProvider {
      * @param {Object} res: express response object
      * @param {Function} next: express next 
      */
-    getToken = async (req: Request | any, res: Response, next: NextFunction): Promise<void> => {
+    getToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 
         // get scopes for token request
         const scopes = (<Resource>Object.values(this.appSettings.resources)
@@ -265,8 +274,8 @@ export class AuthProvider {
 
         if (!req.session[resourceName]) {
             req.session[resourceName] = {
-                accessToken: null
-            };
+                accessToken: ""
+            } as Resource;
         }
 
         try {
@@ -281,7 +290,7 @@ export class AuthProvider {
 
             // In B2C scenarios, sometimes an access token is returned empty.
             // In that case, we will acquire token interactively instead.
-            if (tokenResponse.accessToken.length === 0) {
+            if (StringUtils.isEmpty(tokenResponse.accessToken)) {
                 console.log(ErrorMessages.TOKEN_NOT_FOUND);
                 throw new InteractionRequiredAuthError(ErrorMessages.INTERACTION_REQUIRED);
             }
@@ -323,7 +332,7 @@ export class AuthProvider {
      * @param {Object} res: express response object
      * @param {Function} next: express next 
      */
-    isAuthenticated = (req: Request | any, res: Response, next: NextFunction): void | Response => {
+    isAuthenticated = (req: Request, res: Response, next: NextFunction): void | Response => {
         if (req.session) {
             if (!req.session.isAuthenticated) {
                 return res.status(401).send(ErrorMessages.NOT_PERMITTED);
@@ -342,7 +351,7 @@ export class AuthProvider {
      * @param {Object} res: express response object
      * @param {Function} next: express next 
      */
-    isAuthorized = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+    isAuthorized = async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
 
         const accessToken = req.headers.authorization.split(' ')[1];
 
@@ -366,13 +375,13 @@ export class AuthProvider {
      * @param {NextFunction} next: express next function
      * @param {AuthCodeParams} params: modifies auth code request url
      */
-    private getAuthCode = async (req: Request | any, res: Response, next: NextFunction, params: AuthCodeParams): Promise<void> => {
+    private getAuthCode = async (req: Request, res: Response, next: NextFunction, params: AuthCodeParams): Promise<void> => {
 
         // prepare the request
         req.session.authCodeRequest.authority = params.authority;
         req.session.authCodeRequest.scopes = params.scopes;
         req.session.authCodeRequest.state = params.state;
-        req.session.authCodeRequest.redirectUri = params.redirect;
+        req.session.authCodeRequest.redirectUri = this.urlUtils.ensureAbsoluteUrl(req, params.redirect);
         req.session.authCodeRequest.prompt = params.prompt;
         req.session.authCodeRequest.account = params.account;
 

@@ -159,7 +159,7 @@ The rest of the **key-value** pairs are for resources/APIs that you would like t
     "nameOfYourResource": {
         "callingPageRoute": "/<route_where_this_resource_will_be_called_from>",
         "endpoint": "<uri_coordinates_of_the_resource>",
-        "scopes": ["scope1_of_the_resource", "scope1_of_the_resource", "..."]
+        "scopes": ["scope1_of_the_resource", "scope2_of_the_resource", "..."]
     },
 ```
 
