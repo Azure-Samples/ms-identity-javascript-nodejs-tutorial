@@ -57,9 +57,9 @@ import {
  */
 export class AuthProvider {
 
+    urlUtils: UrlUtils;
     appSettings: AppSettings;
     msalConfig: Configuration;
-    urlUtils: UrlUtils;
     cryptoProvider: CryptoProvider;
     tokenValidator: TokenValidator;
     msalClient: ConfidentialClientApplication;
@@ -203,16 +203,22 @@ export class AuthProvider {
                             const tokenResponse = await this.msalClient.acquireTokenByCode(tokenRequest)
                             console.log("\nResponse: \n:", tokenResponse);
 
-                            if (this.tokenValidator.validateIdToken(tokenResponse.idTokenClaims)) {
+                            try {
+                                const isIdTokenValid = await this.tokenValidator.validateIdToken(tokenResponse.idToken);
 
-                                // assign session variables
-                                req.session.account = tokenResponse.account;
-                                req.session.isAuthenticated = true;
-
-                                res.status(200).redirect(this.appSettings.settings.homePageRoute);
-                            } else {
-                                console.log(ErrorMessages.INVALID_TOKEN);
-                                res.status(401).send(ErrorMessages.NOT_PERMITTED);
+                                if (isIdTokenValid) {
+                                    // assign session variables
+                                    req.session.account = tokenResponse.account;
+                                    req.session.isAuthenticated = true;
+    
+                                    res.status(200).redirect(this.appSettings.settings.homePageRoute);
+                                } else {
+                                    console.log(ErrorMessages.INVALID_TOKEN);
+                                    res.status(401).send(ErrorMessages.NOT_PERMITTED);
+                                }
+                            } catch (error) {
+                                console.log(error);
+                                res.status(500).send(error);
                             }
                         } catch (error) {
                             console.log(error);

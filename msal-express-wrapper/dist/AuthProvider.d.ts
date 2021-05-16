@@ -18,9 +18,9 @@ import { AppSettings } from './Types';
     * req.session.<resourceName>.accessToken: string
  */
 export declare class AuthProvider {
+    urlUtils: UrlUtils;
     appSettings: AppSettings;
     msalConfig: Configuration;
-    urlUtils: UrlUtils;
     cryptoProvider: CryptoProvider;
     tokenValidator: TokenValidator;
     msalClient: ConfidentialClientApplication;

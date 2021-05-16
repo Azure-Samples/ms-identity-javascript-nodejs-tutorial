@@ -1,6 +1,4 @@
-import {
-    Request,
-} from 'express';
+import { Request } from 'express';
 
 import { 
     IUri,

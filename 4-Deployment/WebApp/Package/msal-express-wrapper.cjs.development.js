@@ -806,7 +806,7 @@ try {
 var ConfigurationUtils = function ConfigurationUtils() {};
 /**
  * Validates the fields in the custom JSON configuration file
- * @param {JSON} config: configuration file
+ * @param {AppSettings} config: configuration file
  */
 
 ConfigurationUtils.validateAppSettings = function (config) {
@@ -903,23 +903,158 @@ var ErrorMessages = {
 var TokenValidator = function TokenValidator(appSettings, msalConfig) {
   var _this = this;
 
+  this.verifyTokenSignature = /*#__PURE__*/function () {
+    var _ref = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee(authToken) {
+      var decodedToken, keys, verifiedToken;
+      return runtime_1.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              if (!msalCommon.StringUtils.isEmpty(authToken)) {
+                _context.next = 3;
+                break;
+              }
+
+              console.log(ErrorMessages.TOKEN_NOT_FOUND);
+              return _context.abrupt("return", false);
+
+            case 3:
+              _context.prev = 3;
+              decodedToken = jwt.decode(authToken, {
+                complete: true
+              });
+              _context.next = 12;
+              break;
+
+            case 7:
+              _context.prev = 7;
+              _context.t0 = _context["catch"](3);
+              console.log(ErrorMessages.TOKEN_NOT_DECODED);
+              console.log(_context.t0);
+              return _context.abrupt("return", false);
+
+            case 12:
+              _context.prev = 12;
+              _context.next = 15;
+              return _this.getSigningKeys(decodedToken.header, decodedToken.payload.tid);
+
+            case 15:
+              keys = _context.sent;
+              _context.next = 23;
+              break;
+
+            case 18:
+              _context.prev = 18;
+              _context.t1 = _context["catch"](12);
+              console.log(ErrorMessages.KEYS_NOT_OBTAINED);
+              console.log(_context.t1);
+              return _context.abrupt("return", false);
+
+            case 23:
+              _context.prev = 23;
+              verifiedToken = jwt.verify(authToken, keys);
+              /**
+               * if a multiplexer was used in place of tenantId i.e. if the app
+               * is multi-tenant, the tenantId should be obtained from the user's
+               * token's tid claim for verification purposes
+               */
+
+              if (_this.appSettings.credentials.tenantId === "common" || _this.appSettings.credentials.tenantId === "organizations" || _this.appSettings.credentials.tenantId === "consumers") {
+                _this.appSettings.credentials.tenantId = decodedToken.payload.tid;
+              }
+
+              return _context.abrupt("return", verifiedToken);
+
+            case 29:
+              _context.prev = 29;
+              _context.t2 = _context["catch"](23);
+              console.log(ErrorMessages.TOKEN_NOT_VERIFIED);
+              console.log(_context.t2);
+              return _context.abrupt("return", false);
+
+            case 34:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, null, [[3, 7], [12, 18], [23, 29]]);
+    }));
+
+    return function (_x) {
+      return _ref.apply(this, arguments);
+    };
+  }();
+  /**
+   *
+   * @param {string} idToken: raw Id token
+   */
+
+
+  this.validateIdToken = /*#__PURE__*/function () {
+    var _ref2 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee2(idToken) {
+      var verifiedToken;
+      return runtime_1.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.prev = 0;
+              _context2.next = 3;
+              return _this.verifyTokenSignature(idToken);
+
+            case 3:
+              verifiedToken = _context2.sent;
+
+              if (!verifiedToken) {
+                _context2.next = 8;
+                break;
+              }
+
+              return _context2.abrupt("return", _this.validateIdTokenClaims(verifiedToken));
+
+            case 8:
+              return _context2.abrupt("return", false);
+
+            case 9:
+              _context2.next = 15;
+              break;
+
+            case 11:
+              _context2.prev = 11;
+              _context2.t0 = _context2["catch"](0);
+              console.log(_context2.t0);
+              return _context2.abrupt("return", false);
+
+            case 15:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2, null, [[0, 11]]);
+    }));
+
+    return function (_x2) {
+      return _ref2.apply(this, arguments);
+    };
+  }();
   /**
    * Validates the id token for a set of claims
-   * @param {Object} idTokenClaims: decoded id token claims
+   * @param {TokenClaims} idTokenClaims: decoded id token claims
    */
-  this.validateIdToken = function (idTokenClaims) {
+
+
+  this.validateIdTokenClaims = function (idTokenClaims) {
     var now = Math.round(new Date().getTime() / 1000); // in UNIX format
 
     /**
-     * At the very least, check for tenant, audience, issue and expiry dates.
+     * At the very least, check for issuer, audience, issue and expiry dates.
      * For more information on validating id tokens, visit:
      * https://docs.microsoft.com/azure/active-directory/develop/id-tokens#validating-an-id_token
      */
 
+    var checkIssuer = idTokenClaims['iss'].includes(_this.appSettings.credentials.tenantId) ? true : false;
     var checkAudience = idTokenClaims["aud"] === _this.msalConfig.auth.clientId ? true : false;
     var checkTimestamp = idTokenClaims["iat"] <= now && idTokenClaims["exp"] >= now ? true : false;
-    var checkTenant = _this.appSettings.policies && !idTokenClaims["tid"] || idTokenClaims["tid"] === _this.appSettings.credentials.tenantId ? true : false;
-    return checkAudience && checkTimestamp && checkTenant;
+    return checkIssuer && checkAudience && checkTimestamp;
   };
   /**
    * Validates the access token for signature and against a predefined set of claims
@@ -929,144 +1064,119 @@ var TokenValidator = function TokenValidator(appSettings, msalConfig) {
 
 
   this.validateAccessToken = /*#__PURE__*/function () {
-    var _ref = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee(accessToken, protectedRoute) {
-      var now, decodedToken, keys, verifiedToken, checkIssuer, checkTimestamp, checkAudience, checkScopes;
-      return runtime_1.wrap(function _callee$(_context) {
+    var _ref3 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee3(accessToken, protectedRoute) {
+      var verifiedToken;
+      return runtime_1.wrap(function _callee3$(_context3) {
         while (1) {
-          switch (_context.prev = _context.next) {
+          switch (_context3.prev = _context3.next) {
             case 0:
-              now = Math.round(new Date().getTime() / 1000); // in UNIX format
+              _context3.prev = 0;
+              _context3.next = 3;
+              return _this.verifyTokenSignature(accessToken);
 
-              if (!(!accessToken || accessToken === "" || accessToken === "undefined")) {
-                _context.next = 4;
+            case 3:
+              verifiedToken = _context3.sent;
+
+              if (!verifiedToken) {
+                _context3.next = 8;
                 break;
               }
 
-              console.log(ErrorMessages.TOKEN_NOT_FOUND);
-              return _context.abrupt("return", false);
-
-            case 4:
-              _context.prev = 4;
-              decodedToken = jwt.decode(accessToken, {
-                complete: true
-              });
-              _context.next = 13;
-              break;
+              return _context3.abrupt("return", _this.validateAccessTokenClaims(verifiedToken, protectedRoute));
 
             case 8:
-              _context.prev = 8;
-              _context.t0 = _context["catch"](4);
-              console.log(ErrorMessages.TOKEN_NOT_DECODED);
-              console.log(_context.t0);
-              return _context.abrupt("return", false);
+              return _context3.abrupt("return", false);
 
-            case 13:
-              _context.prev = 13;
-              _context.next = 16;
-              return _this.getSigningKeys(decodedToken.header);
-
-            case 16:
-              keys = _context.sent;
-              _context.next = 24;
+            case 9:
+              _context3.next = 15;
               break;
 
-            case 19:
-              _context.prev = 19;
-              _context.t1 = _context["catch"](13);
-              console.log(ErrorMessages.KEYS_NOT_OBTAINED);
-              console.log(_context.t1);
-              return _context.abrupt("return", false);
+            case 11:
+              _context3.prev = 11;
+              _context3.t0 = _context3["catch"](0);
+              console.log(_context3.t0);
+              return _context3.abrupt("return", false);
 
-            case 24:
-              _context.prev = 24;
-              verifiedToken = jwt.verify(accessToken, keys);
-              _context.next = 33;
-              break;
-
-            case 28:
-              _context.prev = 28;
-              _context.t2 = _context["catch"](24);
-              console.log(ErrorMessages.TOKEN_NOT_VERIFIED);
-              console.log(_context.t2);
-              return _context.abrupt("return", false);
-
-            case 33:
-              /**
-               * At the very least, validate the token with respect to issuer, audience, scope
-               * and timestamp, though implementation and extent vary. For more information, visit:
-               * https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validating-tokens
-               */
-              checkIssuer = verifiedToken['iss'].includes(_this.appSettings.credentials.tenantId) ? true : false;
-              checkTimestamp = verifiedToken["iat"] <= now && verifiedToken["exp"] >= now ? true : false;
-              checkAudience = verifiedToken['aud'] === _this.appSettings.credentials.clientId || verifiedToken['aud'] === 'api://' + _this.appSettings.credentials.clientId ? true : false;
-              checkScopes = _this.appSettings["protected"].find(function (item) {
-                return item.route === protectedRoute;
-              }).scopes.every(function (scp) {
-                return verifiedToken['scp'].includes(scp);
-              });
-
-              if (!(checkAudience && checkIssuer && checkTimestamp && checkScopes)) {
-                _context.next = 39;
-                break;
-              }
-
-              return _context.abrupt("return", true);
-
-            case 39:
-              return _context.abrupt("return", false);
-
-            case 40:
+            case 15:
             case "end":
-              return _context.stop();
+              return _context3.stop();
           }
         }
-      }, _callee, null, [[4, 8], [13, 19], [24, 28]]);
+      }, _callee3, null, [[0, 11]]);
     }));
 
-    return function (_x, _x2) {
-      return _ref.apply(this, arguments);
+    return function (_x3, _x4) {
+      return _ref3.apply(this, arguments);
     };
   }();
   /**
+   *
+   * @param {TokenClaims} verifiedToken
+   * @param {string} protectedRoute
+   */
+
+
+  this.validateAccessTokenClaims = function (verifiedToken, protectedRoute) {
+    var now = Math.round(new Date().getTime() / 1000); // in UNIX format
+
+    /**
+     * At the very least, validate the token with respect to issuer, audience, scope
+     * and timestamp, though implementation and extent vary. For more information, visit:
+     * https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validating-tokens
+     */
+
+    var checkIssuer = verifiedToken['iss'].includes(_this.appSettings.credentials.tenantId) ? true : false;
+    var checkTimestamp = verifiedToken["iat"] <= now && verifiedToken["exp"] >= now ? true : false;
+    var checkAudience = verifiedToken['aud'] === _this.appSettings.credentials.clientId || verifiedToken['aud'] === 'api://' + _this.appSettings.credentials.clientId ? true : false;
+
+    var checkScopes = _this.appSettings["protected"].find(function (item) {
+      return item.route === protectedRoute;
+    }).scopes.every(function (scp) {
+      return verifiedToken['scp'].includes(scp);
+    });
+
+    return checkAudience && checkIssuer && checkTimestamp && checkScopes;
+  };
+  /**
    * Fetches signing keys of an access token
    * from the authority discovery endpoint
-   * @param {string} header
+   * @param {Object} header
    */
 
 
   this.getSigningKeys = /*#__PURE__*/function () {
-    var _ref2 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee2(header) {
+    var _ref4 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee4(header, tid) {
       var jwksUri, client;
-      return runtime_1.wrap(function _callee2$(_context2) {
+      return runtime_1.wrap(function _callee4$(_context4) {
         while (1) {
-          switch (_context2.prev = _context2.next) {
+          switch (_context4.prev = _context4.next) {
             case 0:
               // Check if a B2C application i.e. app has policies
               if (_this.appSettings.policies) {
                 jwksUri = _this.msalConfig.auth.authority + "/discovery/v2.0/keys";
               } else {
-                jwksUri = "https://" + msalCommon.Constants.DEFAULT_AUTHORITY_HOST + "/" + _this.appSettings.credentials.tenantId + "/discovery/v2.0/keys";
+                jwksUri = "https://" + msalCommon.Constants.DEFAULT_AUTHORITY_HOST + "/" + tid + "/discovery/v2.0/keys";
               }
 
               client = jwksClient({
                 jwksUri: jwksUri
               });
-              _context2.next = 4;
+              _context4.next = 4;
               return client.getSigningKeyAsync(header.kid);
 
             case 4:
-              return _context2.abrupt("return", _context2.sent.getPublicKey());
+              return _context4.abrupt("return", _context4.sent.getPublicKey());
 
             case 5:
             case "end":
-              return _context2.stop();
+              return _context4.stop();
           }
         }
-      }, _callee2);
+      }, _callee4);
     }));
 
-    return function (_x3) {
-      return _ref2.apply(this, arguments);
+    return function (_x5, _x6) {
+      return _ref4.apply(this, arguments);
     };
   }();
 
@@ -1210,26 +1320,26 @@ function AuthProvider(appSettings, cache) {
 
   this.handleRedirect = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee(req, res, next) {
-      var state, tokenRequest, tokenResponse, resourceName, _tokenRequest, _tokenResponse;
+      var state, tokenRequest, tokenResponse, isIdTokenValid, resourceName, _tokenRequest, _tokenResponse;
 
       return runtime_1.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
               if (!req.query.state) {
-                _context.next = 44;
+                _context.next = 54;
                 break;
               }
 
               state = JSON.parse(_this.cryptoProvider.base64Decode(req.query.state)); // check if nonce matches
 
               if (!(state.nonce === req.session.nonce)) {
-                _context.next = 40;
+                _context.next = 50;
                 break;
               }
 
               _context.t0 = state.stage;
-              _context.next = _context.t0 === AppStages.SIGN_IN ? 6 : _context.t0 === AppStages.ACQUIRE_TOKEN ? 20 : 36;
+              _context.next = _context.t0 === AppStages.SIGN_IN ? 6 : _context.t0 === AppStages.ACQUIRE_TOKEN ? 30 : 46;
               break;
 
             case 6:
@@ -1246,8 +1356,14 @@ function AuthProvider(appSettings, cache) {
             case 10:
               tokenResponse = _context.sent;
               console.log("\nResponse: \n:", tokenResponse);
+              _context.prev = 12;
+              _context.next = 15;
+              return _this.tokenValidator.validateIdToken(tokenResponse.idToken);
 
-              if (_this.tokenValidator.validateIdToken(tokenResponse.idTokenClaims)) {
+            case 15:
+              isIdTokenValid = _context.sent;
+
+              if (isIdTokenValid) {
                 // assign session variables
                 req.session.account = tokenResponse.account;
                 req.session.isAuthenticated = true;
@@ -1257,19 +1373,29 @@ function AuthProvider(appSettings, cache) {
                 res.status(401).send(ErrorMessages.NOT_PERMITTED);
               }
 
-              _context.next = 19;
+              _context.next = 23;
               break;
 
-            case 15:
-              _context.prev = 15;
-              _context.t1 = _context["catch"](7);
+            case 19:
+              _context.prev = 19;
+              _context.t1 = _context["catch"](12);
               console.log(_context.t1);
               res.status(500).send(_context.t1);
 
-            case 19:
-              return _context.abrupt("break", 38);
+            case 23:
+              _context.next = 29;
+              break;
 
-            case 20:
+            case 25:
+              _context.prev = 25;
+              _context.t2 = _context["catch"](7);
+              console.log(_context.t2);
+              res.status(500).send(_context.t2);
+
+            case 29:
+              return _context.abrupt("break", 48);
+
+            case 30:
               // get the name of the resource associated with scope
               resourceName = _this.getResourceName(state.path);
               _tokenRequest = {
@@ -1277,52 +1403,52 @@ function AuthProvider(appSettings, cache) {
                 scopes: _this.appSettings.resources[resourceName].scopes,
                 redirectUri: _this.urlUtils.ensureAbsoluteUrl(req, _this.appSettings.settings.redirectUri)
               };
-              _context.prev = 22;
-              _context.next = 25;
+              _context.prev = 32;
+              _context.next = 35;
               return _this.msalClient.acquireTokenByCode(_tokenRequest);
 
-            case 25:
+            case 35:
               _tokenResponse = _context.sent;
               console.log("\nResponse: \n:", _tokenResponse);
               req.session.resources[resourceName].accessToken = _tokenResponse.accessToken;
               res.status(200).redirect(state.path);
-              _context.next = 35;
-              break;
-
-            case 31:
-              _context.prev = 31;
-              _context.t2 = _context["catch"](22);
-              console.log(_context.t2);
-              res.status(500).send(_context.t2);
-
-            case 35:
-              return _context.abrupt("break", 38);
-
-            case 36:
-              res.status(500).send(ErrorMessages.CANNOT_DETERMINE_APP_STAGE);
-              return _context.abrupt("break", 38);
-
-            case 38:
-              _context.next = 42;
-              break;
-
-            case 40:
-              console.log(ErrorMessages.NONCE_MISMATCH);
-              res.status(401).send(ErrorMessages.NOT_PERMITTED);
-
-            case 42:
               _context.next = 45;
               break;
 
-            case 44:
-              res.status(500).send(ErrorMessages.STATE_NOT_FOUND);
+            case 41:
+              _context.prev = 41;
+              _context.t3 = _context["catch"](32);
+              console.log(_context.t3);
+              res.status(500).send(_context.t3);
 
             case 45:
+              return _context.abrupt("break", 48);
+
+            case 46:
+              res.status(500).send(ErrorMessages.CANNOT_DETERMINE_APP_STAGE);
+              return _context.abrupt("break", 48);
+
+            case 48:
+              _context.next = 52;
+              break;
+
+            case 50:
+              console.log(ErrorMessages.NONCE_MISMATCH);
+              res.status(401).send(ErrorMessages.NOT_PERMITTED);
+
+            case 52:
+              _context.next = 55;
+              break;
+
+            case 54:
+              res.status(500).send(ErrorMessages.STATE_NOT_FOUND);
+
+            case 55:
             case "end":
               return _context.stop();
           }
         }
-      }, _callee, null, [[7, 15], [22, 31]]);
+      }, _callee, null, [[7, 25], [12, 19], [32, 41]]);
     }));
 
     return function (_x, _x2, _x3) {

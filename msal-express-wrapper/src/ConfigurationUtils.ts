@@ -22,7 +22,7 @@ export class ConfigurationUtils {
 
     /**
      * Validates the fields in the custom JSON configuration file
-     * @param {JSON} config: configuration file
+     * @param {AppSettings} config: configuration file
      */
     static validateAppSettings = (config: AppSettings): void => {
 
