@@ -1,0 +1,49 @@
+{
+    "Sample": {
+        "Title": "A Node.js & Express web app authenticating users against Azure AD with MSAL Node",
+        "Level": 100,
+        "Client": "Node.js & Express web app",
+        "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
+        "Endpoint": "AAD v2.0"
+    },
+    "AADApps": [
+      {
+        "Id": "client",
+        "Name": "msal-node-webapp",
+        "Kind": "WebApp",
+        "Audience": "AzureADMyOrg",
+        "HomePage": "http://localhost:4000",
+        "ReplyUrls": "http://localhost:4000/redirect",
+        "PasswordCredentials": "Auto"
+      }
+    ],
+    "CodeConfiguration": [
+      {
+        "App": "client",
+        "SettingKind": "JSON",
+        "SettingFile": "\\..\\appSettings.json",
+        "Mappings": [
+          {
+            "key": "clientId",
+            "value": ".AppId"
+          },
+          {
+            "key": "tenantId",
+            "value": "$tenantId"
+          },
+          {
+            "key": "clientSecret",
+            "value": ".AppKey"
+          },
+          {
+            "key": "redirectUri",
+            "value": ".ReplyUrls"
+          },
+          {
+            "key": "postLogoutRedirectUri",
+            "value": ".HomePage"
+          }
+        ]
+      }
+    ]
+  }
