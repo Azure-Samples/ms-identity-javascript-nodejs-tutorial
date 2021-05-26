@@ -164,7 +164,8 @@ Wait for a few minutes for your changes on **App Service** to take effect. You s
 
 1. Open your browser and navigate to your deployed client app's URI, for instance: `https://msal-node-webapp1.azurewebsites.net/`.
 1. Click on the **sign-in** button located on the top right corner.
-1. Once you authenticate, click on the **Call web API** button at the center.
+1. Once you sign in, click on the **See my profile** button to call **Microsoft Graph**.
+1. Once you sign in, click on the **Get my tenant** button to call **Azure Resource Manager**.
 
 ![Screenshot](./ReadmeFiles/screenshot.png)
 
