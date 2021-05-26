@@ -2,7 +2,7 @@ const express = require('express');
 
 const mainController = require('../controllers/mainController');
 
-const config = require('../../appSettings.json');
+const config = require('../appSettings.json');
 const cache = require('../utils/cachePlugin');
 const msalWrapper = require('msal-express-wrapper');
 
