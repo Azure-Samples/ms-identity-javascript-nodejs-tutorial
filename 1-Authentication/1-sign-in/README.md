@@ -141,6 +141,9 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 > :information_source: For `redirectUri` and `postLogoutRedirectUri`, you can simply enter the path component of the URI instead of the full URI. This may come in handy in deployment scenarios.
 
+1. Open the `App/app.js` file.
+1. Find the string `ENTER_YOUR_SECRET_HERE` and replace it with a secret that will be used when encrypting your app's session using the [express-session](https://www.npmjs.com/package/express-session) package.
+
 ## Running the sample
 
 Locate the root of the sample folder. Then:

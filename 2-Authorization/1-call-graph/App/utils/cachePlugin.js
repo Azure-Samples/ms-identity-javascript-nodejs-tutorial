@@ -1,5 +1,5 @@
 const fs = require("fs");
-const cachePath = './App/data/cache.json' // replace this string with the path to your valid cache file.
+const cachePath = './data/cache.json' // replace this string with the path to your valid cache file.
 
 /**
  * This implements ICachePlugin for persistent caching. For more information, visit: 
