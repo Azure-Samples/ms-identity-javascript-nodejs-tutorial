@@ -32,7 +32,7 @@
       {
         "App": "client",
         "SettingKind": "JSON",
-        "SettingFile": "\\..\\appSettings.json",
+        "SettingFile": "\\..\\app\\appSettings.json",
         "Mappings": [
           {
             "key": "clientId",

@@ -24,7 +24,7 @@ This sample also demonstrates how to use the [Microsoft Graph JavaScript SDK](ht
 ## Scenario
 
 1. The client application uses the **MSAL Node** to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
-1. The **Access Token** is used as a *bearer* token to authorize the user to access the **resource** (MS Graph or ARM API).
+1. The **Access Token** is used as a *bearer* token to authorize the user to access the **resource server** ([MS Graph](https://aka.ms/graph) or [Azure REST API](https://docs.microsoft.com/rest/api/azure/)).
 1. The **resource server** responds with the resource that the user has access to.
 
 ![Overview](./ReadmeFiles/topology.png)
@@ -69,7 +69,7 @@ or download and extract the repository .zip file.
 Locate the root of the sample folder. Then:
 
 ```console
-    cd 2-Authorization-I/1-call-graph/App
+    cd 2-Authorization\1-call-graph\App
     npm install
 ```
 
