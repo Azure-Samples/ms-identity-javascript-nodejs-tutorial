@@ -69,7 +69,7 @@ or download and extract the repository .zip file.
 Locate the root of the sample folder. Then:
 
 ```console
-    cd 2-Authorization\1-call-graph\App
+    cd 2-Authorization/1-call-graph/App
     npm install
 ```
 
@@ -155,7 +155,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 1. Find the key `redirectUri` and replace the existing value with the Redirect URI for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
 1. Find the key `postLogoutRedirectUri` and replace the existing value with the base address of `msal-node-webapp` (by default `http://localhost:4000/`).
 
-> :information_source: For `redirectUri` and `postLogoutRedirectUri`, you can simply enter the path component of the URI instead of the full URI. This may come in handy in deployment scenarios.
+> :information_source: For `redirectUri` and `postLogoutRedirectUri`, you can simply enter the path component of the URI instead of the full URI. For example, instead of `http://localhost:4000/redirect`, you can simply enter `/redirect`. This may come in handy in deployment scenarios.
 
 The rest of the **key-value** pairs are for resources/APIs that you would like to call. They are set as **default**, but you can modify them as you wish:
 

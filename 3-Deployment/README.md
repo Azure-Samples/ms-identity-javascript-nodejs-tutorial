@@ -13,7 +13,7 @@
 
 ## Overview
 
-This sample demonstrates how to deploy a Node.js & Express web application to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). The application used in this sample is a slightly modified version of the web app from [**chapter 2.1**](../2-Authorization/1-call-graph). The steps here apply similarly to Azure AD and Azure AD B2C apps.
+This sample demonstrates how to deploy a Node.js & Express web application to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). The application used in this sample is a slightly modified version of the web app from [**chapter 2.1**](../2-Authorization/1-call-graph/README.md). The steps here apply similarly to Azure AD and Azure AD B2C apps.
 
 > :information_source: we have placed the [msal-express-wrapper](./App/packages/msal-express-wrapper) project in the App/packages folder and referenced it in [package.json](./App/package.json) for the purpose of this sample. If you decide to use it, you might want to store it in a separate location like a GitHub repository.
 
@@ -61,7 +61,7 @@ Locate the root of the sample folder. Then:
 
 ### Register the app
 
-Use the same app registration credentials that you've obtained during [**chapter 2.1**](../2-Authorization/1-call-graph). You may copy-paste the contents of your `appSettings.json` file to do so.
+Use the same app registration credentials that you've obtained during [**chapter 2.1**](../2-Authorization/1-call-graph/README.md#registration). You may copy-paste the contents of your `appSettings.json` file to do so.
 
 ## Deployment
 
@@ -82,13 +82,13 @@ There are various ways to upload your files to **Azure App Service**. Here we pr
 
 ![api_step1](./ReadmeFiles/step1.png)
 
-2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `App` folder to **Azure App Services**.
+2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `App` folder to **Azure App Services**. You may also right-click to the `App` folder to access it via the context menu.
 
 ![api_step2](./ReadmeFiles/step2.png)
 
 3. Choose a creation option based on the operating system to which you want to deploy. In this sample, we choose **Linux**.
-4. Select a Node.js version when prompted. An **LTS** version is recommended.
-5. Type a globally unique name for your web API and press Enter. The name must be unique across all of **Azure**. (e.g. `msal-node-webapp1`)
+4. Select a Node.js version when prompted. An **LTS** version is recommended (>=12).
+5. Type a globally unique name for your web API and press Enter. The name must be unique across all of **Azure**. (e.g. `example-express-webapp1`)
 6. After you respond to all the prompts, **VS Code** shows the **Azure** resources that are being created for your app in its notification popup.
 7. Select **Yes** when prompted to update your configuration to run npm install on the target Linux server.
 
@@ -102,8 +102,8 @@ Now you need to navigate to the **Azure App Service** Portal, and locate your pr
 
 Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
 
-1. Select the **App Registrations** blade on the left, then find and select the web app that you have registered in the previous tutorial (`msal-node-webapp`).
-1. Navigate to the **Authentication** blade. There, in **Redirect URI** section, enter the following redirect URI: `https://msal-node-webapp1.azurewebsites.net/redirect`.
+1. Select the **App Registrations** blade on the left, then find and select the web app that you have registered in the previous tutorial (`example-express-webapp1`).
+1. Navigate to the **Authentication** blade. There, in **Redirect URI** section, enter the published URL website, for instance: `https://example-express-webapp1.azurewebsites.net/redirect`.
 1. Select **Save** to save your changes.
 
 ### Enable your web app to get secrets from Key Vault using Managed Identity
@@ -126,7 +126,7 @@ Before starting here, make sure:
 
 - You have an [Azure Subscription](https://azure.microsoft.com/free/).
 - You have a working and deployed application as an Azure App Service following the steps listed at [Deploy the web app](#deploy-the-web-app) above.
-- Follow the guide to [create an Azure Key Vault](https://docs.microsoft.com/azure/key-vault/general/quick-create-portal).
+- Follow the guide to [create an Azure Key Vault](https://docs.microsoft.com/azure/key-vault/general/quick-create-portal). Steps below are summarized.
 
 ##### Upload your secret to KeyVault
 
@@ -162,7 +162,7 @@ Wait for a few minutes for your changes on **App Service** to take effect. You s
 
 ## Explore the sample
 
-1. Open your browser and navigate to your deployed client app's URI, for instance: `https://msal-node-webapp1.azurewebsites.net/`.
+1. Open your browser and navigate to your deployed client app's URI, for instance: `https://example-express-webapp1.azurewebsites.net/`.
 1. Click on the **sign-in** button located on the top right corner.
 1. Once you sign in, click on the **See my profile** button to call **Microsoft Graph**.
 1. Once you sign in, click on the **Get my tenant** button to call **Azure Resource Manager**.
