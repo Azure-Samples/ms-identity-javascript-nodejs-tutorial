@@ -5,7 +5,7 @@ const identity = require("@azure/identity");
 const keyvaultSecret = require('@azure/keyvault-secrets');
 
 // importing from packages folder
-const msalWrapper = require('msal-express-wrapper');
+const msalWrapper = require('../packages/msal-express-wrapper/dist');
 
 const mainController = require('../controllers/mainController');
 
@@ -28,7 +28,7 @@ const secretClient = new keyvaultSecret.SecretClient(KVUri, credential);
 
 secretClient.getSecret(secretName).then((secretResponse) => {
 
-    // assing the secret obtained from
+    // assign the secret obtained from
     config.credentials.clientSecret = secretResponse.value;
 
     // initialize wrapper
@@ -45,7 +45,8 @@ secretClient.getSecret(secretName).then((secretResponse) => {
 
     // secure routes
     router.get('/id', authProvider.isAuthenticated, mainController.getIdPage);
-    router.get('/webapi', authProvider.isAuthenticated, authProvider.getToken, mainController.getWebAPI); // get token for this route to call web API
+    router.get('/profile', authProvider.isAuthenticated, authProvider.getToken, mainController.getProfilePage); // get token for this route to call web API
+    router.get('/tenant', authProvider.isAuthenticated, authProvider.getToken, mainController.getTenantPage) // get token for this route to call web API
 
     // 404
     router.get('*', (req, res) => res.status(404).redirect('/404.html'));

@@ -11,6 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "@azure/msal-node": "^1.1.0",
+    "@microsoft/microsoft-graph-client": "^2.2.1",
+    "isomorphic-fetch": "^3.0.0",
     "@azure/identity": "^1.2.3",
     "@azure/keyvault-secrets": "^4.1.0",
     "axios": "^0.21.0",
@@ -19,8 +21,7 @@
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
-    "dotenv": "^8.2.0",
-    "msal-express-wrapper": "file:packages/msal-express-wrapper"
+    "dotenv": "^8.2.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"

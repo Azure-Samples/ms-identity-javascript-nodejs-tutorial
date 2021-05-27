@@ -12,9 +12,7 @@
     - [ ] 1-1) Sign-in with Azure AD
     - [ ] 1-2) Sign-in with Azure AD B2C
     - [ ] 2-1) Acquire a Token and call Microsoft Graph
-    - [ ] 3-1) Protect and call a web API on Azure AD
-    - [ ] 3-2) Protect and call a web API on Azure AD B2C
-    - [ ]   4) Deploy to Azure Storage and App Service
+    - [ ]   3) Deploy to Azure Storage and App Service
 ```
 
 ## This issue is for a

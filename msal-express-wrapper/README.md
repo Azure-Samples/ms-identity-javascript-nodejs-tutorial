@@ -33,7 +33,7 @@ This project illustrates a simple wrapper around **MSAL Node** to handle login, 
     }
     ```
 
-> :information_source: For `redirectUri` and `postLogoutRedirectUri`, you can simply enter the path component of the URI instead of the full URI. This may come in handy in deployment scenarios.
+> :information_source: For `redirectUri` and `postLogoutRedirectUri`, you can simply enter the path component of the URI instead of the full URI. For example, instead of `http://localhost:4000/redirect`, you can simply enter `/redirect`. This may come in handy in deployment scenarios.
 
 4. Add the web API endpoints you would like to call under **resources**:
 

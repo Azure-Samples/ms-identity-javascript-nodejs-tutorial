@@ -6,17 +6,18 @@
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link rel="stylesheet" href="/style.css">
-        <title>web API</title>
+        <title>Tenant</title>
     </head>
     <body>
 
         <%- include('includes/navbar', {isAuthenticated: isAuthenticated}); %>
 
         <div class="table-area-div">
-            <p>Calling <strong>custom Express web API</strong>...</p>
+            <p>Calling <strong>Azure Resource Manager API</strong>...</p>
             <ul>
-                <li><strong>endpoint:</strong> <mark>http://localhost:5000/api</mark></li>
-                <li><strong>scope:</strong> <mark>access_as_user</mark></li>
+                <li><strong>resource:</strong> <mark>Tenant</mark> object</li>
+                <li><strong>endpoint:</strong> <mark>https://management.azure.com/tenants?api-version=2020-01-01</mark></li>
+                <li><strong>scope:</strong> <mark>https://management.azure.com/user_impersonation</mark></li>
             </ul>
             <p>Contents of the <strong>response</strong> is below:</p>
         </div>
@@ -30,7 +31,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% for (const [key, value] of Object.entries(response)) { %>
+                    <% for (const [key, value] of Object.entries(tenant)) { %>
                         <tr>
                             <td><%= key %></td>
                             <td><%= value %></td>
