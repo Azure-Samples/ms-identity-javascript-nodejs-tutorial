@@ -136,7 +136,7 @@ Before starting here, make sure:
 1. On the **Create a secret** screen choose the following values:
     - **Upload options**: Manual.
     - **Name**: Type a name for the secret. The secret name must be unique within a Key Vault. For example, `ExampleSecret`
-    - **Value**: Copy and paste the value for the `clientSecret` property (without quotes!) from your `appSettings.json` file.
+    - **Value**: Copy and paste the value for the `clientSecret` property (without quotes!) from your `appSettings.json` file. (:warning: once done, remove the `clientSecret` from `appSettings.json`).
     - Leave the other values to their defaults. Click **Create**.
 
 ##### Provide the managed identity access to Key Vault
