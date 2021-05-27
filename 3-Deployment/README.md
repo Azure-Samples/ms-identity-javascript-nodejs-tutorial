@@ -94,11 +94,7 @@ There are various ways to upload your files to **Azure App Service**. Here we pr
 
 ![api_step3](./ReadmeFiles/step3.png)
 
-#### Step 2: Disable default authentication
-
-Now you need to navigate to the **Azure App Service** Portal, and locate your project there. Once you do, click on the **Authentication/Authorization** blade. There, make sure that the **App Services Authentication** is switched off (and nothing else is checked), as we are using our own **custom** authentication logic.
-
-#### Step 3: Update Azure AD App Registration
+#### Step 2: Update Azure AD App Registration
 
 Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
 
@@ -136,7 +132,7 @@ Before starting here, make sure:
 1. On the **Create a secret** screen choose the following values:
     - **Upload options**: Manual.
     - **Name**: Type a name for the secret. The secret name must be unique within a Key Vault. For example, `ExampleSecret`
-    - **Value**: Copy and paste the value for the `clientSecret` property (without quotes!) from your `appSettings.json` file. (:warning: once done, remove the `clientSecret` from `appSettings.json`).
+    - **Value**: Copy and paste the value for the `clientSecret` property (without quotes!) from your `appSettings.json` file. (:warning: once done, remove the value of `clientSecret` from `appSettings.json`).
     - Leave the other values to their defaults. Click **Create**.
 
 ##### Provide the managed identity access to Key Vault

@@ -28,7 +28,7 @@ const secretClient = new keyvaultSecret.SecretClient(KVUri, credential);
 
 secretClient.getSecret(secretName).then((secretResponse) => {
 
-    // assing the secret obtained from
+    // assign the secret obtained from
     config.credentials.clientSecret = secretResponse.value;
 
     // initialize wrapper
