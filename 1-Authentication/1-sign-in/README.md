@@ -281,7 +281,7 @@ Then, it creates and encodes a state object to pass with an authorization code r
     }
 ```
 
-The `getAuthCode()` method assigns request parameters, and calls the **MSAL Node** [getAuthCodeUrl()](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html#getauthcodeurl) API. It then redirects the app to this URL:
+The `getAuthCode()` method assigns request parameters, and calls the **MSAL Node**'s [getAuthCodeUrl()](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html#getauthcodeurl) API. It then redirects the app to this URL:
 
 ```typescript
     /**
@@ -305,7 +305,7 @@ The `getAuthCode()` method assigns request parameters, and calls the **MSAL Node
         }
 ```
 
-After making an authorization code URL request, the user is redirected to the redirect route defined in the **Azure AD** app registration. Once redirected, the `handleRedirect` middleware takes over. It first checks for `nonce` parameter in state against *cross-site resource forgery* (csrf) attacks, and then for the current app stage. Then, using the `code` in query parameters, access tokens are requested using the **MSAL Node** [acquireTokenByCode()](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html#acquiretokenbycode) API, and the response is appended to the **express-session** variable.
+After making an authorization code URL request, the user is redirected to the redirect route defined in the **Azure AD** app registration. Once redirected, the `handleRedirect` middleware takes over. It first checks for `nonce` parameter in state against *cross-site resource forgery* (csrf) attacks, and then for the current app stage. Then, using the `code` in query parameters, access tokens are requested using the **MSAL Node**'s [acquireTokenByCode()](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html#acquiretokenbycode) API, and the response is appended to the **express-session** variable.
 
 ```typescript
     /**

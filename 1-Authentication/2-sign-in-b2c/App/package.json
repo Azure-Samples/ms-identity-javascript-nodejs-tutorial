@@ -17,7 +17,7 @@
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
-    "msal-express-wrapper": "file:../../../msal-express-wrapper"
+    "msal-express-wrapper": "git+https://github.com/Azure-Samples/msal-express-wrapper.git"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"
