@@ -23,7 +23,7 @@ This sample also demonstrates how to use the [Microsoft Graph JavaScript SDK](ht
 
 ## Scenario
 
-1. The client application uses the **MSAL Node** to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
+1. The client application uses **MSAL Node** (via [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper)) to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
 1. The **Access Token** is used as a *bearer* token to authorize the user to access the **resource server** ([MS Graph](https://aka.ms/graph) or [Azure REST API](https://docs.microsoft.com/rest/api/azure/)).
 1. The **resource server** responds with the resource that the user has access to.
 

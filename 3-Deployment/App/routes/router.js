@@ -16,15 +16,14 @@ const cache = require('../utils/cachePlugin');
 const router = express.Router();
 
 // Importing from key vault
-const keyVaultName = process.env["KEY_VAULT_NAME"];
-const KVUri = "https://" + keyVaultName + ".vault.azure.net";
+const keyVaultUri = process.env["KEY_VAULT_URI"];
 const secretName = process.env["SECRET_NAME"] ;
 
 // Using VS Code's auth context for credentials
 const credential = new identity.ManagedIdentityCredential();
 
 // Initialize secretClient with credentials
-const secretClient = new keyvaultSecret.SecretClient(KVUri, credential);
+const secretClient = new keyvaultSecret.SecretClient(keyVaultUri, credential);
 
 secretClient.getSecret(secretName).then((secretResponse) => {
 

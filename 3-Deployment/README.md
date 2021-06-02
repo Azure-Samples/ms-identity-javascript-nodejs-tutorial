@@ -15,13 +15,11 @@
 
 This sample demonstrates how to deploy a Node.js & Express web application to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). The application used in this sample is a slightly modified version of the web app from [**chapter 2.1**](../2-Authorization/1-call-graph/README.md). The steps here apply similarly to Azure AD and Azure AD B2C apps.
 
-> :information_source: we have placed the [msal-express-wrapper](./App/packages/msal-express-wrapper) project in the App/packages folder and referenced it in [package.json](./App/package.json) for the purpose of this sample. If you decide to use it, you might want to store it in a separate location like a GitHub repository.
-
 One of the principles of security is to place credentials like secrets and certificates out of your code and use it in a manner that allows them to be replaced or rotated without incurring a downtime. As such, this sample also uses the [Azure Key Vault](https://docs.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates) to store client secrets safely on the cloud.
 
 ## Scenario
 
-1. The client application uses the **MSAL Node** to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
+1. The client application uses the **MSAL Node** (via [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper)) to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
 1. The **Access Token** is used as a *bearer* token to authorize the user to access the **resource** (MS Graph).
 1. The **resource server** responds with the resource that the user has access to.
 
@@ -36,8 +34,6 @@ One of the principles of security is to place credentials like secrets and certi
 
 ## Setup
 
-### Step 1: Clone or download this repository
-
 From your shell or command line:
 
 ```console
@@ -47,15 +43,6 @@ From your shell or command line:
 or download and extract the repository .zip file.
 
 > :warning: To avoid path length limitations on Windows, we recommend cloning into a directory near the root of your drive.
-
-### Step 2: Install project dependencies
-
-Locate the root of the sample folder. Then:
-
-```console
-    cd 3-Deployment/App
-    npm install
-```
 
 ## Registration
 
@@ -151,7 +138,7 @@ Finally, you need to add a few environment variables to the App Service where yo
 1. In the [Azure portal](https://portal.azure.com) , search for and select **App Service**, and then select your app.
 1. Select **Configuration** blade on the left, then select **New Application Settings**.
 1. Add the following variables (name-value):
-    1. **KEY_VAULT_NAME**: the name of the key vault you've created, e.g. `node-test-vault`
+    1. **KEY_VAULT_URI**: the name of the key vault you've created, e.g. `example-key-vault.v`
     1. **SECRET_NAME**: the name of the certificate you specified when importing it to key vault, e.g. `ExampleSecret`
 
 Wait for a few minutes for your changes on **App Service** to take effect. You should then be able to visit your published website and sign-in accordingly.
@@ -173,7 +160,7 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ### Accessing Key Vault using Managed Identity
 
-In [router.js](./App/routes/router.js), we use the [@azure/identity](https://www.npmjs.com/package/@azure/identity) to access the environment credentials via Managed Identity, and then the [@azure/keyvault-secrets](https://www.npmjs.com/package/@azure/keyvault-secrets) to access the Key Vault and grab the secret. Then we initialize the wrapper with the secret obtained from Key Vault:
+In [router.js](./App/routes/router.js), we use the [@azure/identity](https://www.npmjs.com/package/@azure/identity) to access the environment credentials via Managed Identity, and then the [@azure/keyvault-secrets](https://www.npmjs.com/package/@azure/keyvault-secrets) to access the Key Vault and grab the secret. Finally, we initialize the wrapper with the secret obtained from Key Vault:
 
 ```javascript
 const identity = require("@azure/identity");
@@ -187,15 +174,14 @@ const cache = require('../utils/cachePlugin');
 const router = express.Router();
 
 // Importing from key vault
-const keyVaultName = process.env["KEY_VAULT_NAME"];
-const KVUri = "https://" + keyVaultName + ".vault.azure.net";
+const keyVaultUri = process.env["KEY_VAULT_URI"];
 const secretName = process.env["SECRET_NAME"];
 
 // Using the deployment environment as credential provider
 const credential = new identity.ManagedIdentityCredential();
 
 // Initialize secretClient with credentials
-const secretClient = new keyvaultSecret.SecretClient(KVUri, credential);
+const secretClient = new keyvaultSecret.SecretClient(keyVaultUri, credential);
 
 secretClient.getSecret(secretName).then((secretResponse) => {
 
@@ -226,7 +212,7 @@ For more information about how OAuth 2.0 protocols work in this scenario and oth
 
 Use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) to get support from the community.
 Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
-Make sure that your questions or comments are tagged with [`azure-ad` `azure-ad-b2c` `ms-identity` `msal`].
+Make sure that your questions or comments are tagged with [`azure-ad` `node` `ms-identity` `msal`].
 
 If you find a bug in the sample, please raise the issue on [GitHub Issues](../../../issues).
 
