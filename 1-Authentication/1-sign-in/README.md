@@ -19,7 +19,7 @@ This sample demonstrates a Node.js & Express web application that authenticates 
 
 ## Scenario
 
-1. The client application uses **MSAL Node** to obtain an ID Token from **Azure AD**.
+1. The client application uses **MSAL Node** (via [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper)) to obtain an ID Token from **Azure AD**.
 2. The **ID Token** proves that the user has successfully authenticated against **Azure AD**.
 
 ![Overview](./ReadmeFiles/topology.png)
@@ -281,7 +281,7 @@ Then, it creates and encodes a state object to pass with an authorization code r
     }
 ```
 
-The `getAuthCode()` method assigns request parameters, and calls the **MSAL Node** [getAuthCodeUrl()](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html#getauthcodeurl) API. It then redirects the app to this URL:
+The `getAuthCode()` method assigns request parameters, and calls the **MSAL Node**'s [getAuthCodeUrl()](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html#getauthcodeurl) API. It then redirects the app to this URL:
 
 ```typescript
     /**
@@ -305,7 +305,7 @@ The `getAuthCode()` method assigns request parameters, and calls the **MSAL Node
         }
 ```
 
-After making an authorization code URL request, the user is redirected to the redirect route defined in the **Azure AD** app registration. Once redirected, the `handleRedirect` middleware takes over. It first checks for `nonce` parameter in state against *cross-site resource forgery* (csrf) attacks, and then for the current app stage. Then, using the `code` in query parameters, access tokens are requested using the **MSAL Node** [acquireTokenByCode()](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html#acquiretokenbycode) API, and the response is appended to the **express-session** variable.
+After making an authorization code URL request, the user is redirected to the redirect route defined in the **Azure AD** app registration. Once redirected, the `handleRedirect` middleware takes over. It first checks for `nonce` parameter in state against *cross-site resource forgery* (CSRF) attacks, and then for the current app stage. Then, using the `code` in query parameters, access tokens are requested using the **MSAL Node**'s [acquireTokenByCode()](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html#acquiretokenbycode) API, and the response is appended to the **express-session** variable.
 
 ```typescript
     /**
@@ -382,7 +382,7 @@ After making an authorization code URL request, the user is redirected to the re
 
 Web apps (and confidential client apps in general) should validate ID Tokens. In `signIn` middleware, we add the ID token to the session (see above), and then validate it following the guide: [ID Token validation](https://docs.microsoft.com/azure/active-directory/develop/id-tokens#validating-an-id_token).
 
-First, verify the token signature.
+First, verify the token signature:
 
 ```typescript
     verifyTokenSignature = async (authToken: string): Promise<TokenClaims | boolean> => {

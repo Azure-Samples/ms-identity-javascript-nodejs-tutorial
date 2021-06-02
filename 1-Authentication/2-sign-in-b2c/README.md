@@ -19,7 +19,7 @@ This sample demonstrates a Node.js & Express web application that authenticates 
 
 ## Scenario
 
-1. The client application uses **MSAL Node** to obtain an ID Token from **Azure AD B2C**.
+1. The client application uses **MSAL Node** (via [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper)) to obtain an ID Token from **Azure AD B2C**.
 2. The **ID Token** proves that the user has successfully authenticated against **Azure AD B2C**.
 
 ![Overview](./ReadmeFiles/topology.png)

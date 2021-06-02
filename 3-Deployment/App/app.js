@@ -40,7 +40,7 @@ app.use(session({
     secret: 'ENTER_YOUR_SECRET_HERE',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: true } // only if https connection is used
+    cookie: { secure: true } // only if HTTPS connection is used
 }));
 
 app.use(router);
