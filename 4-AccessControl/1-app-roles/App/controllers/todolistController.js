@@ -2,6 +2,7 @@ const lowdb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const adapter = new FileSync('./data/db.json');
 const db = lowdb(adapter);
+const { nanoid } = require('nanoid')
 
 exports.getTodos = (req, res) => {
     const owner = req.session.account.idTokenClaims['preferred_username'];
@@ -14,7 +15,13 @@ exports.getTodos = (req, res) => {
 }
 
 exports.postTodo = (req, res) => {
-    db.get('todos').push(req.body).write();
+    const newTodo = {
+        id: nanoid(),
+        name: req.body.name,
+        owner: req.session.account.idTokenClaims['preferred_username'],
+    };
+
+    db.get('todos').push(newTodo).write();
     res.redirect('/todolist');
 }
 

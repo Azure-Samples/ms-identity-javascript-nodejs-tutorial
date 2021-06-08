@@ -21,6 +21,32 @@ param(
  There are four ways to run this script. For more information, read the AppCreationScripts.md file in the same folder as this script.
 #>
 
+# Create a password that can be used as an application key
+Function ComputePassword
+{
+    $aesManaged = New-Object "System.Security.Cryptography.AesManaged"
+    $aesManaged.Mode = [System.Security.Cryptography.CipherMode]::CBC
+    $aesManaged.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
+    $aesManaged.BlockSize = 128
+    $aesManaged.KeySize = 256
+    $aesManaged.GenerateKey()
+    return [System.Convert]::ToBase64String($aesManaged.Key)
+}
+
+# Create an application key
+# See https://www.sabin.io/blog/adding-an-azure-active-directory-application-and-key-using-powershell/
+Function CreateAppKey([DateTime] $fromDate, [double] $durationInMonths, [string]$pw)
+{
+    $endDate = $fromDate.AddMonths($durationInMonths);
+    $keyId = (New-Guid).ToString();
+    $key = New-Object Microsoft.Open.AzureAD.Model.PasswordCredential
+    $key.StartDate = $fromDate
+    $key.EndDate = $endDate
+    $key.Value = $pw
+    $key.KeyId = $keyId
+    return $key
+}
+
 Function UpdateLine([string] $line, [string] $value)
 {
     $index = $line.IndexOf('=')
@@ -148,10 +174,16 @@ Function ConfigureApplications
 
    # Create the client AAD application
    Write-Host "Creating the AAD application (msal-node-webapp)"
+   # Get a 6 months application key for the client Application
+   $pw = ComputePassword
+   $fromDate = [DateTime]::Now;
+   $key = CreateAppKey -fromDate $fromDate -durationInMonths 6 -pw $pw
+   $clientAppKey = $pw
    # create the application 
    $clientAadApplication = New-AzureADApplication -DisplayName "msal-node-webapp" `
                                                   -HomePage "http://localhost:4000" `
                                                   -ReplyUrls "http://localhost:4000/redirect" `
+                                                  -PasswordCredentials $key `
                                                   -PublicClient $False
 
    # create the service principal of the newly created application 

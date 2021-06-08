@@ -16,6 +16,25 @@
             <p>You can only see this page if you are in <strong>TaskAdmin</strong> role</p>
         </div>
 
+        <div class="table-area-div">
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Task</th>
+                        <th scope="col">Owner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let i=0; i < todos.length; i++) { %>
+                        <tr>
+                            <td><%= todos[i]['name'] %></td>
+                            <td><%= todos[i]['owner'] %></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div> 
+
         <%- include('includes/footer'); %>
 
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
