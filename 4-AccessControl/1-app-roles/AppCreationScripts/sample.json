@@ -1,0 +1,73 @@
+{
+    "Sample": {
+        "Title": "A Node.js & Express web app calling Microsoft Graph using App Roles to implement Role-Based Access Control",
+        "Level": 300,
+        "Client": "Node.js & Express web app",
+        "Service": "Microsoft Graph",
+        "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
+        "Endpoint": "AAD v2.0"
+    },
+    "AADApps": [
+        {
+            "Id": "client",
+            "Name": "msal-node-webapp",
+            "Kind": "WebApp",
+            "Audience": "AzureADMyOrg",
+            "HomePage": "http://localhost:4000",
+            "ReplyUrls": "http://localhost:4000/redirect",
+            "AppRoles": [
+                {
+                    "Types": [
+                        "User"
+                    ],
+                    "Name": "TaskAdmin",
+                    "Description": "Admins can read any user's todo list"
+                },
+                {
+                    "Types": [
+                        "User"
+                    ],
+                    "Name": "TaskUser",
+                    "Description": "Users can read and modify their todo lists"
+                }
+            ],
+            "ManualSteps": [
+                {
+                    "Comment": "To receive the 'roles' claim with the name of the app roles this user is assigned to, make sure that the user accounts you plan to sign-in to this app is assigned to the app roles of this SPA app. The guide, https://aka.ms/userassignmentrequired provides step by step instructions."
+                },
+                {
+                    "Comment": "Or you can run the ..\\CreateUsersAndAssignRoles.ps1 command to automatically create a number of users, and assign these users to the app roles of this app."
+                }
+            ]
+        }
+    ],
+    "CodeConfiguration": [
+        {
+            "App": "client",
+            "SettingKind": "JSON",
+            "SettingFile": "\\..\\App\\appSettings.json",
+            "Mappings": [
+                {
+                    "key": "clientId",
+                    "value": ".AppId"
+                },
+                {
+                    "key": "tenantId",
+                    "value": "$tenantId"
+                },
+                {
+                    "key": "clientSecret",
+                    "value": ".AppKey"
+                },
+                {
+                    "key": "redirectUri",
+                    "value": ".ReplyUrls"
+                },
+                {
+                    "key": "postLogoutRedirectUri",
+                    "value": ".HomePage"
+                }
+            ]
+        }
+    ]
+}

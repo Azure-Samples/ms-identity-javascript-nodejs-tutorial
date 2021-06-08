@@ -39,7 +39,7 @@ This sample also demonstrates how to use the [Microsoft Graph JavaScript SDK](ht
 | `App/cache.json`            | Stores MSAL Node token cache data.                            |
 | `App/app.js`                | Application entry point.                                      |
 | `App/utils/graphManager.js` | Handles calls to Microsoft Graph using Graph JS SDK.          |
-| `App/utils/cacheManager.js` | Handles calls to protected APIs using Axios package.          |
+| `App/utils/fetchManager.js` | Handles calls to protected APIs using Axios package.          |
 
 ## Prerequisites
 

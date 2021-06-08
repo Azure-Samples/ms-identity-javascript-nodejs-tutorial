@@ -71,6 +71,12 @@ Alternatively, choose below the sample you want to review.
 |-----------------|---------------|
 | <img src="./3-Deployment/ReadmeFiles/topology.png" width="200"> | [**Deploy to Azure App Service**](./3-Deployment/README.md) </br> Prepare your app for deployment to various **Azure** services. Learn how to package and upload files, configure authentication parameters and use **Azure** services for managing your operations. |
 
+### Chapter 4: Control access to your app using App Roles and Security Groups
+
+|                 |               |
+|-----------------|---------------|
+| <img src="./4-AccessControl/1-app-roles/ReadmeFiles/topology.png" width="200"> | [**Use App Roles for access control**](./4-AccessControl/1-app-roles/README.md) </br> Define App Roles and use roles claim in a token to implement Role-based Access Control (RBAC) for your web app. |
+
 ## We'd love your feedback!
 
 Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUQkRCSVdRSk8wUjdZSkg2NEZGOFFaTkxQVyQlQCN0PWcu).
