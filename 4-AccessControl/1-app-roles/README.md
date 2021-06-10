@@ -1,28 +1,21 @@
-# A Node.js & Express web app calling Microsoft Graph using App Roles to implement Role-Based Access Control
+# A Node.js & Express web app using App Roles to implement Role-Based Access Control
 
 - [Overview](#overview)
 - [Scenario](#scenario)
 - [Contents](#contents)
 - [Prerequisites](#prerequisites)
 - [Setup](#setup)
-  - [Step 1: Clone or download this repository](#step-1-clone-or-download-this-repository)
-  - [Step 2: Install project dependencies](#step-2-install-project-dependencies)
-  - [Registration](#registration)
-  - [Choose the Azure AD tenant where you want to create your applications](#choose-the-azure-ad-tenant-where-you-want-to-create-your-applications)
-  - [Register the client app (msal-node-webapp)](#register-the-client-app-msal-node-webapp)
-  - [Define Application Roles](#define-application-roles)
+- [Registration](#registration)
 - [Running the sample](#running-the-sample)
 - [Explore the sample](#explore-the-sample)
-- [We'd love your feedback!](#wed-love-your-feedback)
 - [About the code](#about-the-code)
-  - [Implementing role-based access control](#implementing-role-based-access-control)
 - [More information](#more-information)
 - [Community Help and Support](#community-help-and-support)
 - [Contributing](#contributing)
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web app featuring a todo list and secured with the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node). The app implements **Role-based Access Control** (RBAC) by using Azure AD **App Roles**. In the sample, a **dashboard** component allows signed-in users to see the tasks assigned to them and is only accessible by users under an **app role** named **TaskAdmin**.
+This sample demonstrates a Node.js & Express web app featuring a todo list and secured with the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node) (MSAL Node). The app implements **Role-based Access Control** (RBAC) by using Azure AD [App Roles](). In the sample, a users in **TaskUser** role can perform CRUD operations on their todolist, while users in **TaskAdmin** role can see all other users' tasks.
 
 Access control in Azure AD can be done with **Security Groups** as well, as we will cover in the [next tutorial](../2-security-groups/README.md). **Security Groups** and **App Roles** in Azure AD are by no means mutually exclusive - they can be used in tandem to provide even finer grained access control.
 
@@ -41,7 +34,7 @@ Access control in Azure AD can be done with **Security Groups** as well, as we w
 |-----------------------------|---------------------------------------------------------------|
 | `AppCreationScripts/`       | Contains Powershell scripts to automate app registration.     |
 | `ReadmeFiles/`              | Contains illustrations and screenshots.                       |
-| `App/appSettings.json`      | Authentication parameters and settings                        |
+| `App/appSettings.json`      | Authentication parameters and settings.                       |
 | `App/data/cache.json`       | Stores MSAL Node token cache data.                            |
 | `App/data/db.json`          | Stores todo list data.                                        |
 | `App/app.js`                | Application entry point.                                      |

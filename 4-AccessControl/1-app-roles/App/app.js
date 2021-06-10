@@ -5,6 +5,7 @@
 
 const express = require('express');
 const session = require('express-session');
+const methodOverride = require('method-override')
 const path = require('path');
 
 const router = require('./routes/router');
@@ -19,6 +20,7 @@ app.set('view engine', 'ejs');
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
+app.use(methodOverride('_method'));
 app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, './public')));

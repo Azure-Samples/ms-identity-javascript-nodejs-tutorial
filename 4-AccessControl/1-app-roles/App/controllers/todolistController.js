@@ -2,7 +2,7 @@ const lowdb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const adapter = new FileSync('./data/db.json');
 const db = lowdb(adapter);
-const { nanoid } = require('nanoid')
+const { nanoid } = require('nanoid');
 
 exports.getTodos = (req, res) => {
     const owner = req.session.account.idTokenClaims['preferred_username'];
@@ -22,11 +22,12 @@ exports.postTodo = (req, res) => {
     };
 
     db.get('todos').push(newTodo).write();
+    
     res.redirect('/todolist');
 }
 
 exports.deleteTodo = (req, res) => {
-    const id = req.params.id;
+    const id = req.body.id;
     const owner = req.session.account.idTokenClaims['preferred_username'];
 
     db.get('todos')

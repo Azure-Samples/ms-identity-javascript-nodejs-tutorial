@@ -13,7 +13,7 @@
         <%- include('includes/navbar', {isAuthenticated: isAuthenticated}); %>
 
         <div class="table-area-div">
-            <p>You can see this page if you are in <strong>TaskUser</strong> or <strong>TaskAdmin</strong> role</p>
+            <p>You can see this page if you are in <mark>TaskUser</mark> or <mark>TaskAdmin</mark> role</p>
         </div>
 
         <div class="table-area-div">
@@ -30,7 +30,7 @@
                         <tr>
                             <td><%= todos[i]['name'] %></td>
                             <td>
-                                <form action='/todolist' method='POST'>
+                                <form action='/todolist?_method=DELETE' method='POST'>
                                     <input type='hidden' name='id' value='<%= todos[i]["id"] %>'>
                                     <button type='submit'>Delete</button>
                                 </form>

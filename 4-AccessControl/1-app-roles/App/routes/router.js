@@ -32,7 +32,7 @@ router.get('/dashboard', authProvider.isAuthenticated, authProvider.hasAccess, d
 // user routes
 router.get('/todolist', authProvider.isAuthenticated, authProvider.hasAccess, todolistController.getTodos);
 router.post('/todolist', authProvider.isAuthenticated, authProvider.hasAccess, todolistController.postTodo);
-router.delete('/todolist/:id', authProvider.isAuthenticated, authProvider.hasAccess, todolistController.deleteTodo);
+router.delete('/todolist', authProvider.isAuthenticated, authProvider.hasAccess, todolistController.deleteTodo);
 
 // 404
 router.get('*', (req, res) => res.status(404).redirect('/404.html'));
