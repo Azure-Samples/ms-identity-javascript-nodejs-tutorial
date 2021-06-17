@@ -102,23 +102,18 @@ Function GetRequiredPermissions([string] $applicationDisplayName, [string] $requ
 }
 
 
-Function UpdateLine([string] $line, [string] $value)
+Function ReplaceInLine([string] $line, [string] $key, [string] $value)
 {
-    $index = $line.IndexOf('=')
-    $delimiter = ';'
-    if ($index -eq -1)
-    {
-        $index = $line.IndexOf(':')
-        $delimiter = ','
-    }
+    $index = $line.IndexOf($key)
     if ($index -ige 0)
     {
-        $line = $line.Substring(0, $index+1) + " "+'"'+$value+'"'+$delimiter
+        $index2 = $index+$key.Length
+        $line = $line.Substring(0, $index) + $value + $line.Substring($index2)
     }
     return $line
 }
 
-Function UpdateTextFile([string] $configFilePath, [System.Collections.HashTable] $dictionary)
+Function ReplaceInTextFile([string] $configFilePath, [System.Collections.HashTable] $dictionary)
 {
     $lines = Get-Content $configFilePath
     $index = 0
@@ -129,7 +124,7 @@ Function UpdateTextFile([string] $configFilePath, [System.Collections.HashTable]
         {
             if ($line.Contains($key))
             {
-                $lines[$index] = UpdateLine $line $dictionary[$key]
+                $lines[$index] = ReplaceInLine $line $key $dictionary[$key]
             }
         }
         $index++
@@ -258,8 +253,8 @@ Function ConfigureApplications
    # Update config file for 'client'
    $configFile = $pwd.Path + "\..\App\appSettings.js"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "clientId" = $clientAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $clientAppKey;"redirect" = $clientAadApplication.ReplyUrls };
-   UpdateTextFile -configFilePath $configFile -dictionary $dictionary
+   $dictionary = @{ "Enter_the_Application_Id_Here" = $clientAadApplication.AppId;"Enter_the_Tenant_Info_Here" = $tenantId;"Enter_the_Client_Secret_Here" = $clientAppKey;"Enter_the_ObjectId_of_GroupAdmin" = $GroupAdmin.objectId;"Enter_the_ObjectId_of_GroupMember" = $GroupMember.objectId };
+   ReplaceInTextFile -configFilePath $configFile -dictionary $dictionary
    Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
    Write-Host "IMPORTANT: Please follow the instructions below to complete a few manual step(s) in the Azure portal":
    Write-Host "- For client"

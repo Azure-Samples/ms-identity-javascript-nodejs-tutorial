@@ -1,7 +1,7 @@
 {
   "name": "msal-node-tutorial-call-graph",
   "version": "1.0.0",
-  "description": "A Node.js & Express web app calling Microsoft Graph using MSAL Node and Graph SDK",
+  "description": "A Node.js & Express web app calling Microsoft Graph using MSAL Node and MS Graph SDK",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -13,13 +13,12 @@
     "@microsoft/microsoft-graph-client": "^2.2.1",
     "@azure/msal-node": "^1.1.0",
     "axios": "^0.21.1",
-    "body-parser": "^1.19.0",
     "bootstrap": "^4.5.3",
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "isomorphic-fetch": "^3.0.0",
-    "msal-express-wrapper": "git+https://github.com/Azure-Samples/msal-express-wrapper.git"
+    "msal-express-wrapper": "git+https://github.com/Azure-Samples/msal-express-wrapper.git#dev"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"

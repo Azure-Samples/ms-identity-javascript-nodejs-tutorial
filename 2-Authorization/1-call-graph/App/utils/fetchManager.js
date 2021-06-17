@@ -5,6 +5,9 @@
 
 const { default: axios } = require('axios');
 
+/**
+ * Simple function to call an Azure AD protected resource
+ */
 callAPI = async(endpoint, accessToken) => {
 
     if (!accessToken || accessToken === "") {

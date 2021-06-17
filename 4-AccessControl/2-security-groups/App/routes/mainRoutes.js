@@ -16,8 +16,8 @@ module.exports = (authProvider) => {
     router.get('/home', mainController.getHomePage);
 
     // authentication routes
-    router.get('/signin', authProvider.login({ postLogin: '/' }));
-    router.get('/signout', authProvider.logout({ postLogout: '/' }));
+    router.get('/signin', authProvider.signIn({ successRedirect: '/' }));
+    router.get('/signout', authProvider.signOut({ successRedirect: '/' }));
 
     // secure routes
     router.get('/id', authProvider.isAuthenticated(), mainController.getIdPage);

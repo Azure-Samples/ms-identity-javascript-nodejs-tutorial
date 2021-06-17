@@ -191,7 +191,7 @@ In [appSettings.js](./App/appSettings.js), we create an access matrix that defin
     "accessMatrix": {
         "todolist": {
             "methods": ["GET", "POST", "DELETE"],
-            "roles": ["TaskUser", "TaskAdmin"]
+            "roles": ["TaskAdmin", "TaskUser"]
         },
         "dashboard": {
             "methods": ["GET"],
@@ -201,13 +201,19 @@ In [appSettings.js](./App/appSettings.js), we create an access matrix that defin
 }
 ```
 
-Then, in [router.js](./App/routes/router.js), we create an instance of the [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html) class with the `appSettings.json` passed in constructor. The `authProvider` object exposes the middleware we can use to protect our app routes:
+Then, in [app.js](./App/app.js), we create an instance of the [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html) class with the `appSettings.js` passed to constructor.
 
 ```javascript
 
 ```
 
-Under the hood, [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper/blob/8860e0a53779cbdaf1477cd90f613692e1be7f94/src/AuthProvider.ts#L357) `hasAccess` middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.json](./App/appSettings.json):
+The `authProvider` object exposes the middleware we can use to protect our app routes. This can be seen in [mainRoutes.js](./App/routes/mainRoutes.js):
+
+```javascript
+
+```
+
+Under the hood, [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper/blob/8860e0a53779cbdaf1477cd90f613692e1be7f94/src/AuthProvider.ts#L357) `hasAccess` middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
 
 ```typescript
 

@@ -1,12 +1,10 @@
 const express = require('express');
 
 const mainController = require('../controllers/mainController');
-const todolistRouter = require('./todolistRoutes');
-const dashboardRouter = require('./dashboardRoutes');
 
 const config = require('../appSettings.js');
 
-module.exports = (authProvider) => {
+module.exports = async(authProvider) => {
 
     // initialize router
     const router = express.Router();
@@ -22,20 +20,18 @@ module.exports = (authProvider) => {
     // secure routes
     router.get('/id', authProvider.isAuthenticated(), mainController.getIdPage);
 
-    router.use('/todolist',
-        authProvider.isAuthenticated(),
-        authProvider.hasAccess({
-            accessRule: config.accessMatrix.todolist
+    router.get('/profile',
+        authProvider.getToken({
+            resource: config.remoteResources.graphAPI
         }),
-        todolistRouter
+        mainController.getProfilePage
     );
 
-    router.use('/dashboard',
-        authProvider.isAuthenticated(),
-        authProvider.hasAccess({
-            accessRule: config.accessMatrix.dashboard
+    router.get('/tenant',
+        authProvider.getToken({
+            resource: config.remoteResources.armAPI
         }),
-        dashboardRouter
+        mainController.getTenantPage
     );
 
     // unauthorized

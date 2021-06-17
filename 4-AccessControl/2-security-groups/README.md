@@ -243,29 +243,35 @@ In [appSettings.js](./App/appSettings.js), we create an access matrix that defin
     "accessMatrix": {
         "todolist": {
             "methods": ["GET", "POST", "DELETE"],
-            "groups": ["219823", "21222"]
+            "groups": ["Enter_the_ObjectId_of_GroupAdmin", "Enter_the_ObjectId_of_GroupMember"]
         },
         "dashboard": {
             "methods": ["GET"],
-            "groups": ["219823"]
+            "groups": ["Enter_the_ObjectId_of_GroupAdmin"]
         }
     }
 }
 ```
 
-Then, in [router.js](./App/routes/router.js), we create an instance of the [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html) class with the `appSettings.json` passed in constructor. The `authProvider` object exposes the middleware we can use to protect our app routes:
+Then, in [app.js](./App/app.js), we create an instance of the [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html) class with the `appSettings.js` passed to constructor.
 
 ```javascript
 
 ```
 
-Under the hood, [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper/blob/8860e0a53779cbdaf1477cd90f613692e1be7f94/src/AuthProvider.ts#L357) `hasAccess` middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.json](./App/appSettings.json):
+The `authProvider` object exposes the middleware we can use to protect our app routes. This can be seen in [mainRoutes.js](./App/routes/mainRoutes.js):
+
+```javascript
+
+```
+
+Under the hood, [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper/blob/8860e0a53779cbdaf1477cd90f613692e1be7f94/src/AuthProvider.ts#L357) `hasAccess` middleware checks the signed-in user's ID token's `groups` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
 
 ```typescript
 
 ```
 
-### The Groups Overage Claim
+### The groups overage claim
 
 To ensure that the token size doesn’t exceed HTTP header size limits, the Microsoft Identity Platform limits the number of object Ids that it includes in the **groups** claim.
 
@@ -273,13 +279,19 @@ If a user is member of more groups than the overage limit (**150 for SAML tokens
 
 > We strongly advise you use the [group filtering feature](#configure-your-application-to-receive-the-groups-claim-values-from-a-filtered-set-of-groups-a-user-may-be-assigned-to) (if possible) to avoid running into group overages.
 
-#### Create the Overage Scenario for testing
+#### Create the overage scenario for testing
 
 1. You can use the `BulkCreateGroups.ps1` provided in the [App Creation Scripts](./AppCreationScripts/) folder to create a large number of groups and assign users to them. This will help test overage scenarios during development. **Remember to change** the user's **objectId** provided in the `BulkCreateGroups.ps1` script.
 
 When attending to overage scenarios, which requires a call to [Microsoft Graph](https://graph.microsoft.com) to read the signed-in user's group memberships, your app will need to have the [User.Read](https://docs.microsoft.com/graph/permissions-reference#user-permissions) and [GroupMember.Read.All](https://docs.microsoft.com/graph/permissions-reference#group-permissions) for the [getMemberGroups](https://docs.microsoft.com/graph/api/user-getmembergroups) function to execute successfully.
 
 > :warning: For the overage scenario, make sure you have granted **Admin Consent** for the MS Graph API's **GroupMember.Read.All** scope (see the **App Registration** steps above).
+
+#### Handle the overage scenario
+
+```typescript
+
+```
 
 ## More information
 

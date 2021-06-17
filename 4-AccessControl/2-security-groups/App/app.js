@@ -24,11 +24,11 @@ app.set('view engine', 'ejs');
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
-app.use(methodOverride('_method'));
-app.use(express.urlencoded({ extended: false }));
-
 app.use(express.static(path.join(__dirname, './public')));
 
+app.use(methodOverride('_method'));
+
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 /**
@@ -57,7 +57,7 @@ const authProvider = new msalWrapper.AuthProvider(config, cache);
 // initialize the wrapper
 app.use(authProvider.initialize());
 
-// pass the instance to your route handlers
+// pass the instance to your routers
 app.use(mainRouter(authProvider));
 
 app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));

@@ -47,23 +47,18 @@ Function CreateAppKey([DateTime] $fromDate, [double] $durationInMonths, [string]
     return $key
 }
 
-Function UpdateLine([string] $line, [string] $value)
+Function ReplaceInLine([string] $line, [string] $key, [string] $value)
 {
-    $index = $line.IndexOf('=')
-    $delimiter = ';'
-    if ($index -eq -1)
-    {
-        $index = $line.IndexOf(':')
-        $delimiter = ','
-    }
+    $index = $line.IndexOf($key)
     if ($index -ige 0)
     {
-        $line = $line.Substring(0, $index+1) + " "+'"'+$value+'"'+$delimiter
+        $index2 = $index+$key.Length
+        $line = $line.Substring(0, $index) + $value + $line.Substring($index2)
     }
     return $line
 }
 
-Function UpdateTextFile([string] $configFilePath, [System.Collections.HashTable] $dictionary)
+Function ReplaceInTextFile([string] $configFilePath, [System.Collections.HashTable] $dictionary)
 {
     $lines = Get-Content $configFilePath
     $index = 0
@@ -74,7 +69,7 @@ Function UpdateTextFile([string] $configFilePath, [System.Collections.HashTable]
         {
             if ($line.Contains($key))
             {
-                $lines[$index] = UpdateLine $line $dictionary[$key]
+                $lines[$index] = ReplaceInLine $line $key $dictionary[$key]
             }
         }
         $index++
@@ -172,10 +167,10 @@ Function ConfigureApplications
 
 
    # Update config file for 'client'
-   $configFile = $pwd.Path + "\..\appSettings.json"
+   $configFile = $pwd.Path + "\..\App\appSettings.json"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "clientId" = $clientAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $clientAppKey;"redirectUri" = $clientAadApplication.ReplyUrls;"postLogoutRedirectUri" = $clientAadApplication.HomePage };
-   UpdateTextFile -configFilePath $configFile -dictionary $dictionary
+   $dictionary = @{ "Enter_the_Application_Id_Here" = $clientAadApplication.AppId;"Enter_the_Tenant_Info_Here" = $tenantId;"Enter_the_Client_Secret_Here" = $clientAppKey };
+   ReplaceInTextFile -configFilePath $configFile -dictionary $dictionary
    if($isOpenSSL -eq 'Y')
    {
         Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
@@ -188,7 +183,7 @@ Function ConfigureApplications
 
 # Pre-requisites
 if ((Get-Module -ListAvailable -Name "AzureAD") -eq $null) { 
-    Install-Module "AzureAD" -Scope CurrentUser 
+    Install-Module "AzureAD" -Scope CurrentUser
 }
 
 Import-Module AzureAD

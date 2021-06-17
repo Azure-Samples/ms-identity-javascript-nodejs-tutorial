@@ -1,5 +1,5 @@
 {
-  "name": "msal-node-tutorial-app-roles",
+  "name": "msal-node-tutorial-security-groups",
   "version": "1.0.0",
   "description": "A Node.js & Express web app using Azure AD App Roles to implement Role-based Access Control (RBAC)",
   "main": "app.js",
