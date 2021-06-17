@@ -47,18 +47,78 @@ Function CreateAppKey([DateTime] $fromDate, [double] $durationInMonths, [string]
     return $key
 }
 
-Function ReplaceInLine([string] $line, [string] $key, [string] $value)
+# Adds the requiredAccesses (expressed as a pipe separated string) to the requiredAccess structure
+# The exposed permissions are in the $exposedPermissions collection, and the type of permission (Scope | Role) is 
+# described in $permissionType
+Function AddResourcePermission($requiredAccess, `
+                               $exposedPermissions, [string]$requiredAccesses, [string]$permissionType)
 {
-    $index = $line.IndexOf($key)
+        foreach($permission in $requiredAccesses.Trim().Split("|"))
+        {
+            foreach($exposedPermission in $exposedPermissions)
+            {
+                if ($exposedPermission.Value -eq $permission)
+                 {
+                    $resourceAccess = New-Object Microsoft.Open.AzureAD.Model.ResourceAccess
+                    $resourceAccess.Type = $permissionType # Scope = Delegated permissions | Role = Application permissions
+                    $resourceAccess.Id = $exposedPermission.Id # Read directory data
+                    $requiredAccess.ResourceAccess.Add($resourceAccess)
+                 }
+            }
+        }
+}
+
+#
+# Example: GetRequiredPermissions "Microsoft Graph"  "Graph.Read|User.Read"
+# See also: http://stackoverflow.com/questions/42164581/how-to-configure-a-new-azure-ad-application-through-powershell
+Function GetRequiredPermissions([string] $applicationDisplayName, [string] $requiredDelegatedPermissions, [string]$requiredApplicationPermissions, $servicePrincipal)
+{
+    # If we are passed the service principal we use it directly, otherwise we find it from the display name (which might not be unique)
+    if ($servicePrincipal)
+    {
+        $sp = $servicePrincipal
+    }
+    else
+    {
+        $sp = Get-AzureADServicePrincipal -Filter "DisplayName eq '$applicationDisplayName'"
+    }
+    $appid = $sp.AppId
+    $requiredAccess = New-Object Microsoft.Open.AzureAD.Model.RequiredResourceAccess
+    $requiredAccess.ResourceAppId = $appid 
+    $requiredAccess.ResourceAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.ResourceAccess]
+
+    # $sp.Oauth2Permissions | Select Id,AdminConsentDisplayName,Value: To see the list of all the Delegated permissions for the application:
+    if ($requiredDelegatedPermissions)
+    {
+        AddResourcePermission $requiredAccess -exposedPermissions $sp.Oauth2Permissions -requiredAccesses $requiredDelegatedPermissions -permissionType "Scope"
+    }
+    
+    # $sp.AppRoles | Select Id,AdminConsentDisplayName,Value: To see the list of all the Application permissions for the application
+    if ($requiredApplicationPermissions)
+    {
+        AddResourcePermission $requiredAccess -exposedPermissions $sp.AppRoles -requiredAccesses $requiredApplicationPermissions -permissionType "Role"
+    }
+    return $requiredAccess
+}
+
+
+Function UpdateLine([string] $line, [string] $value)
+{
+    $index = $line.IndexOf('=')
+    $delimiter = ';'
+    if ($index -eq -1)
+    {
+        $index = $line.IndexOf(':')
+        $delimiter = ','
+    }
     if ($index -ige 0)
     {
-        $index2 = $index+$key.Length
-        $line = $line.Substring(0, $index) + $value + $line.Substring($index2)
+        $line = $line.Substring(0, $index+1) + " "+'"'+$value+'"'+$delimiter
     }
     return $line
 }
 
-Function ReplaceInTextFile([string] $configFilePath, [System.Collections.HashTable] $dictionary)
+Function UpdateTextFile([string] $configFilePath, [System.Collections.HashTable] $dictionary)
 {
     $lines = Get-Content $configFilePath
     $index = 0
@@ -69,7 +129,7 @@ Function ReplaceInTextFile([string] $configFilePath, [System.Collections.HashTab
         {
             if ($line.Contains($key))
             {
-                $lines[$index] = ReplaceInLine $line $key $dictionary[$key]
+                $lines[$index] = UpdateLine $line $dictionary[$key]
             }
         }
         $index++
@@ -78,40 +138,17 @@ Function ReplaceInTextFile([string] $configFilePath, [System.Collections.HashTab
     Set-Content -Path $configFilePath -Value $lines -Force
 }
 <#.Description
-   This function creates a new Azure AD scope (OAuth2Permission) with default and provided values
+   This function creates a new Azure AD Security Group with provided values
 #>  
-Function CreateScope( [string] $value, [string] $userConsentDisplayName, [string] $userConsentDescription, [string] $adminConsentDisplayName, [string] $adminConsentDescription)
+Function CreateSecurityGroup([string] $name, [string] $description)
 {
-    $scope = New-Object Microsoft.Open.AzureAD.Model.OAuth2Permission
-    $scope.Id = New-Guid
-    $scope.Value = $value
-    $scope.UserConsentDisplayName = $userConsentDisplayName
-    $scope.UserConsentDescription = $userConsentDescription
-    $scope.AdminConsentDisplayName = $adminConsentDisplayName
-    $scope.AdminConsentDescription = $adminConsentDescription
-    $scope.IsEnabled = $true
-    $scope.Type = "User"
-    return $scope
-}
-
-<#.Description
-   This function creates a new Azure AD AppRole with default and provided values
-#>  
-Function CreateAppRole([string] $types, [string] $name, [string] $description)
-{
-    $appRole = New-Object Microsoft.Open.AzureAD.Model.AppRole
-    $appRole.AllowedMemberTypes = New-Object System.Collections.Generic.List[string]
-    $typesArr = $types.Split(',')
-    foreach($type in $typesArr)
-    {
-        $appRole.AllowedMemberTypes.Add($type);
+    if($null -eq (Get-AzureADGroup -SearchString $name)) {
+        Write-Host "A new security group by the name" $name "has successfully been created."
+        return $newsg = New-AzureADGroup -Description $description -DisplayName $name -MailEnabled $false -SecurityEnabled $true -MailNickName $name
+    } else {
+        Write-Host "A security group by the name" $name "already exists in this tenant."
+        return Get-AzureADGroup -SearchString $name
     }
-    $appRole.DisplayName = $name
-    $appRole.Id = New-Guid
-    $appRole.IsEnabled = $true
-    $appRole.Description = $description
-    $appRole.Value = $name;
-    return $appRole
 }
 
 Set-Content -Value "<html><body><table>" -Path createdApps.html
@@ -179,6 +216,7 @@ Function ConfigureApplications
                                                   -HomePage "http://localhost:4000" `
                                                   -ReplyUrls "http://localhost:4000/redirect" `
                                                   -PasswordCredentials $key `
+                                                  -GroupMembershipClaims "SecurityGroup" `
                                                   -PublicClient $False
 
    # create the service principal of the newly created application 
@@ -193,13 +231,9 @@ Function ConfigureApplications
         Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($clientServicePrincipal.DisplayName)'"
    }
 
-   # Add application Roles
-   $appRoles = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.AppRole]
-   $newRole = CreateAppRole -types "User" -name "TaskAdmin" -description "Admins can read any user's todo list"
-   $appRoles.Add($newRole)
-   $newRole = CreateAppRole -types "User" -name "TaskUser" -description "Users can read and modify their todo lists"
-   $appRoles.Add($newRole)
-   Set-AzureADApplication -ObjectId $clientAadApplication.ObjectId -AppRoles $appRoles
+   # Add security groups
+   $GroupAdmin = CreateSecurityGroup -name "GroupAdmin" -description "Admin Security Group"
+   $GroupMember = CreateSecurityGroup -name "GroupMember" -description "User Security Group"
 
    Write-Host "Done creating the client application (msal-node-webapp)"
 
@@ -208,13 +242,32 @@ Function ConfigureApplications
    $clientPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$clientAadApplication.AppId+"/objectId/"+$clientAadApplication.ObjectId+"/isMSAApp/"
    Add-Content -Value "<tr><td>client</td><td>$currentAppId</td><td><a href='$clientPortalUrl'>msal-node-webapp</a></td></tr>" -Path createdApps.html
 
+   $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
+
+   # Add Required Resources Access (from 'client' to 'Microsoft Graph')
+   Write-Host "Getting access from 'client' to 'Microsoft Graph'"
+   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "Microsoft Graph" `
+                                                -requiredDelegatedPermissions "User.Read|GroupMember.Read.All" `
+
+   $requiredResourcesAccess.Add($requiredPermissions)
+
+
+   Set-AzureADApplication -ObjectId $clientAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
+   Write-Host "Granted permissions."
 
    # Update config file for 'client'
    $configFile = $pwd.Path + "\..\App\appSettings.js"
    Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "Enter_the_Application_Id_Here" = $clientAadApplication.AppId;"Enter_the_Tenant_Info_Here" = $tenantId;"Enter_the_Client_Secret_Here" = $clientAppKey };
-   ReplaceInTextFile -configFilePath $configFile -dictionary $dictionary
-   if($isOpenSSL -eq 'Y')
+   $dictionary = @{ "clientId" = $clientAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $clientAppKey;"redirect" = $clientAadApplication.ReplyUrls };
+   UpdateTextFile -configFilePath $configFile -dictionary $dictionary
+   Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+   Write-Host "IMPORTANT: Please follow the instructions below to complete a few manual step(s) in the Azure portal":
+   Write-Host "- For client"
+   Write-Host "  - Navigate to $clientPortalUrl"
+   Write-Host "  - Security groups matching the names you provided have been created in this tenant (if not present already). On Azure portal, assign some users to it, and configure ID & Access tokens to emit GroupIDs" -ForegroundColor Red 
+
+   Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
+      if($isOpenSSL -eq 'Y')
    {
         Write-Host -ForegroundColor Green "------------------------------------------------------------------------------------------------" 
         Write-Host "You have generated certificate using OpenSSL so follow below steps: "

@@ -8,7 +8,7 @@ const session = require('express-session');
 const methodOverride = require('method-override');
 const path = require('path');
 
-const msalWrapper = require('../../../../msal-express-wrapper/dist/index');
+const msalWrapper = require('msal-express-wrapper');
 const config = require('./appSettings.js');
 const cache = require('./utils/cachePlugin');
 const mainRouter = require('./routes/mainRoutes');

@@ -1,30 +1,30 @@
-# A Node.js & Express web app using App Roles to implement Role-Based Access Control
+# Node.js & Express web app using Security Groups to implement Role-Based Access Control
 
-- [Overview](#overview)
-- [Scenario](#scenario)
-- [Contents](#contents)
-- [Prerequisites](#prerequisites)
-- [Setup](#setup)
-- [Registration](#registration)
-- [Running the sample](#running-the-sample)
-- [Explore the sample](#explore-the-sample)
-- [About the code](#about-the-code)
-- [More information](#more-information)
-- [Community Help and Support](#community-help-and-support)
-- [Contributing](#contributing)
+ 1. [Overview](#overview)
+ 1. [Scenario](#scenario)
+ 1. [Contents](#contents)
+ 1. [Prerequisites](#prerequisites)
+ 1. [Setup](#setup)
+ 1. [Registration](#registration)
+ 1. [Running the sample](#running-the-sample)
+ 1. [Explore the sample](#explore-the-sample)
+ 1. [About the code](#about-the-code)
+ 1. [More information](#more-information)
+ 1. [Community Help and Support](#community-help-and-support)
+ 1. [Contributing](#contributing)
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web app featuring a todo list and secured with the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node) (MSAL Node). The app implements **Role-based Access Control** (RBAC) by using Azure AD [App Roles](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps). In the sample, users in **TaskUser** role can perform CRUD operations on their todolist, while users in **TaskAdmin** role can see all other users' tasks.
+This sample demonstrates a Node.js & Express web app featuring a todo list and secured with the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node) (MSAL Node). The app implements **Role-based Access Control** (RBAC) by using Azure AD [Security Groups](). In the sample, users in **TaskUser** role can perform CRUD operations on their todolist, while users in **TaskAdmin** role can see all other users' tasks.
 
-Access control in Azure AD can be done with **Security Groups** as well, as we will cover in the [next tutorial](../2-security-groups/README.md). **Security Groups** and **App Roles** in Azure AD are by no means mutually exclusive - they can be used in tandem to provide even finer grained access control.
+Access control in Azure AD can be done with **App Roles** as well, as we covered in the [previous tutorial](../1-app-roles/README.md). **Security Groups** and **App Roles** in Azure AD are by no means mutually exclusive - they can be used in tandem to provide even finer grained access control.
 
-> :information_source: Check out the recorded session on this topic: [Implement Authorization in your Applications with Microsoft identity platform](https://www.youtube.com/watch?v=LRoc-na27l0)
+> :information_source: Check out the recorded session on this topic: [An introduction to Microsoft Graph for developers](https://www.youtube.com/watch?v=EBbnpFdB92A)
 
 ## Scenario
 
 1. The client application uses **MSAL Node** (via [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper)) to sign-in a user and obtain an **ID Token** from **Azure AD**.
-2. The **ID Token** contains the [roles claim](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#declare-roles-for-an-application) that is used to control access to protected routes.
+2. The **ID Token** contains the [groups claim]() that is used to control access to protected routes.
 
 ![Overview](./ReadmeFiles/topology.png)
 
@@ -65,7 +65,7 @@ or download and extract the repository .zip file.
 ### Step 2: Install project dependencies
 
 ```console
-    cd 4-AccessControl/1-app-roles/App
+    cd 4-AccessControl/2-security-groups/App
     npm install
 ```
 
@@ -120,32 +120,19 @@ There is one project in this sample. To register it, you can:
 1. Select **Register** to create the application.
 1. In the app's registration screen, find and note the **Application (client) ID**. You use this value in your app's configuration file(s) later in your code.
 1. Select **Save** to save your changes.
+1. In the app's registration screen, select the **Certificates & secrets** blade in the left to open the page where you can generate secrets and upload certificates.
 1. In the **Client secrets** section, select **New client secret**:
    - Type a key description (for instance `app secret`),
    - Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
    - The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
    - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
-
-### Define Application Roles
-
-1. Still on the same app registration, select the **App roles** blade to the left.
-1. Select **Create app role**:
-    - For **Display name**, enter a suitable name, for instance **TaskAdmin**.
-    - For **Allowed member types**, choose **User**.
-    - For **Value**, enter **TaskAdmin**.
-    - For **Description**, enter **Admins can read any user's todo list**.
-1. Select **Create app role**:
-    - For **Display name**, enter a suitable name, for instance **TaskUser**.
-    - For **Allowed member types**, choose **User**.
-    - For **Value**, enter **TaskUser**.
-    - For **Description**, enter **Users can read and modify their todo lists**.
-1. Select **Apply** to save your changes.
-
-To add users to this app role, follow the guidelines here: [Assign users and groups to roles](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#assign-users-and-groups-to-roles).
-
-> :bulb: **Important security tip**
->
-> When you set **User assignment required?** to **Yes**, Azure AD will check that only users assigned to your application in the **Users and groups** blade are able to sign-in to your app. You can assign users directly or by assigning security groups they belong to.
+1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs.
+   - Select the **Add a permission** button and then,
+   - Ensure that the **Microsoft APIs** tab is selected.
+   - In the *Commonly used Microsoft APIs* section, select **Microsoft Graph**
+   - In the **Delegated permissions** section, select the **User.Read**, **GroupMember.Read.All** in the list. Use the search box if necessary.
+   - Select the **Add permissions** button at the bottom.
+   - Finally, grant **admin consent** for these scopes (required to handle the [overage scenario](#the-groups-overage-claim))
 
 #### Configure the client app (msal-node-webapp) to use your app registration
 
@@ -153,16 +140,81 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
-1. Open the `App\appSettings.json` file.
+1. Open the `App\appSettings.js` file.
 1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
 1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
 1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
-1. Find the key `redirectUri` and replace the existing value with the **redirect URI** for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
+1. Find the key `redirect` and replace the existing value with the redirect URI for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
+
+### Create Security Groups
+
+1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
+1. Select **Groups** blade on the left.
+1. In the **Groups** blade, select **New Group**.
+    - For **Group Type**, select **Security**
+    - For **Group Name**, enter **GroupAdmin**
+    - For **Group Description**, enter **Admin Security Group**
+    - Add **Group Owners** and **Group Members** as you see fit.
+    - Select **Create**.
+1. In the **Groups** blade, select **New Group**.
+    - For **Group Type**, select **Security**
+    - For **Group Name**, enter **GroupMember**
+    - For **Group Description**, enter **User Security Group**
+    - Add **Group Owners** and **Group Members** as you see fit.
+    - Select **Create**.
+
+For more information, visit: [Create a basic group and add members using Azure AD](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-groups-create-azure-portal)
+
+### Configure Security Groups
+
+You have two different options available to you on how you can further configure your application to receive the `groups` claim.
+
+1. [Receive **all the groups** that the signed-in user is assigned to in an Azure AD tenant, included nested groups](#configure-your-application-to-receive-all-the-groups-the-signed-in-user-is-assigned-to-including-nested-groups).
+2. [Receive the **groups** claim values from a **filtered set of groups** that your application is programmed to work with](#configure-your-application-to-receive-the-groups-claim-values-from-a-filtered-set-of-groups-a-user-may-be-assigned-to) (Not available in the [Azure AD Free edition](https://azure.microsoft.com/pricing/details/active-directory/)).
+
+> To get the on-premise group's `samAccountName` or `On Premises Group Security Identifier` instead of Group ID, please refer to the document [Configure group claims for applications with Azure Active Directory](https://docs.microsoft.com/azure/active-directory/hybrid/how-to-connect-fed-group-claims#prerequisites-for-using-group-attributes-synchronized-from-active-directory).
+
+#### Configure your application to receive **all the groups** the signed-in user is assigned to, including nested groups
+
+1. In the app's registration screen, select the **Token Configuration** blade in the left to open the page where you can configure the claims provided tokens issued to your application.
+1. Select the **Add groups claim** button on top to open the **Edit Groups Claim** screen.
+1. Select `Security groups` **or** the `All groups (includes distribution lists but not groups assigned to the application)` option. Choosing both negates the effect of `Security Groups` option.
+1. Under the **ID** section, select `Group ID`. This will result in Azure AD sending the [object id](https://docs.microsoft.com/graph/api/resources/group?view=graph-rest-1.0) of the groups the user is assigned to in the **groups** claim of the [ID Token](https://docs.microsoft.com/azure/active-directory/develop/id-tokens) that your app receives after signing-in a user.
+
+#### Configure your application to receive the `groups` claim values from a **filtered set of groups** a user may be assigned to
+
+##### Prerequisites, benefits and limitations of using this option
+
+1. This option is useful when your application is interested in a selected set of groups that a signing-in user may be assigned to and not every security group this user is assigned to in the tenant.  This option also saves your application from running into the [overage](#groups-overage-claim) issue.
+1. This feature is not available in the [Azure AD Free edition](https://azure.microsoft.com/pricing/details/active-directory/).
+1. **Nested group assignments** are not available when this option is utilized.
+
+##### Steps to enable this option in your app
+
+1. In the app's registration screen, select the **Token Configuration** blade in the left to open the page where you can configure the claims provided tokens issued to your application.
+1. Select the **Add groups claim** button on top to open the **Edit Groups Claim** screen.
+1. Select `Groups assigned to the application`.
+    1. Choosing additional options like `Security Groups` or `All groups (includes distribution lists but not groups assigned to the application)` will negate the benefits your app derives from choosing to use this option.
+1. Under the **ID** section, select `Group ID`. This will result in Azure AD sending the object [id](https://docs.microsoft.com/graph/api/resources/group?view=graph-rest-1.0) of the groups the user is assigned to in the `groups` claim of the [ID Token](https://docs.microsoft.com/azure/active-directory/develop/id-tokens) that your app receives after signing-in a user.
+1. If you are exposing a Web API using the **Expose an API** option, then you can also choose the `Group ID` option under the **Access** section. This will result in Azure AD sending the [Object ID](https://docs.microsoft.com/graph/api/resources/group?view=graph-rest-1.0) of the groups the user is assigned to in the `groups` claim of the [Access Token](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) issued to the client applications of your API.
+1. In the app's registration screen, select on the **Overview** blade in the left to open the Application overview screen. Select the hyperlink with the name of your application in **Managed application in local directory** (note this field title can be truncated for instance `Managed application in ...`). When you select this link you will navigate to the **Enterprise Application Overview** page associated with the service principal for your application in the tenant where you created it. You can navigate back to the app registration page by using the *back* button of your browser.
+1. Select the **Users and groups** blade in the left to open the page where you can assign users and groups to your application.
+    1. Select the **Add user** button on the top row.
+    1. Select **User and Groups** from the resultant screen.
+    1. Choose the groups that you want to assign to this application.
+    1. Click **Select** in the bottom to finish selecting the groups.
+    1. Select **Assign** to finish the group assignment process.  
+    1. Your application will now receive these selected groups in the `groups` claim when a user signing in to your app is a member of  one or more these **assigned** groups.
+1. Select the **Properties** blade in the left to open the page that lists the basic properties of your application.Set the **User assignment required?** flag to **Yes**.
+
+> :bulb: **Important security tip**
+>
+> When you set **User assignment required?** to **Yes**, Azure AD will check that only users assigned to your application in the **Users and groups** blade are able to sign-in to your app. You can assign users directly or by assigning security groups they belong to.
 
 ## Running the sample
 
 ```console
-    cd 4-AccessControl/1-app-roles/App
+    cd 4-AccessControl/1-security-groups/App
     npm start
 ```
 
@@ -191,11 +243,11 @@ In [appSettings.js](./App/appSettings.js), we create an access matrix that defin
     "accessMatrix": {
         "todolist": {
             "methods": ["GET", "POST", "DELETE"],
-            "roles": ["TaskUser", "TaskAdmin"]
+            "groups": ["219823", "21222"]
         },
         "dashboard": {
             "methods": ["GET"],
-            "roles": ["TaskAdmin"]
+            "groups": ["219823"]
         }
     }
 }
@@ -212,6 +264,22 @@ Under the hood, [msal-express-wrapper](https://github.com/Azure-Samples/msal-exp
 ```typescript
 
 ```
+
+### The Groups Overage Claim
+
+To ensure that the token size doesn’t exceed HTTP header size limits, the Microsoft Identity Platform limits the number of object Ids that it includes in the **groups** claim.
+
+If a user is member of more groups than the overage limit (**150 for SAML tokens, 200 for JWT tokens, 6 for single-page applications**), then the Microsoft identity platform does not emit the group IDs in the `groups` claim in the token. Instead, it includes an **overage** claim in the token that indicates to the application to query the [MS Graph API](https://graph.microsoft.com) to retrieve the user’s group membership.
+
+> We strongly advise you use the [group filtering feature](#configure-your-application-to-receive-the-groups-claim-values-from-a-filtered-set-of-groups-a-user-may-be-assigned-to) (if possible) to avoid running into group overages.
+
+#### Create the Overage Scenario for testing
+
+1. You can use the `BulkCreateGroups.ps1` provided in the [App Creation Scripts](./AppCreationScripts/) folder to create a large number of groups and assign users to them. This will help test overage scenarios during development. **Remember to change** the user's **objectId** provided in the `BulkCreateGroups.ps1` script.
+
+When attending to overage scenarios, which requires a call to [Microsoft Graph](https://graph.microsoft.com) to read the signed-in user's group memberships, your app will need to have the [User.Read](https://docs.microsoft.com/graph/permissions-reference#user-permissions) and [GroupMember.Read.All](https://docs.microsoft.com/graph/permissions-reference#group-permissions) for the [getMemberGroups](https://docs.microsoft.com/graph/api/user-getmembergroups) function to execute successfully.
+
+> :warning: For the overage scenario, make sure you have granted **Admin Consent** for the MS Graph API's **GroupMember.Read.All** scope (see the **App Registration** steps above).
 
 ## More information
 

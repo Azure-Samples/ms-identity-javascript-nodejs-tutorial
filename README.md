@@ -76,6 +76,7 @@ Alternatively, choose below the sample you want to review.
 |                 |               |
 |-----------------|---------------|
 | <img src="./4-AccessControl/1-app-roles/ReadmeFiles/topology.png" width="200"> | [**Use App Roles for access control**](./4-AccessControl/1-app-roles/README.md) </br> Define App Roles and use roles claim in a token to implement Role-based Access Control (RBAC) for your web app. |
+| <img src="./4-AccessControl/2-security-groups/ReadmeFiles/topology.png" width="200"> | [**Use Security Groups for access control**](./4-AccessControl/2-security-groups/README.md) </br> Create Security Groups and use groups claim in a token to implement Role-based Access Control (RBAC) for your web app. Handle groups claim overage scenarios. |
 
 ## We'd love your feedback!
 

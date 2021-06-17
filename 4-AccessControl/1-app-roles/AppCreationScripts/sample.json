@@ -45,28 +45,20 @@
     "CodeConfiguration": [
         {
             "App": "client",
-            "SettingKind": "JSON",
-            "SettingFile": "\\..\\App\\appSettings.json",
+            "SettingKind": "Replace",
+            "SettingFile": "\\..\\App\\appSettings.js",
             "Mappings": [
                 {
-                    "key": "clientId",
+                    "key": "Enter_the_Application_Id_Here",
                     "value": ".AppId"
                 },
                 {
-                    "key": "tenantId",
+                    "key": "Enter_the_Tenant_Info_Here",
                     "value": "$tenantId"
                 },
                 {
-                    "key": "clientSecret",
+                    "key": "Enter_the_Client_Secret_Here",
                     "value": ".AppKey"
-                },
-                {
-                    "key": "redirectUri",
-                    "value": ".ReplyUrls"
-                },
-                {
-                    "key": "postLogoutRedirectUri",
-                    "value": ".HomePage"
                 }
             ]
         }

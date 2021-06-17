@@ -11,14 +11,15 @@
   "license": "MIT",
   "dependencies": {
     "@azure/msal-node": "^1.1.0",
+    "msal-express-wrapper": "git+https://github.com/Azure-Samples/msal-express-wrapper.git",
     "axios": "^0.21.1",
     "bootstrap": "^4.5.3",
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "isomorphic-fetch": "^3.0.0",
     "lowdb": "^1.0.0",
     "method-override": "^3.0.0",
-    "msal-express-wrapper": "git+https://github.com/Azure-Samples/msal-express-wrapper.git",
     "nanoid": "^3.1.23"
   },
   "devDependencies": {
