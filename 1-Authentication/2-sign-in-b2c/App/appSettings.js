@@ -6,12 +6,12 @@ const appSettings = {
     },
     authRoutes: {
         redirect: "/redirect",
-        error: "/error",
-        unauthorized: "/unauthorized"
+        error: "/error", // the wrapper will redirect to this route in case of any error
+        unauthorized: "/unauthorized" // the wrapper will redirect to this route in case of unauthorized access attempt
     },
     b2cPolicies: {
         signUpSignIn: {
-            authority: "https://fabrikamb2c.b2clogin.com/fabrikamb2c.onmicrosoft.com/B2C_1_susi_reset_v2"
+            authority: "https://fabrikamb2c.b2clogin.com/fabrikamb2c.onmicrosoft.com/B2C_1_susi_reset_v2" // the first policy under b2cPolicies will be used as default authority
         }
     }
 }

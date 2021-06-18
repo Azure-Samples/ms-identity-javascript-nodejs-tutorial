@@ -138,7 +138,7 @@ Finally, you need to add a few environment variables to the App Service where yo
 1. In the [Azure portal](https://portal.azure.com) , search for and select **App Service**, and then select your app.
 1. Select **Configuration** blade on the left, then select **New Application Settings**.
 1. Add the following variables (name-value):
-    1. **KEY_VAULT_URI**: the name of the key vault you've created, e.g. `example-key-vault.v`
+    1. **KEY_VAULT_URI**: the name of the key vault you've created, e.g. `example-key-vault`
     1. **SECRET_NAME**: the name of the certificate you specified when importing it to key vault, e.g. `ExampleSecret`
 
 Wait for a few minutes for your changes on **App Service** to take effect. You should then be able to visit your published website and sign-in accordingly.
@@ -163,41 +163,9 @@ Were we successful in addressing your learning objective? Consider taking a mome
 In [router.js](./App/routes/router.js), we use the [@azure/identity](https://www.npmjs.com/package/@azure/identity) to access the environment credentials via Managed Identity, and then the [@azure/keyvault-secrets](https://www.npmjs.com/package/@azure/keyvault-secrets) to access the Key Vault and grab the secret. Finally, we initialize the wrapper with the secret obtained from Key Vault:
 
 ```javascript
-const identity = require("@azure/identity");
-const keyvaultSecret = require('@azure/keyvault-secrets');
-const msalWrapper = require('msal-express-wrapper');
+```
 
-const config = require('../appSettings.json');
-const cache = require('../utils/cachePlugin');
-
-// initialize router
-const router = express.Router();
-
-// Importing from key vault
-const keyVaultUri = process.env["KEY_VAULT_URI"];
-const secretName = process.env["SECRET_NAME"];
-
-// Using the deployment environment as credential provider
-const credential = new identity.ManagedIdentityCredential();
-
-// Initialize secretClient with credentials
-const secretClient = new keyvaultSecret.SecretClient(keyVaultUri, credential);
-
-secretClient.getSecret(secretName).then((secretResponse) => {
-
-    // assing the secret obtained from Key Vault
-    config.credentials.clientSecret = secretResponse.value;
-
-    // initialize wrapper
-    const authProvider = new msalWrapper.AuthProvider(config, cache);
-
-    router.get('/signin', authProvider.signIn);
-    router.get('/signout', authProvider.signOut);
-    router.get('/redirect', authProvider.handleRedirect);
-    
-    // other app routes...
-
-}).catch(err => console.log(err));
+```typescript
 ```
 
 ## More information

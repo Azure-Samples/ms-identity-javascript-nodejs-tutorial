@@ -1,21 +1,19 @@
-// Importing from key vault
-const keyVaultUri = process.env["KEY_VAULT_URI"];
-const secretName = process.env["SECRET_NAME"];
+require('dotenv').config();
 
 const appSettings = {
     appCredentials: {
         clientId: "Enter_the_Application_Id_Here",
         tenantId: "Enter_the_Tenant_Info_Here",
         keyVaultCredential: {
-            credentialType: "",
-            credentialName: "",
-            keyVaultUrl: "",
+            credentialType: "secret",
+            credentialName: process.env["SECRET_NAME"],
+            keyVaultUrl: process.env["KEY_VAULT_URI"]
         }
     },
     authRoutes: {
         redirect: "/redirect",
-        error: "/error",
-        unauthorized: "/unauthorized"
+        error: "/error", // the wrapper will redirect to this route in case of any error
+        unauthorized: "/unauthorized" // the wrapper will redirect to this route in case of unauthorized access attempt
     },
     remoteResources: {
         graphAPI: {

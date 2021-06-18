@@ -8,6 +8,7 @@ exports.getIdPage = (req, res, next) => {
         preferred_username: req.session.account.idTokenClaims.preferred_username,
         oid: req.session.account.idTokenClaims.oid,
         sub: req.session.account.idTokenClaims.sub,
+        groups: req.session.account.idTokenClaims.groups ? req.session.account.idTokenClaims.groups.join(' ') : "Overage!"
     };
 
     res.render('id', { isAuthenticated: req.session.isAuthenticated, claims: claims });

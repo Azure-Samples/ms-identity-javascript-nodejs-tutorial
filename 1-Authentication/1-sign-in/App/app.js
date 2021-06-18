@@ -52,7 +52,6 @@ const authProvider = new msalWrapper.AuthProvider(config, cache);
 // initialize the wrapper
 app.use(authProvider.initialize());
 
-
 // app routes
 app.get('/', (req, res) => res.redirect('/home'));
 app.get('/home', mainController.getHomePage);
@@ -84,6 +83,5 @@ app.get('/unauthorized', (req, res) => res.redirect('/401.html'));
 
 // 404
 app.get('*', (req, res) => res.status(404).redirect('/404.html'));
-
 
 app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));

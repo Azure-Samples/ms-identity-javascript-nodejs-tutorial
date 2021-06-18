@@ -3,64 +3,59 @@
  * Licensed under the MIT License.
  */
 
-require('dotenv').config();
-
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
 
-const msalWrapper = require('msal-express-wrapper');
-const config = require('./appSettings.js');
+const settings = require('./appSettings');
 const cache = require('./utils/cachePlugin');
+
+const msalWrapper = require('msal-express-wrapper');
 const mainRouter = require('./routes/mainRoutes');
 
 const SERVER_PORT = process.env.PORT || 4000;
 
-// initialize express
-const app = express();
+async function main() {
+    const app = express();
 
-app.set('views', path.join(__dirname, './views'));
-app.set('view engine', 'ejs');
+    app.set('views', path.join(__dirname, './views'));
+    app.set('view engine', 'ejs');
 
-app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
-app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
+    app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
+    app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
-app.use(express.static(path.join(__dirname, './public')));
+    app.use(express.static(path.join(__dirname, './public')));
 
-/**
- * Using express-session middleware. Be sure to familiarize yourself with available options
- * and set them as desired. Visit: https://www.npmjs.com/package/express-session
- */
-const sessionConfig = {
-    secret: 'ENTER_YOUR_SECRET_HERE',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: false, // set this to true on production
-    }
-}
-
-if (app.get('env') === 'production') {
+    app.use(express.urlencoded({ extended: false }));
+    app.use(express.json());
 
     /**
-     * In App Service, SSL termination happens at the network load balancers, so all HTTPS requests reach your app as unencrypted HTTP requests.
-     * The line below is needed for getting the correct absolute URL for redirectUri configuration. For more information, visit: 
-     * https://docs.microsoft.com/azure/app-service/configure-language-nodejs?pivots=platform-linux#detect-https-session
+     * Using express-session middleware. Be sure to familiarize yourself with available options
+     * and set the desired options. Visit: https://www.npmjs.com/package/express-session
      */
+    const sessionConfig = {
+        secret: 'ENTER_YOUR_SECRET_HERE',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: false, 
+        }
+    }
 
-    app.set('trust proxy', 1) // trust first proxy
-    sessionConfig.cookie.secure = true // serve secure cookies
+    if (app.get('env') === 'production') {
+        app.set('trust proxy', 1) // trust first proxy
+        sessionConfig.cookie.secure = true // serve secure cookies
+    }
+
+    app.use(session(sessionConfig));
+
+    const authProvider = await msalWrapper.AuthProvider.buildAsync(settings, cache);
+    
+    app.use(authProvider.initialize());
+
+    app.use(mainRouter(authProvider));
+
+    app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
 }
 
-app.use(session(sessionConfig));
-
-// instantiate the wrapper
-const authProvider = new msalWrapper.AuthProvider(config, cache);
-
-// initialize the wrapper
-app.use(authProvider.initialize());
-
-// pass the instance to your routers
-app.use(mainRouter(authProvider));
-
-app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+main();

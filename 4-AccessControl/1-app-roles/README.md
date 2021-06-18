@@ -15,7 +15,7 @@
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web app featuring a todo list and secured with the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node) (MSAL Node). The app implements **Role-based Access Control** (RBAC) by using Azure AD [App Roles](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps). In the sample, users in **TaskUser** role can perform CRUD operations on their todolist, while users in **TaskAdmin** role can see all other users' tasks.
+This sample demonstrates a Node.js & Express web app that is secured with the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node) (MSAL Node). The app implements **Role-based Access Control** (RBAC) by using Azure AD [App Roles](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps). In the sample, users in **TaskUser** role can perform CRUD operations on their todo list, while users in **TaskAdmin** role can see all other users' tasks.
 
 Access control in Azure AD can be done with **Security Groups** as well, as we will cover in the [next tutorial](../2-security-groups/README.md). **Security Groups** and **App Roles** in Azure AD are by no means mutually exclusive - they can be used in tandem to provide even finer grained access control.
 
@@ -157,7 +157,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
 1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
 1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
-1. Find the key `redirectUri` and replace the existing value with the **redirect URI** for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
+1. Find the key `redirect` and replace the existing value with the **redirect URI** for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
 
 ## Running the sample
 
@@ -186,38 +186,181 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 In [appSettings.js](./App/appSettings.js), we create an access matrix that defines the required roles and allowed HTTP methods for each route that we like to grant role-based access:
 
-```json
-{    
-    "accessMatrix": {
-        "todolist": {
-            "methods": ["GET", "POST", "DELETE"],
-            "roles": ["TaskAdmin", "TaskUser"]
+```js
+{
+    accessMatrix: {
+        todolist: {
+            methods: ["GET", "POST", "DELETE"],
+            groups: ["TaskAdmin", "TaskUser"]
         },
-        "dashboard": {
-            "methods": ["GET"],
-            "roles": ["TaskAdmin"]
+        dashboard: {
+            methods: ["GET"],
+            groups: ["TaskAdmin"]
         }
     }
 }
 ```
 
-Then, in [app.js](./App/app.js), we create an instance of the [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html) class with the `appSettings.js` passed to constructor.
+Then, in [app.js](./App/app.js), we create an instance of the [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html) class with the `appSettings.js` passed to its constructor.
 
 ```javascript
+/*
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
 
+const express = require('express');
+const session = require('express-session');
+const msalWrapper = require('msal-express-wrapper');
+
+const config = require('./appSettings.js');
+const cache = require('./utils/cachePlugin');
+const mainRouter = require('./routes/mainRoutes');
+
+const SERVER_PORT = process.env.PORT || 4000;
+
+// initialize express
+const app = express(); 
+
+/**
+ * Using express-session middleware. Be sure to familiarize yourself with available options
+ * and set them as desired. Visit: https://www.npmjs.com/package/express-session
+ */
+ const sessionConfig = {
+    secret: 'ENTER_YOUR_SECRET_HERE',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // set this to true on production
+    }
+}
+
+if (app.get('env') === 'production') {
+    app.set('trust proxy', 1) // trust first proxy
+    sessionConfig.cookie.secure = true // serve secure cookies
+}
+
+app.use(session(sessionConfig));
+
+// instantiate the wrapper
+const authProvider = new msalWrapper.AuthProvider(config, cache);
+
+// initialize the wrapper
+app.use(authProvider.initialize());
+
+// pass the instance to your routers
+app.use(mainRouter(authProvider));
+
+app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
 ```
 
 The `authProvider` object exposes the middleware we can use to protect our app routes. This can be seen in [mainRoutes.js](./App/routes/mainRoutes.js):
 
 ```javascript
+const express = require('express');
 
+const mainController = require('../controllers/mainController');
+const todolistRouter = require('./todolistRoutes');
+const dashboardRouter = require('./dashboardRoutes');
+const config = require('../appSettings.js');
+
+module.exports = (authProvider) => {
+
+    // initialize router
+    const router = express.Router();
+
+    // app routes
+    router.get('/', (req, res, next) => res.redirect('/home'));
+    router.get('/home', mainController.getHomePage);
+
+    // authentication routes
+    router.get('/signin', authProvider.signIn({ successRedirect: '/' }));
+    router.get('/signout', authProvider.signOut({ successRedirect: '/' }));
+
+    // secure routes
+    router.get('/id', authProvider.isAuthenticated(), mainController.getIdPage);
+
+    router.use('/todolist',
+        authProvider.isAuthenticated(),
+        authProvider.hasAccess({
+            accessRule: config.accessMatrix.todolist
+        }),
+        todolistRouter // users have to satisfy hasAccess middleware for all routes under /todolist
+    );
+
+    router.use('/dashboard',
+        authProvider.isAuthenticated(),
+        authProvider.hasAccess({
+            accessRule: config.accessMatrix.dashboard
+        }),
+        dashboardRouter // users have to satisfy hasAccess middleware for all routes under /dashboard
+    );
+
+    return router;
+}
 ```
 
 Under the hood, [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper/blob/8860e0a53779cbdaf1477cd90f613692e1be7f94/src/AuthProvider.ts#L357) `hasAccess` middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
 
 ```typescript
+/**
+ * Checks if the user has access for this route, defined in access matrix
+ * @param {GuardOptions} options
+ * @returns {RequestHandler}
+ */
+hasAccess = (options?: GuardOptions): RequestHandler => {
+    return async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        if (req.session && this.appSettings.accessMatrix) {
 
+            const checkFor = options.accessRule.hasOwnProperty(AccessConstants.GROUPS) ? AccessConstants.GROUPS : AccessConstants.ROLES;
+
+            switch (checkFor) {
+                case AccessConstants.GROUPS:
+
+                    if (req.session.account.idTokenClaims[AccessConstants.GROUPS] === undefined) {
+                        if (req.session.account.idTokenClaims[AccessConstants.CLAIM_NAMES] || req.session.account.idTokenClaims[AccessConstants.CLAIM_SOURCES]) {
+                            return await this.handleOverage(req, res, next, options.accessRule);
+                        } else {
+                            console.log(ErrorMessages.USER_HAS_NO_GROUP);
+                            return res.redirect(this.appSettings.authRoutes.unauthorized);
+                        }
+                    } else {
+                        const groups = req.session.account.idTokenClaims[AccessConstants.GROUPS];
+
+                        if (!this.checkAccessRule(req.method, options.accessRule, groups, AccessConstants.GROUPS)) {
+                            return res.redirect(this.appSettings.authRoutes.unauthorized);
+                        }
+                    }
+
+                    next();
+                    break;
+
+                case AccessConstants.ROLES:
+                    if (req.session.account.idTokenClaims[AccessConstants.ROLES] === undefined) {
+                        console.log(ErrorMessages.USER_HAS_NO_ROLE);
+                        return res.redirect(this.appSettings.authRoutes.unauthorized);
+                    } else {
+                        const roles = req.session.account.idTokenClaims[AccessConstants.ROLES];
+
+                        if (!this.checkAccessRule(req.method, options.accessRule, roles, AccessConstants.ROLES)) {
+                            return res.redirect(this.appSettings.authRoutes.unauthorized);
+                        }
+                    }
+
+                    next();
+                    break;
+
+                default:
+                    break;
+            }
+        } else {
+            res.redirect(this.appSettings.authRoutes.unauthorized);
+        }
+    }
+}
 ```
+
+See this middleware in more detail [here](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#hasaccess).
 
 ## More information
 
