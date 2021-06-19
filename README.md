@@ -21,7 +21,7 @@ urlFragment: "ms-identity-javascript-nodejs-tutorial"
 
 The [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview), along with [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and [Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/overview) (Azure AD B2C) are central to the **Azure** cloud ecosystem. This tutorial aims to take you through the fundamentals of modern authentication with Node.js, using the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js) (MSAL Node).
 
-This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) class in order to automate routine authentication tasks such as login, logout, token acquisition, as well as utility methods to validate tokens and etc. You can find the wrapper here: [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper). Suggestions and contributions are welcome!
+This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) class in order to streamline routine authentication tasks such as login, logout, token acquisition, as well as utility methods to validate tokens and etc. You can find the wrapper here: [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper). Fork it and customize as you need. Suggestions and contributions are welcome!
 
 We recommend following the chapters in successive order. However, the code samples are self-contained, so feel free to pick samples by topics that you may need at the moment.
 
@@ -29,7 +29,8 @@ We recommend following the chapters in successive order. However, the code sampl
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/en/download/)
+- [Node.js](https://nodejs.org/en/download/) (>= v12.x)
+- [Express.js](https://expressjs.com/) (>= v4.x)
 - [Visual Studio Code](https://code.visualstudio.com/download)
 - [VS Code Azure Tools Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack)
 - A modern web browser
@@ -46,11 +47,6 @@ Please refer to each chapter's README for sample-specific prerequisites.
 Please refer to each chapter's README for sample-specific recommendations.
 
 ## Contents
-
-- For **Azure AD**, start the tutorial from [here](./1-Authentication/1-sign-in/README-incremental.md)
-- For **Azure AD B2C**, start the tutorial from [here](./1-Authentication/2-sign-in-b2c/README-incremental.md)
-
-Alternatively, choose below the sample you want to review.
 
 ### Chapter 1: Add Authentication to your web app
 
@@ -70,6 +66,13 @@ Alternatively, choose below the sample you want to review.
 |                 |               |
 |-----------------|---------------|
 | <img src="./3-Deployment/ReadmeFiles/topology.png" width="200"> | [**Deploy to Azure App Service**](./3-Deployment/README.md) </br> Prepare your app for deployment to various **Azure** services. Learn how to package and upload files, configure authentication parameters and use **Azure** services for managing your operations. |
+
+### Chapter 4: Control access to your app using App Roles and Security Groups
+
+|                 |               |
+|-----------------|---------------|
+| <img src="./4-AccessControl/1-app-roles/ReadmeFiles/topology.png" width="200"> | [**Use App Roles for access control**](./4-AccessControl/1-app-roles/README.md) </br> Define App Roles and use roles claim in a token to implement Role-based Access Control (RBAC) for your web app. |
+| <img src="./4-AccessControl/2-security-groups/ReadmeFiles/topology.png" width="200"> | [**Use Security Groups for access control**](./4-AccessControl/2-security-groups/README.md) </br> Create Security Groups and use groups claim in a token to implement Role-based Access Control (RBAC) for your web app. Handle groups claim overage scenarios. |
 
 ## We'd love your feedback!
 

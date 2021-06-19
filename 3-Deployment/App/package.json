@@ -12,16 +12,13 @@
   "dependencies": {
     "@azure/msal-node": "^1.1.0",
     "@microsoft/microsoft-graph-client": "^2.2.1",
-    "isomorphic-fetch": "^3.0.0",
-    "@azure/identity": "^1.2.3",
-    "@azure/keyvault-secrets": "^4.1.0",
     "axios": "^0.21.0",
-    "body-parser": "^1.19.0",
     "bootstrap": "^4.5.3",
+    "dotenv": "^8.2.0",
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
-    "dotenv": "^8.2.0",
+    "isomorphic-fetch": "^3.0.0",
     "msal-express-wrapper": "git+https://github.com/Azure-Samples/msal-express-wrapper.git"
   },
   "devDependencies": {

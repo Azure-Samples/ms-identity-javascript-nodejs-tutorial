@@ -34,6 +34,8 @@ One of the principles of security is to place credentials like secrets and certi
 
 ## Setup
 
+### Step 1: Clone or download this repository
+
 From your shell or command line:
 
 ```console
@@ -44,11 +46,20 @@ or download and extract the repository .zip file.
 
 > :warning: To avoid path length limitations on Windows, we recommend cloning into a directory near the root of your drive.
 
+### Step 2: Install project dependencies
+
+Locate the root of the sample folder. Then:
+
+```console
+    cd 3-Deployment/App
+    npm install
+```
+
 ## Registration
 
 ### Register the app
 
-Use the same app registration credentials that you've obtained during [**chapter 2.1**](../2-Authorization/1-call-graph/README.md#registration). You may copy-paste the contents of your `appSettings.json` file to do so.
+Use the same app registration credentials that you've obtained during [**chapter 2.1**](../2-Authorization/1-call-graph/README.md#registration). Leave out the `clientSecret`, however, as we will fetch secrets from **Azure Key Vault** instead.
 
 ## Deployment
 
@@ -69,7 +80,7 @@ There are various ways to upload your files to **Azure App Service**. Here we pr
 
 ![api_step1](./ReadmeFiles/step1.png)
 
-2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `App` folder to **Azure App Services**. You may also right-click to the `App` folder to access it via the context menu.
+2. On the **App Service** explorer section you will see an **upward-facing** arrow icon. Click on it publish your local files in the `App` folder to **Azure App Services**. You may also right-click to the `App` folder to access it via the context menu.
 
 ![api_step2](./ReadmeFiles/step2.png)
 
@@ -119,7 +130,7 @@ Before starting here, make sure:
 1. On the **Create a secret** screen choose the following values:
     - **Upload options**: Manual.
     - **Name**: Type a name for the secret. The secret name must be unique within a Key Vault. For example, `ExampleSecret`
-    - **Value**: Copy and paste the value for the `clientSecret` property (without quotes!) from your `appSettings.json` file. (:warning: once done, remove the value of `clientSecret` from `appSettings.json`).
+    - **Value**: Copy and paste the value of the `clientSecret` for your App. You can use the secret you created in the previous tutorial. If you forgot it and cannot access it again, simply create a new one.
     - Leave the other values to their defaults. Click **Create**.
 
 ##### Provide the managed identity access to Key Vault
@@ -138,8 +149,9 @@ Finally, you need to add a few environment variables to the App Service where yo
 1. In the [Azure portal](https://portal.azure.com) , search for and select **App Service**, and then select your app.
 1. Select **Configuration** blade on the left, then select **New Application Settings**.
 1. Add the following variables (name-value):
-    1. **KEY_VAULT_URI**: the name of the key vault you've created, e.g. `example-key-vault.v`
+    1. **KEY_VAULT_URI**: the name of the key vault you've created, e.g. `example-key-vault`
     1. **SECRET_NAME**: the name of the certificate you specified when importing it to key vault, e.g. `ExampleSecret`
+    1. **NODE_ENV**: enter `production` (:information_source: this enables your application to set cookies to secure and trust App service proxy)
 
 Wait for a few minutes for your changes on **App Service** to take effect. You should then be able to visit your published website and sign-in accordingly.
 
@@ -160,44 +172,128 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ### Accessing Key Vault using Managed Identity
 
-In [router.js](./App/routes/router.js), we use the [@azure/identity](https://www.npmjs.com/package/@azure/identity) to access the environment credentials via Managed Identity, and then the [@azure/keyvault-secrets](https://www.npmjs.com/package/@azure/keyvault-secrets) to access the Key Vault and grab the secret. Finally, we initialize the wrapper with the secret obtained from Key Vault:
+In [appSettings.js](./App/appSettings.js) file, we enter the parameters needed for accessing [Azure Key Vault](https://docs.microsoft.com/azure/key-vault/general/basic-concepts) to fetch the application's credentials:
 
 ```javascript
-const identity = require("@azure/identity");
-const keyvaultSecret = require('@azure/keyvault-secrets');
+const appSettings = {
+    appCredentials: {
+        clientId: "Enter_the_Application_Id_Here",
+        tenantId: "Enter_the_Tenant_Info_Here",
+        keyVaultCredential: {
+            credentialType: "secret", // credential type: secret | certificate
+            credentialName: process.env["SECRET_NAME"], // you may enter your secret's name manually for local development
+            keyVaultUrl: process.env["KEY_VAULT_URI"] // you may enter your key vault uri manually for local development
+        }
+    },
+    authRoutes: {
+        redirect: "/redirect",
+        error: "/error", // the wrapper will redirect to this route in case of any error
+        unauthorized: "/unauthorized" // the wrapper will redirect to this route in case of unauthorized access attempt
+    },
+    remoteResources: {
+        graphAPI: {
+            endpoint: "https://graph.microsoft.com/v1.0/me",
+            scopes: ["user.read"]
+        },
+        armAPI: {
+            endpoint: "https://management.azure.com/tenants?api-version=2020-01-01",
+            scopes: ["https://management.azure.com/user_impersonation"]
+        }
+    }
+}
+```
+
+Then in [app.js](./App/app.js), we instantiate an **authProvider** object asynchronously using the [buildAsync](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#buildasync) method of [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html). To do so, we need to start the express server asynchronously:
+
+```javascript
+const express = require('express');
+const session = require('express-session');
 const msalWrapper = require('msal-express-wrapper');
 
-const config = require('../appSettings.json');
-const cache = require('../utils/cachePlugin');
+// async function to wait for key vault credentials before start
+async function main() {
+    const app = express();
 
-// initialize router
-const router = express.Router();
+    /**
+     * Using express-session middleware. Be sure to familiarize yourself with available options
+     * and set them as desired. Visit: https://www.npmjs.com/package/express-session
+     */
+    app.use(session({
+        secret: 'ENTER_YOUR_SECRET_HERE',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: false, // set true on production
+        }
+    }));
 
-// Importing from key vault
-const keyVaultUri = process.env["KEY_VAULT_URI"];
-const secretName = process.env["SECRET_NAME"];
-
-// Using the deployment environment as credential provider
-const credential = new identity.ManagedIdentityCredential();
-
-// Initialize secretClient with credentials
-const secretClient = new keyvaultSecret.SecretClient(keyVaultUri, credential);
-
-secretClient.getSecret(secretName).then((secretResponse) => {
-
-    // assing the secret obtained from Key Vault
-    config.credentials.clientSecret = secretResponse.value;
-
-    // initialize wrapper
-    const authProvider = new msalWrapper.AuthProvider(config, cache);
-
-    router.get('/signin', authProvider.signIn);
-    router.get('/signout', authProvider.signOut);
-    router.get('/redirect', authProvider.handleRedirect);
+    // fetching credentials from key vault
+    const authProvider = await msalWrapper.AuthProvider.buildAsync(settings, cache);
     
-    // other app routes...
+    app.use(authProvider.initialize());
 
-}).catch(err => console.log(err));
+    // pass authProvider instance to your routers
+    app.use(mainRouter(authProvider));
+
+    app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+}
+
+main();
+```
+
+Under the hood, the wrapper calls the **Azure Key Vault** to access credentials needed for the application to authenticate with Azure AD using the [KeyVaultManager](https://azure-samples.github.io/msal-express-wrapper/classes/keyvaultmanager.html) class. This class is leveraging the [@azure/identity](https://www.npmjs.com/package/@azure/identity) and [@azure/key-vault](https://www.npmjs.com/package/@azure/keyvault-secrets) packages:
+
+```typescript
+import { CertificateClient, KeyVaultCertificate } from "@azure/keyvault-certificates";
+import { DefaultAzureCredential } from "@azure/identity";
+import { KeyVaultSecret, SecretClient } from "@azure/keyvault-secrets";
+
+export class KeyVaultManager {
+
+    // updates appSettings object with credentials from key vault
+    async getCredentialFromKeyVault(config: AppSettings): Promise<AppSettings> {
+
+        const credential = new DefaultAzureCredential();
+
+        if (!config.appCredentials.keyVaultCredential) {
+            return config;
+        }
+
+        switch (config.appCredentials.keyVaultCredential.credentialType) {
+            case KeyVaultCredentialTypes.SECRET: {
+                try {
+                    const secretResponse = await this.getSecretCredential(config, credential);
+                    config.appCredentials.clientSecret = secretResponse.value;
+                    return config;
+                } catch (error) {
+                    console.log(error);
+                }
+                break;
+            }
+
+            // ...
+
+            default:
+                break;
+        }
+    };
+
+    // ...
+
+    async getSecretCredential(config: AppSettings, credential: DefaultAzureCredential): Promise<KeyVaultSecret> {
+
+        // instantiate @azure/key-vault-secrets secret client
+        const secretClient = new SecretClient(config.appCredentials.keyVaultCredential.keyVaultUrl, credential);
+
+        try {
+            const keyVaultSecret = await secretClient.getSecret(config.appCredentials.keyVaultCredential.credentialName);
+            return keyVaultSecret;
+        } catch (error) {
+            console.log(error);
+            return error;
+        }
+    }
+}
 ```
 
 ## More information

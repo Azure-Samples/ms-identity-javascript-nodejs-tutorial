@@ -1,0 +1,70 @@
+{
+    "Sample": {
+        "Title": "Node.js & Express web app using Security Groups to implement Role-Based Access Control",
+        "Level": 300,
+        "Client": "Node.js & Express web app",
+        "Service": "Microsoft Graph",
+        "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
+        "Endpoint": "AAD v2.0"
+    },
+    "AADApps": [
+        {
+            "Id": "client",
+            "Name": "msal-node-webapp",
+            "Kind": "WebApp",
+            "Audience": "AzureADMyOrg",
+            "GroupMembershipClaims": "SecurityGroup",
+            "PasswordCredentials": "Auto",
+            "HomePage": "http://localhost:4000",
+            "ReplyUrls": "http://localhost:4000/redirect",
+            "RequiredResourcesAccess": [
+                {
+                    "Resource": "Microsoft Graph",
+                    "DelegatedPermissions": [
+                        "User.Read",
+                        "GroupMember.Read.All"
+                    ]
+                }
+            ],
+            "SecurityGroups": [
+                {
+                    "Name": "GroupAdmin",
+                    "Description": "Admin Security Group"
+                },
+                {
+                    "Name": "GroupMember",
+                    "Description": "User Security Group"
+                }
+            ]
+        }
+    ],
+    "CodeConfiguration": [
+        {
+            "App": "client",
+            "SettingKind": "Replace",
+            "SettingFile": "\\..\\App\\appSettings.js",
+            "Mappings": [
+                {
+                    "key": "Enter_the_Application_Id_Here",
+                    "value": ".AppId"
+                },
+                {
+                    "key": "Enter_the_Tenant_Info_Here",
+                    "value": "$tenantId"
+                },
+                {
+                    "key": "Enter_the_Client_Secret_Here",
+                    "value": ".AppKey"
+                },
+                {
+                    "key": "Enter_the_ObjectId_of_GroupAdmin",
+                    "value": "$GroupAdmin.objectId"
+                },
+                {
+                    "key": "Enter_the_ObjectId_of_GroupMember",
+                    "value": "$GroupMember.objectId"
+                }
+            ]
+        }
+    ]
+}
