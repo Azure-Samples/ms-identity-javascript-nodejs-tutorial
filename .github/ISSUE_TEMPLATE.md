@@ -14,6 +14,7 @@
     - [ ] 2-1) Acquire a Token and call Microsoft Graph
     - [ ]   3) Deploy to Azure Storage and App Service
     - [ ] 4-1) Use App Roles for Role-based Access Control
+    - [ ] 4-2) Use Security Groups for Role-based Access Control
 ```
 
 ## This issue is for a

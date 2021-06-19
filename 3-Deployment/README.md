@@ -34,6 +34,8 @@ One of the principles of security is to place credentials like secrets and certi
 
 ## Setup
 
+### Step 1: Clone or download this repository
+
 From your shell or command line:
 
 ```console
@@ -44,11 +46,20 @@ or download and extract the repository .zip file.
 
 > :warning: To avoid path length limitations on Windows, we recommend cloning into a directory near the root of your drive.
 
+### Step 2: Install project dependencies
+
+Locate the root of the sample folder. Then:
+
+```console
+    cd 3-Deployment/App
+    npm install
+```
+
 ## Registration
 
 ### Register the app
 
-Use the same app registration credentials that you've obtained during [**chapter 2.1**](../2-Authorization/1-call-graph/README.md#registration). You may copy-paste the contents of your `appSettings.json` file to do so.
+Use the same app registration credentials that you've obtained during [**chapter 2.1**](../2-Authorization/1-call-graph/README.md#registration). Leave out the `clientSecret`, however, as we will fetch secrets from **Azure Key Vault** instead.
 
 ## Deployment
 
@@ -69,7 +80,7 @@ There are various ways to upload your files to **Azure App Service**. Here we pr
 
 ![api_step1](./ReadmeFiles/step1.png)
 
-2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the `App` folder to **Azure App Services**. You may also right-click to the `App` folder to access it via the context menu.
+2. On the **App Service** explorer section you will see an **upward-facing** arrow icon. Click on it publish your local files in the `App` folder to **Azure App Services**. You may also right-click to the `App` folder to access it via the context menu.
 
 ![api_step2](./ReadmeFiles/step2.png)
 
@@ -119,7 +130,7 @@ Before starting here, make sure:
 1. On the **Create a secret** screen choose the following values:
     - **Upload options**: Manual.
     - **Name**: Type a name for the secret. The secret name must be unique within a Key Vault. For example, `ExampleSecret`
-    - **Value**: Copy and paste the value for the `clientSecret` property (without quotes!) from your `appSettings.json` file. (:warning: once done, remove the value of `clientSecret` from `appSettings.json`).
+    - **Value**: Copy and paste the value of the `clientSecret` for your App. You can use the secret you created in the previous tutorial. If you forgot it and cannot access it again, simply create a new one.
     - Leave the other values to their defaults. Click **Create**.
 
 ##### Provide the managed identity access to Key Vault
@@ -140,6 +151,7 @@ Finally, you need to add a few environment variables to the App Service where yo
 1. Add the following variables (name-value):
     1. **KEY_VAULT_URI**: the name of the key vault you've created, e.g. `example-key-vault`
     1. **SECRET_NAME**: the name of the certificate you specified when importing it to key vault, e.g. `ExampleSecret`
+    1. **NODE_ENV**: enter `production`
 
 Wait for a few minutes for your changes on **App Service** to take effect. You should then be able to visit your published website and sign-in accordingly.
 
@@ -159,8 +171,6 @@ Were we successful in addressing your learning objective? Consider taking a mome
 ## About the code
 
 ### Accessing Key Vault using Managed Identity
-
-In [router.js](./App/routes/router.js), we use the [@azure/identity](https://www.npmjs.com/package/@azure/identity) to access the environment credentials via Managed Identity, and then the [@azure/keyvault-secrets](https://www.npmjs.com/package/@azure/keyvault-secrets) to access the Key Vault and grab the secret. Finally, we initialize the wrapper with the secret obtained from Key Vault:
 
 ```javascript
 ```
