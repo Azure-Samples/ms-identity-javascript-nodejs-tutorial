@@ -9,6 +9,7 @@ const methodOverride = require('method-override');
 const path = require('path');
 
 const msalWrapper = require('msal-express-wrapper');
+
 const config = require('./appSettings.js');
 const cache = require('./utils/cachePlugin');
 const mainRouter = require('./routes/mainRoutes');

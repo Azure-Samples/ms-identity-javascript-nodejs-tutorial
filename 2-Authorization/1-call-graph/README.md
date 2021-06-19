@@ -35,7 +35,7 @@ This sample also demonstrates how to use the [Microsoft Graph JavaScript SDK](ht
 |-----------------------------|---------------------------------------------------------------|
 | `AppCreationScripts/`       | Contains Powershell scripts to automate app registration.     |
 | `ReadmeFiles/`              | Contains illustrations and screenshots.                       |
-| `App/appSettings.json`      | Authentication parameters and settings                        |
+| `App/appSettings.js`      | Authentication parameters and settings                        |
 | `App/cache.json`            | Stores MSAL Node token cache data.                            |
 | `App/app.js`                | Application entry point.                                      |
 | `App/utils/graphManager.js` | Handles calls to Microsoft Graph using Graph JS SDK.          |
@@ -148,7 +148,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
-1. Open the `App/appSettings.json` file.
+1. Open the `App/appSettings.js` file.
 1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
 1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
 1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
@@ -210,19 +210,176 @@ Scopes can come in various forms so it pays off to be familiar with them. The fo
 ### Acquiring an access token
 
 ```javascript
+const express = require('express');
+const session = require('express-session');
+const msalWrapper = require('msal-express-wrapper');
 
+// initialize express
+const app = express();
+
+app.use(session({
+    secret: 'ENTER_YOUR_SECRET_HERE',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // set this to true on production
+    }
+}));
+
+// instantiate the wrapper
+const authProvider = new msalWrapper.AuthProvider(config, cache);
+
+// initialize the wrapper
+app.use(authProvider.initialize());
+
+// authentication routes
+app.get('/signin', 
+    authProvider.signIn({
+        successRedirect: '/'
+    }
+));
+
+app.get('/signout', 
+    authProvider.signOut({
+        successRedirect: '/'
+    }
+));
+
+app.get('/profile', 
+    authProvider.getToken({
+        resource: config.remoteResources.graphAPI
+    }), 
+    mainController.getProfilePage
+);
+
+app.get('/tenant',
+    authProvider.getToken({
+        resource: config.remoteResources.armAPI
+    }),
+    mainController.getTenantPage
+);
+
+app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
 ```
 
-Under the hood, the `getToken` middleware grabs resource endpoint and associated scope from [appSettings.json](./App/appSettings.json), and attempts to obtain an access token from cache silently and attaches it to session. If silent token acquisition fails for some reason (e.g. consent required), it makes an auth code request, which triggers the first leg of auth code flow.
+Under the hood, the [getToken()](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#gettoken) middleware grabs resource endpoint and associated scope from [appSettings.js](./App/appSettings.js), and attempts to obtain an access token from cache silently and attaches it to session. If silent token acquisition fails for some reason (e.g. consent required), it makes an auth code request, which triggers the first leg of auth code flow.
 
 ```typescript
+getToken = (options: TokenRequestOptions): RequestHandler => {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        // get scopes for token request
+        const scopes = options.resource.scopes;
 
+        const resourceName = this.getResourceNameFromScopes(scopes)
+
+        if (!req.session.remoteResources) {
+            req.session.remoteResources = {};
+        }
+
+        req.session.remoteResources = {
+            [resourceName]: {
+                ...this.appSettings.remoteResources[resourceName],
+                accessToken: null,
+            } as Resource
+        };
+
+        try {
+            const silentRequest: SilentFlowRequest = {
+                account: req.session.account,
+                scopes: scopes,
+            };
+
+            // acquire token silently to be used in resource call
+            const tokenResponse = await this.msalClient.acquireTokenSilent(silentRequest);
+            console.log("\nSuccessful silent token acquisition:\n Response: \n:", tokenResponse);
+
+            // In B2C scenarios, sometimes an access token is returned empty.
+            // In that case, we will acquire token interactively instead.
+            if (StringUtils.isEmpty(tokenResponse.accessToken)) {
+                console.log(ErrorMessages.TOKEN_NOT_FOUND);
+                throw new InteractionRequiredAuthError(ErrorMessages.INTERACTION_REQUIRED);
+            }
+
+            req.session.remoteResources[resourceName].accessToken = tokenResponse.accessToken;
+            next();
+        } catch (error) {
+            // in case there are no cached tokens, initiate an interactive call
+            if (error instanceof InteractionRequiredAuthError) {
+                const state = this.cryptoProvider.base64Encode(
+                    JSON.stringify({
+                        stage: AppStages.ACQUIRE_TOKEN,
+                        path: req.route.path,
+                        nonce: req.session.nonce,
+                    })
+                );
+
+                const params: AuthCodeParams = {
+                    authority: this.msalConfig.auth.authority,
+                    scopes: scopes,
+                    state: state,
+                    redirect: UrlUtils.ensureAbsoluteUrl(req, this.appSettings.authRoutes.redirect),
+                    account: req.session.account,
+                };
+
+                // get an auth code url and initiate the first leg of auth code grant to get token
+                return this.getAuthCode(req, res, next, params);
+            } else {
+                console.log(error);
+                next(error);
+            }
+        }
+    }
+};
 ```
 
-In the second leg of auth code flow, the auth code from redirect response is used to request a new access token (and refresh token) via the `handleRedirect` middleware.
+In the second leg of auth code flow, the auth code from redirect response is used to request a new access token (and refresh token) via the [handleRedirect](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#handleredirect) middleware.
 
 ```typescript
- 
+private handleRedirect = (options?: HandleRedirectOptions): RequestHandler => {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        if (req.query.state) {
+            const state = JSON.parse(this.cryptoProvider.base64Decode(req.query.state as string));
+
+            // check if nonce matches
+            if (state.nonce === req.session.nonce) {
+                switch (state.stage) {
+                    
+                    // ...
+
+                    case AppStages.ACQUIRE_TOKEN: {
+                        // get the name of the resource associated with scope
+                        const resourceName = this.getResourceNameFromScopes(req.session.tokenRequest.scopes);
+
+                        req.session.tokenRequest.code = req.query.code as string
+
+                        try {
+                            const tokenResponse = await this.msalClient.acquireTokenByCode(req.session.tokenRequest);
+                            console.log("\nResponse: \n:", tokenResponse);
+                            req.session.remoteResources[resourceName].accessToken = tokenResponse.accessToken;
+                            res.redirect(state.path);
+                        } catch (error) {
+                            console.log(ErrorMessages.TOKEN_ACQUISITION_FAILED);
+                            console.log(error);
+                            next(error);
+                        }
+                        break;
+                    }
+
+                    default:
+                        console.log(ErrorMessages.CANNOT_DETERMINE_APP_STAGE);
+                        res.redirect(this.appSettings.authRoutes.error);
+                        break;
+                }
+            } else {
+                console.log(ErrorMessages.NONCE_MISMATCH);
+                res.redirect(this.appSettings.authRoutes.unauthorized);
+            }
+        } else {
+            console.log(ErrorMessages.STATE_NOT_FOUND)
+            res.redirect(this.appSettings.authRoutes.unauthorized);
+        }
+    }
+};
 ```
 
 ### Access Token validation

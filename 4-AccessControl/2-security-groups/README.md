@@ -146,6 +146,9 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
 1. Find the key `redirect` and replace the existing value with the redirect URI for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
 
+1. Open the `App/app.js` file.
+1. Find the string `ENTER_YOUR_SECRET_HERE` and replace it with a secret that will be used when encrypting your app's session using the [express-session](https://www.npmjs.com/package/express-session) package.
+
 ### Create Security Groups
 
 1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
@@ -256,43 +259,21 @@ In [appSettings.js](./App/appSettings.js), we create an access matrix that defin
 Then, in [app.js](./App/app.js), we create an instance of the [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html) class with the `appSettings.js` passed to its constructor.
 
 ```javascript
-/*
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License.
- */
-
 const express = require('express');
 const session = require('express-session');
 const msalWrapper = require('msal-express-wrapper');
 
-const config = require('./appSettings.js');
-const cache = require('./utils/cachePlugin');
-const mainRouter = require('./routes/mainRoutes');
-
-const SERVER_PORT = process.env.PORT || 4000;
-
 // initialize express
 const app = express(); 
 
-/**
- * Using express-session middleware. Be sure to familiarize yourself with available options
- * and set them as desired. Visit: https://www.npmjs.com/package/express-session
- */
- const sessionConfig = {
+app.use(session({
     secret: 'ENTER_YOUR_SECRET_HERE',
     resave: false,
     saveUninitialized: false,
     cookie: {
         secure: false, // set this to true on production
     }
-}
-
-if (app.get('env') === 'production') {
-    app.set('trust proxy', 1) // trust first proxy
-    sessionConfig.cookie.secure = true // serve secure cookies
-}
-
-app.use(session(sessionConfig));
+}));
 
 // instantiate the wrapper
 const authProvider = new msalWrapper.AuthProvider(config, cache);
@@ -310,11 +291,6 @@ The `authProvider` object exposes the middleware we can use to protect our app r
 
 ```javascript
 const express = require('express');
-
-const mainController = require('../controllers/mainController');
-const todolistRouter = require('./todolistRoutes');
-const dashboardRouter = require('./dashboardRoutes');
-const config = require('../appSettings.js');
 
 module.exports = (authProvider) => {
 
@@ -352,7 +328,7 @@ module.exports = (authProvider) => {
 }
 ```
 
-Under the hood, [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper/blob/8860e0a53779cbdaf1477cd90f613692e1be7f94/src/AuthProvider.ts#L357) `hasAccess` middleware checks the signed-in user's ID token's `groups` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
+Under the hood, [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper/blob/8860e0a53779cbdaf1477cd90f613692e1be7f94/src/AuthProvider.ts#L357) [hasAccess](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#hasaccess) middleware checks the signed-in user's ID token's `groups` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
 
 ```typescript
 /**
@@ -387,20 +363,7 @@ hasAccess = (options?: GuardOptions): RequestHandler => {
                     next();
                     break;
 
-                case AccessConstants.ROLES:
-                    if (req.session.account.idTokenClaims[AccessConstants.ROLES] === undefined) {
-                        console.log(ErrorMessages.USER_HAS_NO_ROLE);
-                        return res.redirect(this.appSettings.authRoutes.unauthorized);
-                    } else {
-                        const roles = req.session.account.idTokenClaims[AccessConstants.ROLES];
-
-                        if (!this.checkAccessRule(req.method, options.accessRule, roles, AccessConstants.ROLES)) {
-                            return res.redirect(this.appSettings.authRoutes.unauthorized);
-                        }
-                    }
-
-                    next();
-                    break;
+                // ...
 
                 default:
                     break;
@@ -411,8 +374,6 @@ hasAccess = (options?: GuardOptions): RequestHandler => {
     }
 }
 ```
-
-See this middleware in more detail [here](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#hasaccess).
 
 ### The groups overage claim
 
@@ -432,17 +393,9 @@ When attending to overage scenarios, which requires a call to [Microsoft Graph](
 
 #### Handle the overage scenario
 
-When the overage occurs, the user's ID token will have the `_claim_names` and `_claim_sources` claims instead of the `groups` claim. Furthermore, `_claim_sources` claim contains the URI that we can query to get the full list of groups the user belongs to. In the `hasAccess` middleware we detect if the overage, and trigger the `handleOverage` middleware to query URI we mentioned.
+When the overage occurs, the user's ID token will have the `_claim_names` and `_claim_sources` claims instead of the `groups` claim. Furthermore, `_claim_sources` claim contains the URL that we can query to get the full list of groups the user belongs to. In the [hasAccess()](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#hasaccess) middleware we detect if the overage, and trigger the [handleOverage](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#handleoverage) method to query the URL we mentioned.
 
 ```typescript
-/**
- * Handles group overage claims by querying MS Graph /memberOf endpoint
- * @param {Request} req: express request object
- * @param {Response} res: express response object
- * @param {NextFunction} next: express next function
- * @param {AccessRule} rule: a given access rule
- * @returns 
- */
 private async handleOverage(req: Request, res: Response, next: NextFunction, rule: AccessRule): Promise<void> {
     const { _claim_names, _claim_sources, ...newIdTokenClaims } = <any>req.session.account.idTokenClaims;
 
@@ -503,8 +456,6 @@ private async handleOverage(req: Request, res: Response, next: NextFunction, rul
     }
 }
 ```
-
-See this middleware in more detail [here](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#handleoverage).
 
 ## More information
 
