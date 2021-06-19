@@ -29,7 +29,8 @@ We recommend following the chapters in successive order. However, the code sampl
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/en/download/)
+- [Node.js](https://nodejs.org/en/download/) (>= v12.x)
+- [Express.js](https://expressjs.com/) (>= v4.x)
 - [Visual Studio Code](https://code.visualstudio.com/download)
 - [VS Code Azure Tools Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack)
 - A modern web browser
