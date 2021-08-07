@@ -19,6 +19,12 @@ urlFragment: "ms-identity-javascript-nodejs-tutorial"
 
 # Tutorial: Enable your Node.js web app to sign-in users and call APIs with the Microsoft identity platform
 
+[![Build](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/node.js.yml/badge.svg)](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/node.js.yml)
+[![Code Scan](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/codeql.yml/badge.svg)](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/codeql.yml)
+![GitHub issues](https://img.shields.io/github/issues/Azure-Samples/ms-identity-javascript-nodejs-tutorial)
+![npm](https://img.shields.io/npm/v/@azure/msal-node?label=msal-node)
+![GitHub](https://img.shields.io/github/license/Azure-Samples/ms-identity-javascript-nodejs-tutorial)
+
 The [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview), along with [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and [Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/overview) (Azure AD B2C) are central to the **Azure** cloud ecosystem. This tutorial aims to take you through the fundamentals of modern authentication with Node.js, using the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js) (MSAL Node).
 
 This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) class in order to streamline routine authentication tasks such as login, logout, token acquisition, as well as utility methods to validate tokens and etc. You can find the wrapper here: [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper). Fork it and customize as you need. Suggestions and contributions are welcome!
