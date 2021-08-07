@@ -1,4 +1,5 @@
 const request = require('supertest');
+const { v4: uuidv4 } = require('uuid');
 
 describe('Sanitize configuration object', () => {
     let appSettings;
@@ -28,14 +29,25 @@ describe('Sanitize configuration object', () => {
 });
 
 describe('Ensure pages served', () => {
-    let app;
 
+    let app;
+    let appSettings;
+    let randomGuid;
+    
     beforeAll(() => {
         process.env.NODE_ENV = 'test';
+
+        appSettings = require('./appSettings.js');
+        randomGuid = uuidv4();
+
+        appSettings.appCredentials.clientId = randomGuid;
+        appSettings.appCredentials.tenantId = randomGuid;
+
         app = require('./app.js');
     });
 
     it('should serve home page', async () => {
+
         const res = await request(app)
             .get('/home');
 

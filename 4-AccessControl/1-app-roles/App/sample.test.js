@@ -32,13 +32,16 @@ describe('Ensure pages served', () => {
 
     let app;
     let appSettings;
+    let randomGuid;
     
     beforeAll(() => {
         process.env.NODE_ENV = 'test';
 
         appSettings = require('./appSettings.js');
-        appSettings.appCredentials.clientId = uuidv4();
-        appSettings.appCredentials.tenantId = uuidv4();
+        randomGuid = uuidv4();
+
+        appSettings.appCredentials.clientId = randomGuid;
+        appSettings.appCredentials.tenantId = randomGuid;
 
         app = require('./app.js');
     });
