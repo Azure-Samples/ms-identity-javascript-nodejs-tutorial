@@ -31,9 +31,7 @@ This sample demonstrates a Node.js & Express web application that authenticates 
 | `AppCreationScripts/`       | Contains Powershell scripts to automate app registration.     |
 | `ReadmeFiles/`              | Contains illustrations and screenshots.                       |
 | `App/appSettings.json`      | Authentication parameters and settings                        |
-| `App/cache.json`            | Stores MSAL Node token cache data.                            |
 | `App/app.js`                | Application entry point.                                      |
-| `App/utils/cachePlugin.js`  | Handles serializing and writing cache to disk.                |
 
 ## Prerequisites
 
@@ -169,7 +167,7 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ### Initialization
 
-In [app.js](./App/app.js), we instantiate the [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html) class. **AuthProvider** constructor expects two parameters: a configuration object ([appSettings.js](./App/appSettings.js)), and an optional cache plug-in ([cachePlugin.js](./App/utils/cachePlugin.js)) if you wish to save MSAL Node cache to disk. Otherwise, in-memory only cache is used. Once instantiated, **authProvider** exposes the [initialize()](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#initialize) middleware, which sets the default routes for handling redirect response from Azure AD and etc.
+In [app.js](./App/app.js), we instantiate the [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html) class. **AuthProvider** constructor expects two parameters: a configuration object ([appSettings.js](./App/appSettings.js)), and an **optional** cache plug-in if you wish to save MSAL Node cache to disk. Otherwise, in-memory only cache is used. Once instantiated, **authProvider** exposes the [initialize()](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#initialize) middleware, which sets the default routes for handling redirect response from Azure AD and etc.
 
 ```javascript
 const express = require('express');
@@ -192,7 +190,7 @@ app.use(session({
     }));
 
 // instantiate the wrapper
-const authProvider = new msalWrapper.AuthProvider(config, cache);
+const authProvider = new msalWrapper.AuthProvider(config);
 
 // initialize the wrapper
 app.use(authProvider.initialize());

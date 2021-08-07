@@ -228,7 +228,7 @@ async function main() {
     }));
 
     // fetching credentials from key vault
-    const authProvider = await msalWrapper.AuthProvider.buildAsync(settings, cache);
+    const authProvider = await msalWrapper.AuthProvider.buildAsync(settings);
     
     app.use(authProvider.initialize());
 

@@ -101,9 +101,6 @@ typings/
 # TernJS port file
 .tern-port
 
-# NPM lock file
-package-lock.json
-
 # VS Code cache
 .vscode/
 

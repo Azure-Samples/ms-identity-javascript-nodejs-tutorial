@@ -35,8 +35,7 @@ This sample also demonstrates how to use the [Microsoft Graph JavaScript SDK](ht
 |-----------------------------|---------------------------------------------------------------|
 | `AppCreationScripts/`       | Contains Powershell scripts to automate app registration.     |
 | `ReadmeFiles/`              | Contains illustrations and screenshots.                       |
-| `App/appSettings.js`      | Authentication parameters and settings                        |
-| `App/cache.json`            | Stores MSAL Node token cache data.                            |
+| `App/appSettings.js`      | Authentication parameters and settings.                         |
 | `App/app.js`                | Application entry point.                                      |
 | `App/utils/graphManager.js` | Handles calls to Microsoft Graph using Graph JS SDK.          |
 | `App/utils/fetchManager.js` | Handles calls to protected APIs using Axios package.          |
@@ -227,7 +226,7 @@ app.use(session({
 }));
 
 // instantiate the wrapper
-const authProvider = new msalWrapper.AuthProvider(config, cache);
+const authProvider = new msalWrapper.AuthProvider(config);
 
 // initialize the wrapper
 app.use(authProvider.initialize());

@@ -11,7 +11,6 @@ const path = require('path');
 const msalWrapper = require('msal-express-wrapper');
 
 const config = require('./appSettings.js');
-const cache = require('./utils/cachePlugin');
 const mainRouter = require('./routes/mainRoutes');
 
 const SERVER_PORT = process.env.PORT || 4000;
@@ -53,7 +52,7 @@ if (app.get('env') === 'production') {
 app.use(session(sessionConfig));
 
 // instantiate the wrapper
-const authProvider = new msalWrapper.AuthProvider(config, cache);
+const authProvider = new msalWrapper.AuthProvider(config);
 
 // initialize the wrapper
 app.use(authProvider.initialize());
@@ -62,3 +61,5 @@ app.use(authProvider.initialize());
 app.use(mainRouter(authProvider));
 
 app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+
+module.exports = app;
