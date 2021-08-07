@@ -8,7 +8,6 @@ const session = require('express-session');
 const path = require('path');
 
 const settings = require('./appSettings');
-const cache = require('./utils/cachePlugin');
 
 const msalWrapper = require('msal-express-wrapper');
 const mainRouter = require('./routes/mainRoutes');
@@ -49,13 +48,19 @@ async function main() {
 
     app.use(session(sessionConfig));
 
-    const authProvider = await msalWrapper.AuthProvider.buildAsync(settings, cache);
+    /**
+     * In order to initialize the wrapper with the credentials fetched from
+     * Azure Key Vault, we use the async builder pattern.
+     */
+    const authProvider = await msalWrapper.AuthProvider.buildAsync(settings);
     
     app.use(authProvider.initialize());
 
     app.use(mainRouter(authProvider));
 
     app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+
+    module.exports = app;
 }
 
 main();

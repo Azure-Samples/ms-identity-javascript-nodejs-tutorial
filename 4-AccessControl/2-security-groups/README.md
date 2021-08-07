@@ -35,7 +35,6 @@ Access control in Azure AD can be done with **App Roles** as well, as we covered
 | `AppCreationScripts/`       | Contains Powershell scripts to automate app registration.     |
 | `ReadmeFiles/`              | Contains illustrations and screenshots.                       |
 | `App/appSettings.json`      | Authentication parameters and settings.                       |
-| `App/data/cache.json`       | Stores MSAL Node token cache data.                            |
 | `App/data/db.json`          | Stores todo list data.                                        |
 | `App/app.js`                | Application entry point.                                      |
 
@@ -276,7 +275,7 @@ app.use(session({
 }));
 
 // instantiate the wrapper
-const authProvider = new msalWrapper.AuthProvider(config, cache);
+const authProvider = new msalWrapper.AuthProvider(config);
 
 // initialize the wrapper
 app.use(authProvider.initialize());

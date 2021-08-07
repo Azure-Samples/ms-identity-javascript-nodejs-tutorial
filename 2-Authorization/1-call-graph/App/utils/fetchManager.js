@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-const { default: axios } = require('axios');
+const fetch = require('isomorphic-fetch');
 
 /**
  * Simple function to call an Azure AD protected resource
@@ -23,8 +23,8 @@ callAPI = async(endpoint, accessToken) => {
     console.log('request made to web API at: ' + new Date().toString());
 
     try {
-        const response = await axios.default.get(endpoint, options);
-        return response.data;
+        const response = await fetch(endpoint, options);
+        return response.json();
     } catch(error) {
         console.log(error)
         return error;
