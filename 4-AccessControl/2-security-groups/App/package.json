@@ -13,7 +13,7 @@
   "dependencies": {
     "@azure/msal-node": "^1.2.0",
     "msal-express-wrapper": "git+https://github.com/Azure-Samples/msal-express-wrapper.git#1.0.0-beta.3",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "bootstrap": "^4.5.3",
     "ejs": "^3.0.1",
     "express": "^4.17.1",
