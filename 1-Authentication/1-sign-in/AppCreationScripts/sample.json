@@ -21,7 +21,7 @@
     {
       "App": "client",
       "SettingKind": "Replace",
-      "SettingFile": "\\..\\App\\appSettings.json",
+      "SettingFile": "\\..\\App\\appSettings.js",
       "Mappings": [
         {
           "key": "Enter_the_Application_Id_Here",

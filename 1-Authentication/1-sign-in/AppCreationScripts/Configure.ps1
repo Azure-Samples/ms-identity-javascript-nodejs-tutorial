@@ -167,7 +167,7 @@ Function ConfigureApplications
 
 
    # Update config file for 'client'
-   $configFile = $pwd.Path + "\..\App\appSettings.json"
+   $configFile = $pwd.Path + "\..\App\appSettings.js"
    Write-Host "Updating the sample code ($configFile)"
    $dictionary = @{ "Enter_the_Application_Id_Here" = $clientAadApplication.AppId;"Enter_the_Tenant_Info_Here" = $tenantId;"Enter_the_Client_Secret_Here" = $clientAppKey };
    ReplaceInTextFile -configFilePath $configFile -dictionary $dictionary
