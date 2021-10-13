@@ -34,7 +34,7 @@ Access control in Azure AD can be done with **App Roles** as well, as we covered
 |-----------------------------|---------------------------------------------------------------|
 | `AppCreationScripts/`       | Contains Powershell scripts to automate app registration.     |
 | `ReadmeFiles/`              | Contains illustrations and screenshots.                       |
-| `App/appSettings.json`      | Authentication parameters and settings.                       |
+| `App/appSettings.js`      | Authentication parameters and settings.                       |
 | `App/data/db.json`          | Stores todo list data.                                        |
 | `App/app.js`                | Application entry point.                                      |
 
@@ -141,7 +141,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 1. Open the `App\appSettings.js` file.
 1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
-1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
+1. Find the key `tenantInfo` and replace the existing value with your Azure AD tenant ID.
 1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
 1. Find the key `redirect` and replace the existing value with the redirect URI for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
 
@@ -255,12 +255,17 @@ In [appSettings.js](./App/appSettings.js), we create an access matrix that defin
 }
 ```
 
-Then, in [app.js](./App/app.js), we create an instance of the [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html) class with the `appSettings.js` passed to its constructor.
+Then, in [app.js](./App/app.js), we create an instance of the [MsalWebAppAuthClient](https://azure-samples.github.io/msal-express-wrapper/classes/MsalWebAppAuthClient.html) class.
 
 ```javascript
 const express = require('express');
 const session = require('express-session');
-const msalWrapper = require('msal-express-wrapper');
+const MsIdExpress = require('microsoft-identity-express');
+
+const appSettings = require('./appSettings.js');
+const mainRouter = require('./routes/mainRoutes');
+
+const SERVER_PORT = process.env.PORT || 4000;
 
 // initialize express
 const app = express(); 
@@ -275,23 +280,25 @@ app.use(session({
 }));
 
 // instantiate the wrapper
-const authProvider = new msalWrapper.AuthProvider(config);
+const msid = new MsIdExpress.WebAppAuthClientBuilder(appSettings).build();
 
 // initialize the wrapper
-app.use(authProvider.initialize());
+app.use(msid.initialize());
 
 // pass the instance to your routers
-app.use(mainRouter(authProvider));
+app.use(mainRouter(msid));
 
 app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+
+module.exports = app;
 ```
 
-The `authProvider` object exposes the middleware we can use to protect our app routes. This can be seen in [mainRoutes.js](./App/routes/mainRoutes.js):
+The `msid` object exposes the middleware we can use to protect our app routes. This can be seen in [mainRoutes.js](./App/routes/mainRoutes.js):
 
 ```javascript
 const express = require('express');
 
-module.exports = (authProvider) => {
+module.exports = (msid) => {
 
     // initialize router
     const router = express.Router();
@@ -301,23 +308,23 @@ module.exports = (authProvider) => {
     router.get('/home', mainController.getHomePage);
 
     // authentication routes
-    router.get('/signin', authProvider.signIn({ successRedirect: '/' }));
-    router.get('/signout', authProvider.signOut({ successRedirect: '/' }));
+    router.get('/signin', msid.signIn({ successRedirect: '/' }));
+    router.get('/signout', msid.signOut({ successRedirect: '/' }));
 
     // secure routes
-    router.get('/id', authProvider.isAuthenticated(), mainController.getIdPage);
+    router.get('/id', msid.isAuthenticated(), mainController.getIdPage);
 
     router.use('/todolist',
-        authProvider.isAuthenticated(),
-        authProvider.hasAccess({
+        msid.isAuthenticated(),
+        msid.hasAccess({
             accessRule: config.accessMatrix.todolist
         }),
         todolistRouter // users have to satisfy hasAccess middleware for all routes under /todolist
     );
 
     router.use('/dashboard',
-        authProvider.isAuthenticated(),
-        authProvider.hasAccess({
+        msid.isAuthenticated(),
+        msid.hasAccess({
             accessRule: config.accessMatrix.dashboard
         }),
         dashboardRouter // users have to satisfy hasAccess middleware for all routes under /dashboard
@@ -327,34 +334,31 @@ module.exports = (authProvider) => {
 }
 ```
 
-Under the hood, [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper/blob/8860e0a53779cbdaf1477cd90f613692e1be7f94/src/AuthProvider.ts#L357) [hasAccess](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#hasaccess) middleware checks the signed-in user's ID token's `groups` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
+Under the hood, the [hasAccess](https://azure-samples.github.io/msal-express-wrapper/classes/MsalWebAppAuthClient.html#hasaccess) middleware checks the signed-in user's ID token's `groups` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
 
 ```typescript
-/**
- * Checks if the user has access for this route, defined in access matrix
- * @param {GuardOptions} options
- * @returns {RequestHandler}
- */
-hasAccess = (options?: GuardOptions): RequestHandler => {
-    return async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+hasAccess(options?: GuardOptions): RequestHandler {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         if (req.session && this.appSettings.accessMatrix) {
 
-            const checkFor = options.accessRule.hasOwnProperty(AccessConstants.GROUPS) ? AccessConstants.GROUPS : AccessConstants.ROLES;
+            const checkFor = options.accessRule.hasOwnProperty(AccessControlConstants.GROUPS) ? AccessControlConstants.GROUPS : AccessControlConstants.ROLES;
 
             switch (checkFor) {
-                case AccessConstants.GROUPS:
+                case AccessControlConstants.GROUPS:
 
-                    if (req.session.account.idTokenClaims[AccessConstants.GROUPS] === undefined) {
-                        if (req.session.account.idTokenClaims[AccessConstants.CLAIM_NAMES] || req.session.account.idTokenClaims[AccessConstants.CLAIM_SOURCES]) {
+                    if (req.session.account.idTokenClaims[AccessControlConstants.GROUPS] === undefined) {
+                        if (req.session.account.idTokenClaims[AccessControlConstants.CLAIM_NAMES]
+                            || req.session.account.idTokenClaims[AccessControlConstants.CLAIM_SOURCES]) {
+                            this.logger.warning(InfoMessages.OVERAGE_OCCURRED);
                             return await this.handleOverage(req, res, next, options.accessRule);
                         } else {
-                            console.log(ErrorMessages.USER_HAS_NO_GROUP);
+                            this.logger.error(ErrorMessages.USER_HAS_NO_GROUP);
                             return res.redirect(this.appSettings.authRoutes.unauthorized);
                         }
                     } else {
-                        const groups = req.session.account.idTokenClaims[AccessConstants.GROUPS];
+                        const groups = req.session.account.idTokenClaims[AccessControlConstants.GROUPS];
 
-                        if (!this.checkAccessRule(req.method, options.accessRule, groups, AccessConstants.GROUPS)) {
+                        if (!this.checkAccessRule(req.method, options.accessRule, groups, AccessControlConstants.GROUPS)) {
                             return res.redirect(this.appSettings.authRoutes.unauthorized);
                         }
                     }
@@ -392,22 +396,22 @@ When attending to overage scenarios, which requires a call to [Microsoft Graph](
 
 #### Handle the overage scenario
 
-When the overage occurs, the user's ID token will have the `_claim_names` and `_claim_sources` claims instead of the `groups` claim. Furthermore, `_claim_sources` claim contains the URL that we can query to get the full list of groups the user belongs to. In the [hasAccess()](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#hasaccess) middleware we detect if the overage, and trigger the [handleOverage](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#handleoverage) method to query the URL we mentioned.
+When the overage occurs, the user's ID token will have the `_claim_names` and `_claim_sources` claims instead of the `groups` claim. Furthermore, `_claim_sources` claim contains the URL that we can query to get the full list of groups the user belongs to. In the [hasAccess()](https://azure-samples.github.io/msal-express-wrapper/classes/MsalWebAppAuthClient.html#hasaccess) middleware we detect if the overage, and trigger the [handleOverage](https://azure-samples.github.io/msal-express-wrapper/classes/MsalWebAppAuthClient.html#handleoverage) method to query the URL we mentioned.
 
 ```typescript
-private async handleOverage(req: Request, res: Response, next: NextFunction, rule: AccessRule): Promise<void> {
-    const { _claim_names, _claim_sources, ...newIdTokenClaims } = <any>req.session.account.idTokenClaims;
+async handleOverage(req: Request, res: Response, next: NextFunction, rule: AccessRule): Promise<void> {
+    const { _claim_names, _claim_sources, ...newIdTokenClaims } = <IdTokenClaims>req.session.account.idTokenClaims;
 
     const silentRequest: SilentFlowRequest = {
         account: req.session.account,
-        scopes: AccessConstants.GRAPH_MEMBER_SCOPES.split(" "),
+        scopes: AccessControlConstants.GRAPH_MEMBER_SCOPES.split(" "),
     };
 
     try {
         // acquire token silently to be used in resource call
         const tokenResponse = await this.msalClient.acquireTokenSilent(silentRequest);
         try {
-            const graphResponse = await FetchManager.callApiEndpoint(AccessConstants.GRAPH_MEMBERS_ENDPOINT, tokenResponse.accessToken);
+            const graphResponse = await FetchManager.callApiEndpointWithToken(AccessControlConstants.GRAPH_MEMBERS_ENDPOINT, tokenResponse.accessToken);
 
             /**
              * Some queries against Microsoft Graph return multiple pages of data either due to server-side paging 
@@ -415,22 +419,21 @@ private async handleOverage(req: Request, res: Response, next: NextFunction, rul
              * When a result set spans multiple pages, Microsoft Graph returns an @odata.nextLink property in 
              * the response that contains a URL to the next page of results. Learn more at https://docs.microsoft.com/graph/paging
              */
-            if (graphResponse[AccessConstants.PAGINATION_LINK]) {
+            if (graphResponse[AccessControlConstants.PAGINATION_LINK]) {
                 try {
-                    const userGroups = await FetchManager.handlePagination(tokenResponse.accessToken, graphResponse[AccessConstants.PAGINATION_LINK]);
+                    const userGroups = await FetchManager.handlePagination(tokenResponse.accessToken, graphResponse[AccessControlConstants.PAGINATION_LINK]);
 
                     req.session.account.idTokenClaims = {
                         ...newIdTokenClaims,
                         groups: userGroups
                     }
 
-                    if (!this.checkAccessRule(req.method, rule, req.session.account.idTokenClaims[AccessConstants.GROUPS], AccessConstants.GROUPS)) {
+                    if (!this.checkAccessRule(req.method, rule, req.session.account.idTokenClaims[AccessControlConstants.GROUPS], AccessControlConstants.GROUPS)) {
                         return res.redirect(this.appSettings.authRoutes.unauthorized);
                     } else {
                         return next();
                     }
                 } catch (error) {
-                    console.log(error);
                     next(error);
                 }
             } else {
@@ -439,18 +442,16 @@ private async handleOverage(req: Request, res: Response, next: NextFunction, rul
                     groups: graphResponse["value"].map((v) => v.id)
                 }
 
-                if (!this.checkAccessRule(req.method, rule, req.session.account.idTokenClaims[AccessConstants.GROUPS], AccessConstants.GROUPS)) {
+                if (!this.checkAccessRule(req.method, rule, req.session.account.idTokenClaims[AccessControlConstants.GROUPS], AccessControlConstants.GROUPS)) {
                     return res.redirect(this.appSettings.authRoutes.unauthorized);
                 } else {
                     return next();
                 }
             }
         } catch (error) {
-            console.log(error);
             next(error);
         }
     } catch (error) {
-        console.log(error);
         next(error);
     }
 }

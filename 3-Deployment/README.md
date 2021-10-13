@@ -172,70 +172,44 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ### Accessing Key Vault using Managed Identity
 
-In [appSettings.js](./App/appSettings.js) file, we enter the parameters needed for accessing [Azure Key Vault](https://docs.microsoft.com/azure/key-vault/general/basic-concepts) to fetch the application's credentials:
-
-```javascript
-const appSettings = {
-    appCredentials: {
-        clientId: "Enter_the_Application_Id_Here",
-        tenantId: "Enter_the_Tenant_Info_Here",
-        keyVaultCredential: {
-            credentialType: "secret", // credential type: secret | certificate
-            credentialName: process.env["SECRET_NAME"], // you may enter your secret's name manually for local development
-            keyVaultUrl: process.env["KEY_VAULT_URI"] // you may enter your key vault uri manually for local development
-        }
-    },
-    authRoutes: {
-        redirect: "/redirect",
-        error: "/error", // the wrapper will redirect to this route in case of any error
-        unauthorized: "/unauthorized" // the wrapper will redirect to this route in case of unauthorized access attempt
-    },
-    remoteResources: {
-        graphAPI: {
-            endpoint: "https://graph.microsoft.com/v1.0/me",
-            scopes: ["user.read"]
-        },
-        armAPI: {
-            endpoint: "https://management.azure.com/tenants?api-version=2020-01-01",
-            scopes: ["https://management.azure.com/user_impersonation"]
-        }
-    }
-}
-```
-
-Then in [app.js](./App/app.js), we instantiate an **authProvider** object asynchronously using the [buildAsync](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#buildasync) method of [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html). To do so, we need to start the express server asynchronously:
+In [app.js](./App/app.js), we instantiate an **MsalWebAppAuthClient** object asynchronously using the [buildAsync](https://azure-samples.github.io/msal-express-wrapper/classes/WebAppAuthClientBuilder.html#buildasync) method of [WebAppAuthClientBuilder](https://azure-samples.github.io/msal-express-wrapper/classes/WebAppAuthClientBuilder.html). To do so, we need to start the express server asynchronously:
 
 ```javascript
 const express = require('express');
 const session = require('express-session');
-const msalWrapper = require('msal-express-wrapper');
+const MsIdExpress = require('microsoft-identity-express');
+const appSettings = require('./appSettings');
 
-// async function to wait for key vault credentials before start
 async function main() {
     const app = express();
 
-    /**
-     * Using express-session middleware. Be sure to familiarize yourself with available options
-     * and set them as desired. Visit: https://www.npmjs.com/package/express-session
-     */
     app.use(session({
         secret: 'ENTER_YOUR_SECRET_HERE',
         resave: false,
         saveUninitialized: false,
         cookie: {
-            secure: false, // set true on production
+            secure: true, 
         }
     }));
 
-    // fetching credentials from key vault
-    const authProvider = await msalWrapper.AuthProvider.buildAsync(settings);
-    
-    app.use(authProvider.initialize());
+    app.set('trust proxy', 1);
 
-    // pass authProvider instance to your routers
-    app.use(mainRouter(authProvider));
+    try {
+        const msid = await new MsIdExpress.WebAppAuthClientBuilder(appSettings)
+            .withKeyVaultCredentials({
+                credentialType: "clientSecret",
+                credentialName: process.env["SECRET_NAME"],
+                keyVaultUrl: process.env["KEY_VAULT_URI"]
+            }).buildAsync();
 
-    app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+        app.use(msid.initialize());
+
+        app.use(mainRouter(msid));
+
+        app.listen(SERVER_PORT, () => console.log(`Server is listening on port ${SERVER_PORT}!`));
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 main();
@@ -244,27 +218,33 @@ main();
 Under the hood, the wrapper calls the **Azure Key Vault** to access credentials needed for the application to authenticate with Azure AD using the [KeyVaultManager](https://azure-samples.github.io/msal-express-wrapper/classes/keyvaultmanager.html) class. This class is leveraging the [@azure/identity](https://www.npmjs.com/package/@azure/identity) and [@azure/key-vault](https://www.npmjs.com/package/@azure/keyvault-secrets) packages:
 
 ```typescript
-import { CertificateClient, KeyVaultCertificate } from "@azure/keyvault-certificates";
 import { DefaultAzureCredential } from "@azure/identity";
+import { CertificateClient, KeyVaultCertificate } from "@azure/keyvault-certificates";
 import { KeyVaultSecret, SecretClient } from "@azure/keyvault-secrets";
 
-export class KeyVaultManager {
+import { KeyVaultCredential, ClientCertificate } from "../config/AppSettings";
+import { KeyVaultCredentialTypes } from "../utils/Constants";
 
-    // updates appSettings object with credentials from key vault
-    async getCredentialFromKeyVault(config: AppSettings): Promise<AppSettings> {
+export type KeyVaultCredentialResponse = {
+    type: KeyVaultCredentialTypes.SECRET | KeyVaultCredentialTypes.CERTIFICATE,
+    value: string & ClientCertificate
+}
+
+export class KeyVaultManager {
+    async getCredentialFromKeyVault(keyVaultCredential: KeyVaultCredential): Promise<KeyVaultCredentialResponse> {
 
         const credential = new DefaultAzureCredential();
 
-        if (!config.appCredentials.keyVaultCredential) {
-            return config;
-        }
-
-        switch (config.appCredentials.keyVaultCredential.credentialType) {
+        switch (keyVaultCredential.credentialType) {
             case KeyVaultCredentialTypes.SECRET: {
                 try {
-                    const secretResponse = await this.getSecretCredential(config, credential);
-                    config.appCredentials.clientSecret = secretResponse.value;
-                    return config;
+                    const secretResponse = await this.getSecretCredential(keyVaultCredential, credential);
+
+                    return {
+                        type: KeyVaultCredentialTypes.SECRET,
+                        value: secretResponse.value,
+                    } as KeyVaultCredentialResponse;
+
                 } catch (error) {
                     console.log(error);
                 }
@@ -278,15 +258,13 @@ export class KeyVaultManager {
         }
     };
 
-    // ...
+    async getSecretCredential(keyVaultCredential: KeyVaultCredential, credential: DefaultAzureCredential): Promise<KeyVaultSecret> {
 
-    async getSecretCredential(config: AppSettings, credential: DefaultAzureCredential): Promise<KeyVaultSecret> {
-
-        // instantiate @azure/key-vault-secrets secret client
-        const secretClient = new SecretClient(config.appCredentials.keyVaultCredential.keyVaultUrl, credential);
+        // Initialize secretClient with credentials
+        const secretClient = new SecretClient(keyVaultCredential.keyVaultUrl, credential);
 
         try {
-            const keyVaultSecret = await secretClient.getSecret(config.appCredentials.keyVaultCredential.credentialName);
+            const keyVaultSecret = await secretClient.getSecret(keyVaultCredential.credentialName);
             return keyVaultSecret;
         } catch (error) {
             console.log(error);

@@ -33,7 +33,6 @@ async function main() {
      * Using express-session middleware. Be sure to familiarize yourself with available options
      * and set them as desired. Visit: https://www.npmjs.com/package/express-session
      */
-
     app.use(session({
         secret: 'ENTER_YOUR_SECRET_HERE',
         resave: false,
