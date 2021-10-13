@@ -246,7 +246,7 @@ Function ConfigureApplications
    Write-Host "Granted permissions."
 
    # Update config file for 'client'
-   $configFile = $pwd.Path + "\..\app\appSettings.json"
+   $configFile = $pwd.Path + "\..\app\appSettings.js"
    Write-Host "Updating the sample code ($configFile)"
    $dictionary = @{ "clientId" = $clientAadApplication.AppId;"tenantId" = $tenantId;"clientSecret" = $clientAppKey;"redirectUri" = $clientAadApplication.ReplyUrls;"postLogoutRedirectUri" = $clientAadApplication.HomePage };
    UpdateTextFile -configFilePath $configFile -dictionary $dictionary
