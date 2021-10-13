@@ -132,11 +132,11 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 1. Open the `App/appSettings.json` file.
 1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
-1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
+1. Find the key `tenantInfo` and replace the existing value with your Azure AD tenant ID.
 1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
 1. Find the key `redirect` and replace the existing value with the Redirect URI for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
 
-> :information_source: For `redirectUri`, you can simply enter the path component of the URI instead of the full URI. For example, instead of `http://localhost:4000/redirect`, you can simply enter `/redirect`. This may come in handy in deployment scenarios.
+> :information_source: For `redirect`, you can simply enter the path component of the URI instead of the full URI. For example, instead of `http://localhost:4000/redirect`, you can simply enter `/redirect`. This may come in handy in deployment scenarios.
 
 1. Open the `App/app.js` file.
 1. Find the string `ENTER_YOUR_SECRET_HERE` and replace it with a secret that will be used when encrypting your app's session using the [express-session](https://www.npmjs.com/package/express-session) package.
@@ -189,11 +189,12 @@ app.use(session({
         secure: false, // set this to true on production
     }));
 
+
 // instantiate the wrapper
-const authProvider = new msalWrapper.AuthProvider(config);
+const msid = new MsIdExpress.WebAppAuthClientBuilder(appSettings).build();
 
 // initialize the wrapper
-app.use(authProvider.initialize());
+app.use(msid.initialize());
 
 app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
 ```
@@ -203,13 +204,13 @@ The `authProvider` object exposes several middlewares that you can use in your r
 ```javascript
 // authentication routes
 app.get('/signin', 
-    authProvider.signIn({
+    msid.signIn({
         successRedirect: '/'
     }
 ));
 
 app.get('/signout', 
-    authProvider.signOut({
+    msid.signOut({
         successRedirect: '/'
     }
 ));
@@ -522,7 +523,7 @@ Simply add the [isAuthenticated()](https://azure-samples.github.io/msal-express-
 ```javascript
 // secure routes
 app.get('/id', 
-    authProvider.isAuthenticated(), 
+    msid.isAuthenticated(), 
     mainController.getIdPage
 );
 ```

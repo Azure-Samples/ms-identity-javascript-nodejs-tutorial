@@ -1,7 +1,7 @@
 const appSettings = {
     appCredentials: {
         clientId: "c5f4d666-c952-402b-8e3d-b005fae1ac64",
-        tenantId: "775527ff-9a37-4307-8b3d-cc311f58d925",
+        tenantInfo: "775527ff-9a37-4307-8b3d-cc311f58d925",
         clientSecret: "c5zKd51Vlx3O48Q-B0_mr._SqBQm-xW.o5"
     },
     authRoutes: {

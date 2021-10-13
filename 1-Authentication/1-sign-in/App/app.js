@@ -7,8 +7,8 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 
-const msalWrapper = require('msal-express-wrapper');
-const config = require('./appSettings.js');
+const MsIdExpress = require('microsoft-identity-express');
+const appSettings = require('./appSettings.js');
 
 const mainController = require('./controllers/mainController');
 
@@ -29,27 +29,20 @@ app.use(express.static(path.join(__dirname, './public')));
  * Using express-session middleware. Be sure to familiarize yourself with available options
  * and set them as desired. Visit: https://www.npmjs.com/package/express-session
  */
- const sessionConfig = {
+app.use(session({
     secret: 'ENTER_YOUR_SECRET_HERE',
     resave: false,
     saveUninitialized: false,
     cookie: {
         secure: false, // set this to true on production
     }
-}
-
-if (app.get('env') === 'production') {
-    app.set('trust proxy', 1) // trust first proxy
-    sessionConfig.cookie.secure = true // serve secure cookies
-}
-
-app.use(session(sessionConfig));
+}));
 
 // instantiate the wrapper
-const authProvider = new msalWrapper.AuthProvider(config);
+const msid = new MsIdExpress.WebAppAuthClientBuilder(appSettings).build();
 
 // initialize the wrapper
-app.use(authProvider.initialize());
+app.use(msid.initialize());
 
 // app routes
 app.get('/', (req, res) => res.redirect('/home'));
@@ -57,20 +50,20 @@ app.get('/home', mainController.getHomePage);
 
 // authentication routes
 app.get('/signin', 
-    authProvider.signIn({
+    msid.signIn({
         successRedirect: '/'
     }
 ));
 
 app.get('/signout', 
-    authProvider.signOut({
+    msid.signOut({
         successRedirect: '/'
     }
 ));
 
 // secure routes
 app.get('/id', 
-    authProvider.isAuthenticated(), 
+    msid.isAuthenticated(), 
     mainController.getIdPage
 );
 

@@ -19,7 +19,7 @@ describe('Sanitize configuration object', () => {
 
     it('should contain tenant Id', () => {
         const regexGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-        expect(regexGuid.test(appSettings.appCredentials.tenantId)).toBe(true);
+        expect(regexGuid.test(appSettings.appCredentials.tenantInfo)).toBe(true);
     });
 
     it('should contain client secret', () => {
@@ -41,7 +41,7 @@ describe('Ensure pages served', () => {
         randomGuid = uuidv4();
 
         appSettings.appCredentials.clientId = randomGuid;
-        appSettings.appCredentials.tenantId = randomGuid;
+        appSettings.appCredentials.tenantInfo = randomGuid;
 
         app = require('./app.js');
     });

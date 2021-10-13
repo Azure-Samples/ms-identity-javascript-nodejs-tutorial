@@ -2,9 +2,9 @@ const express = require('express');
 
 const mainController = require('../controllers/mainController');
 
-const config = require('../appSettings.js');
+const appSettings = require('../appSettings.js');
 
-module.exports = (authProvider) => {
+module.exports = (msid) => {
 
     // initialize router
     const router = express.Router();
@@ -14,22 +14,24 @@ module.exports = (authProvider) => {
     router.get('/home', mainController.getHomePage);
 
     // authentication routes
-    router.get('/signin', authProvider.signIn({ successRedirect: '/' }));
-    router.get('/signout', authProvider.signOut({ successRedirect: '/' }));
+    router.get('/signin', msid.signIn({ successRedirect: '/' }));
+    router.get('/signout', msid.signOut({ successRedirect: '/' }));
 
     // secure routes
-    router.get('/id', authProvider.isAuthenticated(), mainController.getIdPage);
+    router.get('/id', msid.isAuthenticated(), mainController.getIdPage);
 
-    router.get('/profile', 
-        authProvider.getToken({
-            resource: config.remoteResources.graphAPI
+    router.get('/profile',
+        msid.isAuthenticated(), 
+        msid.getToken({
+            resource: appSettings.protectedResources.graphAPI
         }), 
         mainController.getProfilePage
     );
 
     router.get('/tenant',
-        authProvider.getToken({
-            resource: config.remoteResources.armAPI
+        msid.isAuthenticated(),
+        msid.getToken({
+            resource: appSettings.protectedResources.armAPI
         }),
         mainController.getTenantPage
     );

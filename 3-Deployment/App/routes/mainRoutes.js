@@ -2,7 +2,7 @@ const express = require('express');
 const mainController = require('../controllers/mainController');
 const appSettings = require('../appSettings');
 
-module.exports = (authProvider) => {
+module.exports = (msid) => {
     // initialize router
     const router = express.Router();
 
@@ -11,28 +11,28 @@ module.exports = (authProvider) => {
     router.get('/home', mainController.getHomePage);
 
     // auth routes
-    router.get('/signin', authProvider.signIn({ successRedirect: "/" }));
+    router.get('/signin', msid.signIn({ successRedirect: "/" }));
 
-    router.get('/signout', authProvider.signOut({ successRedirect: "/" }));
+    router.get('/signout', msid.signOut({ successRedirect: "/" }));
 
     // secure routes
     router.get('/id',
-        authProvider.isAuthenticated(),
+        msid.isAuthenticated(),
         mainController.getIdPage
     );
 
     router.get('/profile',
-        authProvider.isAuthenticated(),
-        authProvider.getToken({
-            resource: appSettings.remoteResources.graphAPI
+        msid.isAuthenticated(),
+        msid.getToken({
+            resource: appSettings.protectedResources.graphAPI
         }),
         mainController.getProfilePage
     ); // get token for this route to call web API
 
     router.get('/tenant',
-        authProvider.isAuthenticated(),
-        authProvider.getToken({
-            resource: appSettings.remoteResources.armAPI
+        msid.isAuthenticated(),
+        msid.getToken({
+            resource: appSettings.protectedResources.armAPI
         }),
         mainController.getTenantPage
     ); // get token for this route to call web API

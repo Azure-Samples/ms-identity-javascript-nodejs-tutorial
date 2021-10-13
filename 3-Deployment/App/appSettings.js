@@ -1,21 +1,14 @@
-require('dotenv').config();
-
 const appSettings = {
     appCredentials: {
         clientId: "Enter_the_Application_Id_Here",
-        tenantId: "Enter_the_Tenant_Info_Here",
-        keyVaultCredential: {
-            credentialType: "secret",
-            credentialName: process.env["SECRET_NAME"],
-            keyVaultUrl: process.env["KEY_VAULT_URI"]
-        }
+        tenantInfo: "Enter_the_Tenant_Info_Here",
     },
     authRoutes: {
         redirect: "/redirect",
         error: "/error", // the wrapper will redirect to this route in case of any error
         unauthorized: "/unauthorized" // the wrapper will redirect to this route in case of unauthorized access attempt
     },
-    remoteResources: {
+    protectedResources: {
         graphAPI: {
             endpoint: "https://graph.microsoft.com/v1.0/me",
             scopes: ["user.read"]

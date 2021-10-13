@@ -8,9 +8,9 @@ const session = require('express-session');
 const methodOverride = require('method-override');
 const path = require('path');
 
-const msalWrapper = require('msal-express-wrapper');
+const MsIdExpress = require('microsoft-identity-express');
 
-const config = require('./appSettings.js');
+const appSettings = require('./appSettings.js');
 const mainRouter = require('./routes/mainRoutes');
 
 const SERVER_PORT = process.env.PORT || 4000;
@@ -35,30 +35,23 @@ app.use(express.json());
  * Using express-session middleware. Be sure to familiarize yourself with available options
  * and set them as desired. Visit: https://www.npmjs.com/package/express-session
  */
- const sessionConfig = {
+app.use(session({
     secret: 'ENTER_YOUR_SECRET_HERE',
     resave: false,
     saveUninitialized: false,
     cookie: {
         secure: false, // set this to true on production
     }
-}
-
-if (app.get('env') === 'production') {
-    app.set('trust proxy', 1) // trust first proxy
-    sessionConfig.cookie.secure = true // serve secure cookies
-}
-
-app.use(session(sessionConfig));
+}));
 
 // instantiate the wrapper
-const authProvider = new msalWrapper.AuthProvider(config);
+const msid = new MsIdExpress.WebAppAuthClientBuilder(appSettings).build();
 
 // initialize the wrapper
-app.use(authProvider.initialize());
+app.use(msid.initialize());
 
 // pass the instance to your routers
-app.use(mainRouter(authProvider));
+app.use(mainRouter(msid));
 
 app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
 

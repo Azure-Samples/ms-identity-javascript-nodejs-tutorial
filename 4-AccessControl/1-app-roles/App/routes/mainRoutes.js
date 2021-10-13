@@ -4,9 +4,9 @@ const mainController = require('../controllers/mainController');
 const todolistRouter = require('./todolistRoutes');
 const dashboardRouter = require('./dashboardRoutes');
 
-const config = require('../appSettings.js');
+const appSettings = require('../appSettings.js');
 
-module.exports = (authProvider) => {
+module.exports = (msid) => {
 
     // initialize router
     const router = express.Router();
@@ -16,24 +16,24 @@ module.exports = (authProvider) => {
     router.get('/home', mainController.getHomePage);
 
     // authentication routes
-    router.get('/signin', authProvider.signIn({ successRedirect: '/' }));
-    router.get('/signout', authProvider.signOut({ successRedirect: '/' }));
+    router.get('/signin', msid.signIn({ successRedirect: '/' }));
+    router.get('/signout', msid.signOut({ successRedirect: '/' }));
 
     // secure routes
-    router.get('/id', authProvider.isAuthenticated(), mainController.getIdPage);
+    router.get('/id', msid.isAuthenticated(), mainController.getIdPage);
 
     router.use('/todolist',
-        authProvider.isAuthenticated(),
-        authProvider.hasAccess({
-            accessRule: config.accessMatrix.todolist
+        msid.isAuthenticated(),
+        msid.hasAccess({
+            accessRule: appSettings.accessMatrix.todolist
         }),
         todolistRouter
     );
 
     router.use('/dashboard',
-        authProvider.isAuthenticated(),
-        authProvider.hasAccess({
-            accessRule: config.accessMatrix.dashboard
+        msid.isAuthenticated(),
+        msid.hasAccess({
+            accessRule: appSettings.accessMatrix.dashboard
         }),
         dashboardRouter
     );
