@@ -51,13 +51,13 @@ app.get('/home', mainController.getHomePage);
 // authentication routes
 app.get('/signin', 
     msid.signIn({
-        successRedirect: '/'
+        postLoginRedirect: '/'
     }
 ));
 
 app.get('/signout', 
     msid.signOut({
-        successRedirect: '/'
+        postLogoutRedirect: '/'
     }
 ));
 

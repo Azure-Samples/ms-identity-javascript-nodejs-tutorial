@@ -1,6 +1,6 @@
 {
     "Sample": {
-        "Title": "A Node.js & Express web app calling Microsoft Graph using App Roles to implement Role-Based Access Control",
+        "Title": "A Node.js & Express web app using App Roles to implement Role-Based Access Control",
         "Level": 300,
         "Client": "Node.js & Express web app",
         "Service": "Microsoft Graph",

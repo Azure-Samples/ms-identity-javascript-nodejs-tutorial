@@ -23,7 +23,7 @@ This sample also demonstrates how to use the [Microsoft Graph JavaScript SDK](ht
 
 ## Scenario
 
-1. The client application uses **MSAL Node** (via [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper)) to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
+1. The client application uses **MSAL Node** (via [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express)) to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
 1. The **Access Token** is used as a *bearer* token to authorize the user to access the **resource server** ([MS Graph](https://aka.ms/graph) or [Azure REST API](https://docs.microsoft.com/rest/api/azure/)).
 1. The **resource server** responds with the resource that the user has access to.
 
@@ -149,7 +149,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 1. Open the `App/appSettings.js` file.
 1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
-1. Find the key `tenantInfo` and replace the existing value with your Azure AD tenant ID.
+1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
 1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
 1. Find the key `redirect` and replace the existing value with the Redirect URI for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
 
@@ -241,8 +241,8 @@ app.get('/', (req, res, next) => res.redirect('/home'));
 app.get('/home', mainController.getHomePage);
 
 // authentication routes
-app.get('/signin', msid.signIn({ successRedirect: '/' }));
-app.get('/signout', msid.signOut({ successRedirect: '/' }));
+app.get('/signin', msid.signIn({ postLoginRedirect: '/' }));
+app.get('/signout', msid.signOut({ postLogoutRedirect: '/' }));
 
 app.get('/profile',
     msid.isAuthenticated(), 
@@ -263,7 +263,7 @@ app.get('/tenant',
 app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
 ```
 
-Under the hood, the [getToken()](https://azure-samples.github.io/msal-express-wrapper/classes/MsalWebAppAuthClient.html#gettoken) middleware grabs resource endpoint and associated scope from [appSettings.js](./App/appSettings.js), and attempts to obtain an access token from cache silently and attaches it to session. If silent token acquisition fails for some reason (e.g. consent required), it makes an auth code request, which triggers the first leg of auth code flow.
+Under the hood, the [getToken()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#gettoken) middleware grabs resource endpoint and associated scope from [appSettings.js](./App/appSettings.js), and attempts to obtain an access token from cache silently and attaches it to session. If silent token acquisition fails for some reason (e.g. consent required), it makes an auth code request, which triggers the first leg of auth code flow.
 
 ```typescript
 getToken(options: TokenRequestOptions): RequestHandler {
@@ -331,7 +331,7 @@ getToken(options: TokenRequestOptions): RequestHandler {
 };
 ```
 
-In the second leg of auth code flow, the auth code from redirect response is used to request a new access token (and a refresh token) via the [handleRedirect](https://azure-samples.github.io/msal-express-wrapper/classes/MsalWebAppAuthClient.html#handleredirect) middleware.
+In the second leg of auth code flow, the auth code from redirect response is used to request a new access token (and a refresh token) via the [handleRedirect](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#handleredirect) middleware.
 
 ```typescript
 handleRedirect = (options?: HandleRedirectOptions): RequestHandler => {

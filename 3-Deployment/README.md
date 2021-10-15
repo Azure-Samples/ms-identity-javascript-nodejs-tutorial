@@ -19,7 +19,7 @@ One of the principles of security is to place credentials like secrets and certi
 
 ## Scenario
 
-1. The client application uses the **MSAL Node** (via [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper)) to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
+1. The client application uses the **MSAL Node** (via [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express)) to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
 1. The **Access Token** is used as a *bearer* token to authorize the user to access the **resource** (MS Graph).
 1. The **resource server** responds with the resource that the user has access to.
 
@@ -172,7 +172,7 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ### Accessing Key Vault using Managed Identity
 
-In [app.js](./App/app.js), we instantiate an **MsalWebAppAuthClient** object asynchronously using the [buildAsync](https://azure-samples.github.io/msal-express-wrapper/classes/WebAppAuthClientBuilder.html#buildasync) method of [WebAppAuthClientBuilder](https://azure-samples.github.io/msal-express-wrapper/classes/WebAppAuthClientBuilder.html). To do so, we need to start the express server asynchronously:
+In [app.js](./App/app.js), we instantiate an **MsalWebAppAuthClient** object asynchronously using the [buildAsync](https://azure-samples.github.io/microsoft-identity-express/classes/WebAppAuthClientBuilder.html#buildasync) method of [WebAppAuthClientBuilder](https://azure-samples.github.io/microsoft-identity-express/classes/WebAppAuthClientBuilder.html). To do so, we need to start the express server asynchronously:
 
 ```javascript
 const express = require('express');
@@ -215,7 +215,7 @@ async function main() {
 main();
 ```
 
-Under the hood, the wrapper calls the **Azure Key Vault** to access credentials needed for the application to authenticate with Azure AD using the [KeyVaultManager](https://azure-samples.github.io/msal-express-wrapper/classes/keyvaultmanager.html) class. This class is leveraging the [@azure/identity](https://www.npmjs.com/package/@azure/identity) and [@azure/key-vault](https://www.npmjs.com/package/@azure/keyvault-secrets) packages:
+Under the hood, the wrapper calls the **Azure Key Vault** to access credentials needed for the application to authenticate with Azure AD using the [KeyVaultManager](https://azure-samples.github.io/microsoft-identity-express/classes/keyvaultmanager.html) class. This class is leveraging the [@azure/identity](https://www.npmjs.com/package/@azure/identity) and [@azure/key-vault](https://www.npmjs.com/package/@azure/keyvault-secrets) packages:
 
 ```typescript
 import { DefaultAzureCredential } from "@azure/identity";

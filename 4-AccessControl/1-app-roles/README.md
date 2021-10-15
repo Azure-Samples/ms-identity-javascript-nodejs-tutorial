@@ -23,7 +23,7 @@ Access control in Azure AD can be done with **Security Groups** as well, as we w
 
 ## Scenario
 
-1. The client application uses **MSAL Node** (via [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper)) to sign-in a user and obtain an **ID Token** from **Azure AD**.
+1. The client application uses **MSAL Node** (via [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express)) to sign-in a user and obtain an **ID Token** from **Azure AD**.
 2. The **ID Token** contains the [roles claim](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#declare-roles-for-an-application) that is used to control access to protected routes.
 
 ![Overview](./ReadmeFiles/topology.png)
@@ -154,7 +154,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 1. Open the `App\appSettings.json` file.
 1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
-1. Find the key `tenantInfo` and replace the existing value with your Azure AD tenant ID.
+1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
 1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
 1. Find the key `redirect` and replace the existing value with the **redirect URI** for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
 
@@ -203,7 +203,7 @@ In [appSettings.js](./App/appSettings.js), we create an access matrix that defin
 }
 ```
 
-Then, in [app.js](./App/app.js), we create an instance of the [MsalWebAppAuthClient](https://azure-samples.github.io/msal-express-wrapper/classes/MsalWebAppAuthClient.html) class.
+Then, in [app.js](./App/app.js), we create an instance of the [MsalWebAppAuthClient](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html) class.
 
 ```javascript
 const express = require('express');
@@ -254,8 +254,8 @@ module.exports = (msid) => {
     router.get('/home', mainController.getHomePage);
 
     // authentication routes
-    router.get('/signin', msid.signIn({ successRedirect: '/' }));
-    router.get('/signout', msid.signOut({ successRedirect: '/' }));
+    router.get('/signin', msid.signIn({ postLoginRedirect: '/' }));
+    router.get('/signout', msid.signOut({ postLogoutRedirect: '/' }));
 
     // secure routes
     router.get('/id', msid.isAuthenticated(), mainController.getIdPage);
@@ -280,7 +280,7 @@ module.exports = (msid) => {
 }
 ```
 
-Under the hood, the wrapper's [hasAccess()](https://azure-samples.github.io/msal-express-wrapper/classes/MsalWebAppAuthClient.html#hasaccess) middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
+Under the hood, the wrapper's [hasAccess()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#hasaccess) middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
 
 ```typescript
 hasAccess(options?: GuardOptions): RequestHandler {

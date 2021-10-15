@@ -1,8 +1,8 @@
 const appSettings = {
     appCredentials: {
-        clientId: "Enter_the_Application_Id_Here",
-        tenantInfo: "Enter_the_Tenant_Info_Here",
-        clientSecret: "Enter_the_Client_Secret_Here"
+        clientId: "3ac2e4be-0740-4c63-8a09-4f7fb56ac979",
+        tenantId: "cbaf2168-de14-4c72-9d88-f5f05366dbef",
+        clientSecret: "2Cx7Q~vsiBXOEI9XfzDQ-vtNZQNMzMDBXE.iE"
     },
     authRoutes: {
         redirect: "/redirect",
