@@ -263,7 +263,7 @@ app.get('/tenant',
 app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
 ```
 
-Under the hood, the [getToken()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#gettoken) middleware grabs resource endpoint and associated scope from [appSettings.js](./App/appSettings.js), and attempts to obtain an access token from cache silently and attaches it to session. If silent token acquisition fails for some reason (e.g. consent required), it makes an auth code request, which triggers the first leg of auth code flow.
+Under the hood, the [getToken()](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#gettoken) middleware grabs resource endpoint and associated scope from [appSettings.js](./App/appSettings.js), and attempts to obtain an access token from cache silently and attaches it to session. If silent token acquisition fails for some reason (e.g. consent required), it makes an auth code request, which triggers the first leg of auth code flow.
 
 ```typescript
 getToken(options: TokenRequestOptions): RequestHandler {
@@ -331,7 +331,7 @@ getToken(options: TokenRequestOptions): RequestHandler {
 };
 ```
 
-In the second leg of auth code flow, the auth code from redirect response is used to request a new access token (and a refresh token) via the [handleRedirect](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#handleredirect) middleware.
+In the second leg of auth code flow, the auth code from redirect response is used to request a new access token (and a refresh token) via the [handleRedirect](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#handleredirect) middleware.
 
 ```typescript
 handleRedirect = (options?: HandleRedirectOptions): RequestHandler => {

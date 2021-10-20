@@ -255,7 +255,7 @@ In [appSettings.js](./App/appSettings.js), we create an access matrix that defin
 }
 ```
 
-Then, in [app.js](./App/app.js), we create an instance of the [MsalWebAppAuthClient](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html) class.
+Then, in [app.js](./App/app.js), we create an instance of the [MsalWebAppAuthClient](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html) class.
 
 ```javascript
 const express = require('express');
@@ -334,7 +334,7 @@ module.exports = (msid) => {
 }
 ```
 
-Under the hood, the [hasAccess](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#hasaccess) middleware checks the signed-in user's ID token's `groups` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
+Under the hood, the [hasAccess](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#hasaccess) middleware checks the signed-in user's ID token's `groups` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
 
 ```typescript
 hasAccess(options?: GuardOptions): RequestHandler {
@@ -396,7 +396,7 @@ When attending to overage scenarios, which requires a call to [Microsoft Graph](
 
 #### Handle the overage scenario
 
-When the overage occurs, the user's ID token will have the `_claim_names` and `_claim_sources` claims instead of the `groups` claim. Furthermore, `_claim_sources` claim contains the URL that we can query to get the full list of groups the user belongs to. In the [hasAccess()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#hasaccess) middleware we detect if the overage, and trigger the [handleOverage](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#handleoverage) method to query the URL we mentioned.
+When the overage occurs, the user's ID token will have the `_claim_names` and `_claim_sources` claims instead of the `groups` claim. Furthermore, `_claim_sources` claim contains the URL that we can query to get the full list of groups the user belongs to. In the [hasAccess()](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#hasaccess) middleware we detect if the overage, and trigger the [handleOverage](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#handleoverage) method to query the URL we mentioned.
 
 ```typescript
 async handleOverage(req: Request, res: Response, next: NextFunction, rule: AccessRule): Promise<void> {

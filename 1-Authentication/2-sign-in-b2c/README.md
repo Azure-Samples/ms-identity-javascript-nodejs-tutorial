@@ -143,7 +143,7 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 ### Initialization
 
-In [app.js](./App/app.js), we instantiate the [MsalWebAppAuthClient](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html) class. Once instantiated, **MsalWebAppAuthClient** exposes the [initialize()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#initialize) middleware, which sets the default routes for handling redirect response from Azure AD and etc.
+In [app.js](./App/app.js), we instantiate the [MsalWebAppAuthClient](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html) class. Once instantiated, **MsalWebAppAuthClient** exposes the [initialize()](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#initialize) middleware, which sets the default routes for handling redirect response from Azure AD and etc.
 
 ```javascript
 const express = require('express');
@@ -212,7 +212,7 @@ class MsalWebAppAuthClient extends BaseAuthClient {
 
 ### Sign-in
 
-The user clicks on the **sign-in** button and routes to `/signin`. From there, the [signIn()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#signin) middleware takes over. It creates and encodes a state object to pass with an authorization code request. The object is passed to the `state` parameter as a means of controlling the application flow. For more information, see [Pass custom state in authentication requests using MSAL](https://docs.microsoft.com/azure/active-directory/develop/msal-js-pass-custom-state-authentication-request).
+The user clicks on the **sign-in** button and routes to `/signin`. From there, the [signIn()](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#signin) middleware takes over. It creates and encodes a state object to pass with an authorization code request. The object is passed to the `state` parameter as a means of controlling the application flow. For more information, see [Pass custom state in authentication requests using MSAL](https://docs.microsoft.com/azure/active-directory/develop/msal-js-pass-custom-state-authentication-request).
 
 ```typescript
 signIn(options?: SignInOptions): RequestHandler {
@@ -272,7 +272,7 @@ async getAuthCode(req: Request, res: Response, next: NextFunction, params: AuthC
 };
 ```
 
-After making an authorization code URL request, the user is redirected to the redirect route defined in the **Azure AD** app registration. Once redirected, the [handleRedirect()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#handleredirect) middleware takes over. It first checks for `nonce` parameter in state against *cross-site resource forgery* (CSRF) attacks, and then for the current app stage. Then, using the `code` in query parameters, an access and an ID token are requested using the **MSAL Node**'s [acquireTokenByCode()](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html#acquiretokenbycode) API, and the response is appended to the **express-session** variable.
+After making an authorization code URL request, the user is redirected to the redirect route defined in the **Azure AD** app registration. Once redirected, the [handleRedirect()](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#handleredirect) middleware takes over. It first checks for `nonce` parameter in state against *cross-site resource forgery* (CSRF) attacks, and then for the current app stage. Then, using the `code` in query parameters, an access and an ID token are requested using the **MSAL Node**'s [acquireTokenByCode()](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html#acquiretokenbycode) API, and the response is appended to the **express-session** variable.
 
 ```typescript
 private handleRedirect(options?: HandleRedirectOptions): RequestHandler {
@@ -426,7 +426,7 @@ validateIdTokenClaims(idTokenClaims: IdTokenClaims): boolean {
 
 ### Secure routes
 
-Simply add the [isAuthenticated()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#isauthenticated) middleware to your route, before the controller that displays the page you want to be secure. This would require any user to be authenticated to access this route:
+Simply add the [isAuthenticated()](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#isauthenticated) middleware to your route, before the controller that displays the page you want to be secure. This would require any user to be authenticated to access this route:
 
 ```javascript
 // secure routes
@@ -458,7 +458,7 @@ isAuthenticated(options?: GuardOptions): RequestHandler {
 
 ### Sign-out
 
-To sign out, the wrapper's [signOut()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#signout) middleware constructs a logout URL following the [guide here](https://docs.microsoft.com/azure/active-directory/develop/v2-protocols-oidc#send-a-sign-out-request). Then, we destroy the current **express-session** and redirect the user to the **sign-out endpoint**:
+To sign out, the wrapper's [signOut()](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#signout) middleware constructs a logout URL following the [guide here](https://docs.microsoft.com/azure/active-directory/develop/v2-protocols-oidc#send-a-sign-out-request). Then, we destroy the current **express-session** and redirect the user to the **sign-out endpoint**:
 
 ```typescript
 signOut(options?: SignOutOptions): RequestHandler {

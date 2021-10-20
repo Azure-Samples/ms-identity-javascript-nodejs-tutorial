@@ -203,7 +203,7 @@ In [appSettings.js](./App/appSettings.js), we create an access matrix that defin
 }
 ```
 
-Then, in [app.js](./App/app.js), we create an instance of the [MsalWebAppAuthClient](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html) class.
+Then, in [app.js](./App/app.js), we create an instance of the [MsalWebAppAuthClient](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html) class.
 
 ```javascript
 const express = require('express');
@@ -280,7 +280,7 @@ module.exports = (msid) => {
 }
 ```
 
-Under the hood, the wrapper's [hasAccess()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#hasaccess) middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
+Under the hood, the wrapper's [hasAccess()](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#hasaccess) middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
 
 ```typescript
 hasAccess(options?: GuardOptions): RequestHandler {
