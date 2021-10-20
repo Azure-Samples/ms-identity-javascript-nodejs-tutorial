@@ -8,7 +8,7 @@ exports.getIdPage = (req, res, next) => {
         preferred_username: req.session.account.idTokenClaims.preferred_username,
         oid: req.session.account.idTokenClaims.oid,
         sub: req.session.account.idTokenClaims.sub,
-        roles: req.session.account.idTokenClaims.roles.join(' ')
+        roles: req.session.account.idTokenClaims.roles ? req.session.account.idTokenClaims.roles.join(' ') : null
     };
 
     res.render('id', { isAuthenticated: req.session.isAuthenticated, claims: claims });

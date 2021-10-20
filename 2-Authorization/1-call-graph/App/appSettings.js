@@ -9,7 +9,7 @@ const appSettings = {
         error: "/error", // the wrapper will redirect to this route in case of any error
         unauthorized: "/unauthorized" // the wrapper will redirect to this route in case of unauthorized access attempt
     },
-    remoteResources: {
+    protectedResources: {
         graphAPI: {
             endpoint: "https://graph.microsoft.com/v1.0/me",
             scopes: ["user.read"]

@@ -21,7 +21,7 @@ exports.getProfilePage = async (req, res, next) => {
     let profile;
 
     try {
-        const graphClient = graphManager.getAuthenticatedClient(req.session.remoteResources["graphAPI"].accessToken);
+        const graphClient = graphManager.getAuthenticatedClient(req.session.protectedResources["graphAPI"].accessToken);
 
         profile = await graphClient
             .api('/me')
@@ -39,7 +39,7 @@ exports.getTenantPage = async (req, res, next) => {
     let tenant;
 
     try {
-        tenant = await fetchManager.callAPI(appSettings.remoteResources.armAPI.endpoint, req.session.remoteResources["armAPI"].accessToken);
+        tenant = await fetchManager.callAPI(appSettings.protectedResources.armAPI.endpoint, req.session.protectedResources["armAPI"].accessToken);
     } catch (error) {
         console.log(error)
         next(error);

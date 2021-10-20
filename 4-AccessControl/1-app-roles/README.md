@@ -23,7 +23,7 @@ Access control in Azure AD can be done with **Security Groups** as well, as we w
 
 ## Scenario
 
-1. The client application uses **MSAL Node** (via [msal-express-wrapper](https://github.com/Azure-Samples/msal-express-wrapper)) to sign-in a user and obtain an **ID Token** from **Azure AD**.
+1. The client application uses **MSAL Node** (via [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express)) to sign-in a user and obtain an **ID Token** from **Azure AD**.
 2. The **ID Token** contains the [roles claim](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#declare-roles-for-an-application) that is used to control access to protected routes.
 
 ![Overview](./ReadmeFiles/topology.png)
@@ -34,7 +34,7 @@ Access control in Azure AD can be done with **Security Groups** as well, as we w
 |-----------------------------|---------------------------------------------------------------|
 | `AppCreationScripts/`       | Contains Powershell scripts to automate app registration.     |
 | `ReadmeFiles/`              | Contains illustrations and screenshots.                       |
-| `App/appSettings.json`      | Authentication parameters and settings.                       |
+| `App/appSettings.js`      | Authentication parameters and settings.                       |
 | `App/data/db.json`          | Stores todo list data.                                        |
 | `App/app.js`                | Application entry point.                                      |
 
@@ -203,12 +203,18 @@ In [appSettings.js](./App/appSettings.js), we create an access matrix that defin
 }
 ```
 
-Then, in [app.js](./App/app.js), we create an instance of the [AuthProvider](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html) class with the `appSettings.js` passed to its constructor.
+Then, in [app.js](./App/app.js), we create an instance of the [MsalWebAppAuthClient](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html) class.
 
 ```javascript
 const express = require('express');
 const session = require('express-session');
-const msalWrapper = require('msal-express-wrapper');
+const MsIdExpress = require('microsoft-identity-express');
+
+const appSettings = require('./appSettings.js');
+const mainRouter = require('./routes/mainRoutes');
+
+const SERVER_PORT = process.env.PORT || 4000;
+
 // initialize express
 const app = express(); 
 
@@ -222,23 +228,23 @@ app.use(session({
 }));
 
 // instantiate the wrapper
-const authProvider = new msalWrapper.AuthProvider(config);
+const msid = new MsIdExpress.WebAppAuthClientBuilder(appSettings).build();
 
 // initialize the wrapper
-app.use(authProvider.initialize());
+app.use(msid.initialize());
 
 // pass the instance to your routers
-app.use(mainRouter(authProvider));
+app.use(mainRouter(msid));
 
 app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
 ```
 
-The `authProvider` object exposes the middleware we can use to protect our app routes. This can be seen in [mainRoutes.js](./App/routes/mainRoutes.js):
+The `msid` object exposes the middleware we can use to protect our app routes. This can be seen in [mainRoutes.js](./App/routes/mainRoutes.js):
 
 ```javascript
 const express = require('express');
 
-module.exports = (authProvider) => {
+module.exports = (msid) => {
 
     // initialize router
     const router = express.Router();
@@ -248,55 +254,57 @@ module.exports = (authProvider) => {
     router.get('/home', mainController.getHomePage);
 
     // authentication routes
-    router.get('/signin', authProvider.signIn({ successRedirect: '/' }));
-    router.get('/signout', authProvider.signOut({ successRedirect: '/' }));
+    router.get('/signin', msid.signIn({ postLoginRedirect: '/' }));
+    router.get('/signout', msid.signOut({ postLogoutRedirect: '/' }));
 
     // secure routes
-    router.get('/id', authProvider.isAuthenticated(), mainController.getIdPage);
+    router.get('/id', msid.isAuthenticated(), mainController.getIdPage);
 
     router.use('/todolist',
-        authProvider.isAuthenticated(),
-        authProvider.hasAccess({
-            accessRule: config.accessMatrix.todolist
+        msid.isAuthenticated(),
+        msid.hasAccess({
+            accessRule: appSettings.accessMatrix.todolist
         }),
-        todolistRouter // users have to satisfy hasAccess middleware for all routes under /todolist
+        todolistRouter
     );
 
     router.use('/dashboard',
-        authProvider.isAuthenticated(),
-        authProvider.hasAccess({
-            accessRule: config.accessMatrix.dashboard
+        msid.isAuthenticated(),
+        msid.hasAccess({
+            accessRule: appSettings.accessMatrix.dashboard
         }),
-        dashboardRouter // users have to satisfy hasAccess middleware for all routes under /dashboard
+        dashboardRouter
     );
 
     return router;
 }
 ```
 
-Under the hood, the wrapper's [hasAccess()](https://azure-samples.github.io/msal-express-wrapper/classes/authprovider.html#hasaccess) middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
+Under the hood, the wrapper's [hasAccess()](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#hasaccess) middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
 
 ```typescript
-hasAccess = (options?: GuardOptions): RequestHandler => {
-    return async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+hasAccess(options?: GuardOptions): RequestHandler {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         if (req.session && this.appSettings.accessMatrix) {
 
-            const checkFor = options.accessRule.hasOwnProperty(AccessConstants.GROUPS) ? AccessConstants.GROUPS : AccessConstants.ROLES;
+            const checkFor = options.accessRule.hasOwnProperty(AccessControlConstants.GROUPS) ? AccessControlConstants.GROUPS : AccessControlConstants.ROLES;
 
             switch (checkFor) {
-                case AccessConstants.GROUPS:
+                case AccessControlConstants.GROUPS:
 
-                    if (req.session.account.idTokenClaims[AccessConstants.GROUPS] === undefined) {
-                        if (req.session.account.idTokenClaims[AccessConstants.CLAIM_NAMES] || req.session.account.idTokenClaims[AccessConstants.CLAIM_SOURCES]) {
+                    if (req.session.account.idTokenClaims[AccessControlConstants.GROUPS] === undefined) {
+                        if (req.session.account.idTokenClaims[AccessControlConstants.CLAIM_NAMES]
+                            || req.session.account.idTokenClaims[AccessControlConstants.CLAIM_SOURCES]) {
+                            this.logger.warning(InfoMessages.OVERAGE_OCCURRED);
                             return await this.handleOverage(req, res, next, options.accessRule);
                         } else {
-                            console.log(ErrorMessages.USER_HAS_NO_GROUP);
+                            this.logger.error(ErrorMessages.USER_HAS_NO_GROUP);
                             return res.redirect(this.appSettings.authRoutes.unauthorized);
                         }
                     } else {
-                        const groups = req.session.account.idTokenClaims[AccessConstants.GROUPS];
+                        const groups = req.session.account.idTokenClaims[AccessControlConstants.GROUPS];
 
-                        if (!this.checkAccessRule(req.method, options.accessRule, groups, AccessConstants.GROUPS)) {
+                        if (!this.checkAccessRule(req.method, options.accessRule, groups, AccessControlConstants.GROUPS)) {
                             return res.redirect(this.appSettings.authRoutes.unauthorized);
                         }
                     }
@@ -304,14 +312,14 @@ hasAccess = (options?: GuardOptions): RequestHandler => {
                     next();
                     break;
 
-                case AccessConstants.ROLES:
-                    if (req.session.account.idTokenClaims[AccessConstants.ROLES] === undefined) {
-                        console.log(ErrorMessages.USER_HAS_NO_ROLE);
+                case AccessControlConstants.ROLES:
+                    if (req.session.account.idTokenClaims[AccessControlConstants.ROLES] === undefined) {
+                        this.logger.error(ErrorMessages.USER_HAS_NO_ROLE);
                         return res.redirect(this.appSettings.authRoutes.unauthorized);
                     } else {
-                        const roles = req.session.account.idTokenClaims[AccessConstants.ROLES];
+                        const roles = req.session.account.idTokenClaims[AccessControlConstants.ROLES];
 
-                        if (!this.checkAccessRule(req.method, options.accessRule, roles, AccessConstants.ROLES)) {
+                        if (!this.checkAccessRule(req.method, options.accessRule, roles, AccessControlConstants.ROLES)) {
                             return res.redirect(this.appSettings.authRoutes.unauthorized);
                         }
                     }
