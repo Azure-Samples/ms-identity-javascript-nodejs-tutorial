@@ -20,7 +20,7 @@
     "express-session": "^1.17.1",
     "lowdb": "^1.0.0",
     "method-override": "^3.0.0",
-    "nanoid": "^3.1.23"
+    "nanoid": "^3.1.31"
   },
   "devDependencies": {
     "jest": "^27.0.6",
