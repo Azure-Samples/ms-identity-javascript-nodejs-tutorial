@@ -24,33 +24,3 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
-        
-    - run: |
-        cd 1-Authentication/2-sign-in-b2c/App
-        npm ci
-        npm audit --production
-        npm run test
-
-    - run: |
-        cd 2-Authorization/1-call-graph/App
-        npm ci
-        npm audit --production
-        npm run test
-
-    - run: |
-        cd 3-Deployment/App
-        npm ci
-        npm audit --production
-        npm run test
-
-    - run: |
-        cd 4-AccessControl/1-app-roles/App
-        npm ci
-        npm audit --production
-        npm run test
-
-    - run: |
-        cd 4-AccessControl/2-security-groups/App
-        npm ci
-        npm audit --production
-        npm run test
