@@ -14,7 +14,7 @@ module.exports = (msid) => {
     router.get('/home', mainController.getHomePage);
 
     // authentication routes
-    router.get('/signin', msid.signIn({ postLogoutRedirect: '/' }));
+    router.get('/signin', msid.signIn({ postLoginRedirect: '/' }));
     router.get('/signout', msid.signOut({ postLogoutRedirect: '/' }));
 
     // secure routes
