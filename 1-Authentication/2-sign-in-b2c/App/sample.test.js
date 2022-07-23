@@ -14,17 +14,17 @@ describe('Sanitize configuration object', () => {
 
     it('should contain client Id', () => {
         const regexGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-        expect(regexGuid.test(appSettings.appCredentials.clientId)).toBe(true);
+        expect(regexGuid.test(appSettings.appCredentials.clientId)).toBe(false);
     });
 
     it('should contain tenant Id', () => {
         const regexGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-        expect(regexGuid.test(appSettings.appCredentials.tenantId)).toBe(true);
+        expect(regexGuid.test(appSettings.appCredentials.tenantId)).toBe(false);
     });
 
     it('should contain client secret', () => {
         const regexSecret = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{34,}$/;
-        expect(regexSecret.test(appSettings.appCredentials.clientSecret)).toBe(true);
+        expect(regexSecret.test(appSettings.appCredentials.clientSecret)).toBe(false);
     });
 });
 

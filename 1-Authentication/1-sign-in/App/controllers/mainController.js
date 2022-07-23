@@ -1,6 +1,7 @@
 exports.getHomePage = (req, res, next) => {
     const isAuthenticated = req.session.isAuthenticated;
-    res.render('home', { isAuthenticated: isAuthenticated });
+    const username = req.session.account ? req.session.account.username : '';
+    res.render('home', { isAuthenticated: isAuthenticated, username: username });
 }
 
 exports.getIdPage = (req, res, next) => {

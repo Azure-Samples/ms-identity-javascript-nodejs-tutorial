@@ -203,7 +203,7 @@ In [appSettings.js](./App/appSettings.js), we create an access matrix that defin
 }
 ```
 
-Then, in [app.js](./App/app.js), we create an instance of the [MsalWebAppAuthClient](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html) class.
+Then, in [app.js](./App/app.js), we create an instance of the [MsalWebAppAuthClient](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html) class.
 
 ```javascript
 const express = require('express');
@@ -226,6 +226,9 @@ app.use(session({
         secure: false, // set this to true on production
     }
 }));
+
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 // instantiate the wrapper
 const msid = new MsIdExpress.WebAppAuthClientBuilder(appSettings).build();
@@ -280,47 +283,40 @@ module.exports = (msid) => {
 }
 ```
 
-Under the hood, the wrapper's [hasAccess()](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#hasaccess) middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
+Under the hood, the wrapper's [hasAccess()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#hasAccess) middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
 
 ```typescript
-hasAccess(options?: GuardOptions): RequestHandler {
-    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        if (req.session && this.appSettings.accessMatrix) {
+    hasAccess(options: GuardOptions): RequestHandler {
+        return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            if (!this.webAppSettings.accessMatrix) {
+                this.logger.error(ConfigurationErrorMessages.NO_ACCESS_MATRIX_CONFIGURED);
+                return next(new Error(ConfigurationErrorMessages.NO_ACCESS_MATRIX_CONFIGURED));
+            }
 
-            const checkFor = options.accessRule.hasOwnProperty(AccessControlConstants.GROUPS) ? AccessControlConstants.GROUPS : AccessControlConstants.ROLES;
+            if (!req.session.account?.idTokenClaims) {
+                this.logger.error(ErrorMessages.ID_TOKEN_CLAIMS_NOT_FOUND);
+                return next(new Error(ErrorMessages.ID_TOKEN_CLAIMS_NOT_FOUND));
+            }
+
+            const checkFor = options.accessRule.hasOwnProperty(AccessControlConstants.GROUPS)
+                ? AccessControlConstants.GROUPS
+                : AccessControlConstants.ROLES;
 
             switch (checkFor) {
                 case AccessControlConstants.GROUPS:
-
-                    if (req.session.account.idTokenClaims[AccessControlConstants.GROUPS] === undefined) {
-                        if (req.session.account.idTokenClaims[AccessControlConstants.CLAIM_NAMES]
-                            || req.session.account.idTokenClaims[AccessControlConstants.CLAIM_SOURCES]) {
-                            this.logger.warning(InfoMessages.OVERAGE_OCCURRED);
-                            return await this.handleOverage(req, res, next, options.accessRule);
-                        } else {
-                            this.logger.error(ErrorMessages.USER_HAS_NO_GROUP);
-                            return res.redirect(this.appSettings.authRoutes.unauthorized);
-                        }
-                    } else {
-                        const groups = req.session.account.idTokenClaims[AccessControlConstants.GROUPS];
-
-                        if (!this.checkAccessRule(req.method, options.accessRule, groups, AccessControlConstants.GROUPS)) {
-                            return res.redirect(this.appSettings.authRoutes.unauthorized);
-                        }
-                    }
-
-                    next();
+                    // ...
                     break;
 
                 case AccessControlConstants.ROLES:
-                    if (req.session.account.idTokenClaims[AccessControlConstants.ROLES] === undefined) {
-                        this.logger.error(ErrorMessages.USER_HAS_NO_ROLE);
-                        return res.redirect(this.appSettings.authRoutes.unauthorized);
+                    if (!req.session.account.idTokenClaims[AccessControlConstants.ROLES]) {
+                        return res.redirect(this.webAppSettings.authRoutes.unauthorized);
                     } else {
-                        const roles = req.session.account.idTokenClaims[AccessControlConstants.ROLES];
+                        const roles = req.session.account.idTokenClaims[AccessControlConstants.ROLES] as string[];
 
-                        if (!this.checkAccessRule(req.method, options.accessRule, roles, AccessControlConstants.ROLES)) {
-                            return res.redirect(this.appSettings.authRoutes.unauthorized);
+                        if (
+                            !this.checkAccessRule(req.method, options.accessRule, roles, AccessControlConstants.ROLES)
+                        ) {
+                            return res.redirect(this.webAppSettings.authRoutes.unauthorized);
                         }
                     }
 
@@ -330,11 +326,8 @@ hasAccess(options?: GuardOptions): RequestHandler {
                 default:
                     break;
             }
-        } else {
-            res.redirect(this.appSettings.authRoutes.unauthorized);
-        }
-    }
-}
+        };
+    };
 ```
 
 ## More information

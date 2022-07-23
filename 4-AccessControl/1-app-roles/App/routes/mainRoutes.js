@@ -39,9 +39,6 @@ module.exports = (msid) => {
     );
 
     // unauthorized
-    router.get('/error', (req, res) => res.redirect('/500.html'));
-
-    // error
     router.get('/unauthorized', (req, res) => res.redirect('/401.html'));
 
     // 404

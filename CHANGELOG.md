@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 07/23/2022
+
+* Updated samples to the new version of wrapper library
+
 ## 10/11/2021
 
 * Updated samples to the new version of wrapper library
