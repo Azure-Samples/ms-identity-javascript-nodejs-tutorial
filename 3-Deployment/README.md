@@ -183,6 +183,8 @@ const appSettings = require('./appSettings');
 async function main() {
     const app = express();
 
+    app.set('trust proxy', 1);
+
     app.use(session({
         secret: 'ENTER_YOUR_SECRET_HERE',
         resave: false,
@@ -192,7 +194,8 @@ async function main() {
         }
     }));
 
-    app.set('trust proxy', 1);
+    app.use(express.urlencoded({ extended: false }));
+    app.use(express.json());
 
     try {
         const msid = await new MsIdExpress.WebAppAuthClientBuilder(appSettings)
@@ -215,7 +218,7 @@ async function main() {
 main();
 ```
 
-Under the hood, the wrapper calls the **Azure Key Vault** to access credentials needed for the application to authenticate with Azure AD using the [KeyVaultManager](https://azure-samples.github.io/microsoft-identity-express/classes/keyvaultmanager.html) class. This class is leveraging the [@azure/identity](https://www.npmjs.com/package/@azure/identity) and [@azure/key-vault](https://www.npmjs.com/package/@azure/keyvault-secrets) packages:
+Under the hood, the wrapper calls the **Azure Key Vault** to access credentials needed for the application to authenticate with Azure AD using the [KeyVaultManager](https://azure-samples.github.io/microsoft-identity-express/classes/KeyVaultManager.html) class. This class is leveraging the [@azure/identity](https://www.npmjs.com/package/@azure/identity) and [@azure/key-vault](https://www.npmjs.com/package/@azure/keyvault-secrets) packages:
 
 ```typescript
 import { DefaultAzureCredential } from "@azure/identity";

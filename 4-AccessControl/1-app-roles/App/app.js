@@ -16,7 +16,25 @@ const mainRouter = require('./routes/mainRoutes');
 const SERVER_PORT = process.env.PORT || 4000;
 
 // initialize express
-const app = express(); 
+const app = express();
+
+/**
+ * Using express-session middleware. Be sure to familiarize yourself with available options
+ * and set them as desired. Visit: https://www.npmjs.com/package/express-session
+ */
+ app.use(session({
+    secret: 'ENTER_YOUR_SECRET_HERE',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // set this to true on production
+    }
+}));
+
+app.use(methodOverride('_method'));
+
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'ejs');
@@ -25,24 +43,6 @@ app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
 app.use(express.static(path.join(__dirname, './public')));
-
-app.use(methodOverride('_method'));
-
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
-/**
- * Using express-session middleware. Be sure to familiarize yourself with available options
- * and set them as desired. Visit: https://www.npmjs.com/package/express-session
- */
-app.use(session({
-    secret: 'ENTER_YOUR_SECRET_HERE',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: false, // set this to true on production
-    }
-}));
 
 // instantiate the wrapper
 const msid = new MsIdExpress.WebAppAuthClientBuilder(appSettings).build();

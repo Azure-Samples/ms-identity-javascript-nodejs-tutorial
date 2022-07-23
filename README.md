@@ -29,13 +29,15 @@ The [Microsoft identity platform](https://docs.microsoft.com/azure/active-direct
 
 This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) class in order to streamline routine authentication tasks such as login, logout, token acquisition, as well as utility methods to validate tokens and etc. You can find the wrapper here: [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express). Fork it and customize as you need. Suggestions and contributions are welcome!
 
+> :warning: [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express) is for demo purposes only and is not suitable for production applications. 
+
 We recommend following the chapters in successive order. However, the code samples are self-contained, so feel free to pick samples by topics that you may need at the moment.
 
 > :warning: This is a *work in progress*. Come back frequently to discover more samples.
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/en/download/) (>= v12.x)
+- [Node.js](https://nodejs.org/en/download/) (>= v14.x)
 - [Express.js](https://expressjs.com/) (>= v4.x)
 - [Visual Studio Code](https://code.visualstudio.com/download)
 - [VS Code Azure Tools Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack)

@@ -11,9 +11,9 @@ module.exports = (msid) => {
     router.get('/home', mainController.getHomePage);
 
     // auth routes
-    router.get('/signin', msid.signIn({ postLoginRedirect: "/" }));
+    router.get('/signin', msid.signIn({ postLoginRedirect: '/', failureRedirect: '/signin' }));
 
-    router.get('/signout', msid.signOut({ postLogoutRedirect: "/" }));
+    router.get('/signout', msid.signOut({ postLogoutRedirect: '/' }));
 
     // secure routes
     router.get('/id',
@@ -38,9 +38,6 @@ module.exports = (msid) => {
     ); // get token for this route to call web API
 
     // unauthorized
-    router.get('/error', (req, res) => res.redirect('/500.html'));
-
-    // error
     router.get('/unauthorized', (req, res) => res.redirect('/401.html'));
 
     // 404

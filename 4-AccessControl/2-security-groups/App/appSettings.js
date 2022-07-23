@@ -6,7 +6,6 @@ const appSettings = {
     },
     authRoutes: {
         redirect: "/redirect",
-        error: "/error", // the wrapper will redirect to this route in case of any error
         unauthorized: "/unauthorized" // the wrapper will redirect to this route in case of unauthorized access attempt
     },
     accessMatrix: {

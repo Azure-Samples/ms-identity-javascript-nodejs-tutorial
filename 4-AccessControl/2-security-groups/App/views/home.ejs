@@ -17,7 +17,7 @@
                 <div class="card text-center">
                     <div class="card-body">
                         <% if (isAuthenticated) { %>
-                            <h5 class="card-description">Welcome!</h5>
+                            <h5 class="card-description">Welcome <%= username %></h5>
                             <a class="btn btn-primary" href="/todolist" "role="button">Todolist</a>
                             <a class="btn btn-primary" href="/dashboard" "role="button">Dashboard</a>
                         <% }  else { %>

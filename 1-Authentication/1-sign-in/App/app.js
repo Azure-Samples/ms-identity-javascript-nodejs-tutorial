@@ -17,19 +17,11 @@ const SERVER_PORT = process.env.PORT || 4000;
 // initialize express
 const app = express(); 
 
-app.set('views', path.join(__dirname, './views'));
-app.set('view engine', 'ejs');
-
-app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
-app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
-
-app.use(express.static(path.join(__dirname, './public')));
-
 /**
  * Using express-session middleware. Be sure to familiarize yourself with available options
  * and set them as desired. Visit: https://www.npmjs.com/package/express-session
  */
-app.use(session({
+ app.use(session({
     secret: 'ENTER_YOUR_SECRET_HERE',
     resave: false,
     saveUninitialized: false,
@@ -37,6 +29,17 @@ app.use(session({
         secure: false, // set this to true on production
     }
 }));
+
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
+app.set('views', path.join(__dirname, './views'));
+app.set('view engine', 'ejs');
+
+app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
+app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
+
+app.use(express.static(path.join(__dirname, './public')));
 
 // instantiate the wrapper
 const msid = new MsIdExpress.WebAppAuthClientBuilder(appSettings).build();
@@ -51,26 +54,24 @@ app.get('/home', mainController.getHomePage);
 // authentication routes
 app.get('/signin', 
     msid.signIn({
-        postLoginRedirect: '/'
+        postLoginRedirect: '/',
+        failureRedirect: '/signin'
     }
 ));
 
 app.get('/signout', 
     msid.signOut({
-        postLogoutRedirect: '/'
+        postLogoutRedirect: '/',
     }
 ));
 
 // secure routes
 app.get('/id', 
-    msid.isAuthenticated(), 
+    msid.isAuthenticated(),
     mainController.getIdPage
 );
 
 // unauthorized
-app.get('/error', (req, res) => res.redirect('/500.html'));
-
-// error
 app.get('/unauthorized', (req, res) => res.redirect('/401.html'));
 
 // 404

@@ -279,6 +279,9 @@ app.use(session({
     }
 }));
 
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
 // instantiate the wrapper
 const msid = new MsIdExpress.WebAppAuthClientBuilder(appSettings).build();
 
@@ -334,48 +337,49 @@ module.exports = (msid) => {
 }
 ```
 
-Under the hood, the [hasAccess](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#hasaccess) middleware checks the signed-in user's ID token's `groups` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
+Under the hood, the [hasAccess](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#hasAccess) middleware checks the signed-in user's ID token's `groups` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
 
 ```typescript
-hasAccess(options?: GuardOptions): RequestHandler {
-    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        if (req.session && this.appSettings.accessMatrix) {
+    hasAccess(options: GuardOptions): RequestHandler {
+        return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            if (!this.webAppSettings.accessMatrix) {
+                this.logger.error(ConfigurationErrorMessages.NO_ACCESS_MATRIX_CONFIGURED);
+                return next(new Error(ConfigurationErrorMessages.NO_ACCESS_MATRIX_CONFIGURED));
+            }
 
-            const checkFor = options.accessRule.hasOwnProperty(AccessControlConstants.GROUPS) ? AccessControlConstants.GROUPS : AccessControlConstants.ROLES;
+            if (!req.session.account?.idTokenClaims) {
+                this.logger.error(ErrorMessages.ID_TOKEN_CLAIMS_NOT_FOUND);
+                return next(new Error(ErrorMessages.ID_TOKEN_CLAIMS_NOT_FOUND));
+            }
+
+            const checkFor = options.accessRule.hasOwnProperty(AccessControlConstants.GROUPS)
+                ? AccessControlConstants.GROUPS
+                : AccessControlConstants.ROLES;
 
             switch (checkFor) {
                 case AccessControlConstants.GROUPS:
+                    // ...
+                    break;
 
-                    if (req.session.account.idTokenClaims[AccessControlConstants.GROUPS] === undefined) {
-                        if (req.session.account.idTokenClaims[AccessControlConstants.CLAIM_NAMES]
-                            || req.session.account.idTokenClaims[AccessControlConstants.CLAIM_SOURCES]) {
-                            this.logger.warning(InfoMessages.OVERAGE_OCCURRED);
-                            return await this.handleOverage(req, res, next, options.accessRule);
-                        } else {
-                            this.logger.error(ErrorMessages.USER_HAS_NO_GROUP);
-                            return res.redirect(this.appSettings.authRoutes.unauthorized);
-                        }
+                case AccessControlConstants.ROLES:
+                    if (!req.session.account.idTokenClaims[AccessControlConstants.ROLES]) {
+                        return res.redirect(this.webAppSettings.authRoutes.unauthorized);
                     } else {
-                        const groups = req.session.account.idTokenClaims[AccessControlConstants.GROUPS];
+                        const roles = req.session.account.idTokenClaims[AccessControlConstants.ROLES] as string[];
 
-                        if (!this.checkAccessRule(req.method, options.accessRule, groups, AccessControlConstants.GROUPS)) {
-                            return res.redirect(this.appSettings.authRoutes.unauthorized);
+                        if (!this.checkAccessRule(req.method, options.accessRule, roles, AccessControlConstants.ROLES)) {
+                            return res.redirect(this.webAppSettings.authRoutes.unauthorized);
                         }
                     }
 
                     next();
                     break;
 
-                // ...
-
                 default:
                     break;
             }
-        } else {
-            res.redirect(this.appSettings.authRoutes.unauthorized);
-        }
-    }
-}
+        };
+    };
 ```
 
 ### The groups overage claim
@@ -396,65 +400,93 @@ When attending to overage scenarios, which requires a call to [Microsoft Graph](
 
 #### Handle the overage scenario
 
-When the overage occurs, the user's ID token will have the `_claim_names` and `_claim_sources` claims instead of the `groups` claim. Furthermore, `_claim_sources` claim contains the URL that we can query to get the full list of groups the user belongs to. In the [hasAccess()](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#hasaccess) middleware we detect if the overage, and trigger the [handleOverage](https://azure-samples.github.io/microsoft-identity-express/classes/msalwebappauthclient.html#handleoverage) method to query the URL we mentioned.
+When the overage occurs, the user's ID token will have the `_claim_names` and `_claim_sources` claims instead of the `groups` claim. Furthermore, `_claim_sources` claim contains the URL that we can query to get the full list of groups the user belongs to. In the [hasAccess()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#hasAccess) middleware we detect if the overage, and trigger the [handleOverage](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#handleOverage) method to query the URL we mentioned.
 
 ```typescript
-async handleOverage(req: Request, res: Response, next: NextFunction, rule: AccessRule): Promise<void> {
-    const { _claim_names, _claim_sources, ...newIdTokenClaims } = <IdTokenClaims>req.session.account.idTokenClaims;
+    private async handleOverage(req: Request, res: Response, next: NextFunction, rule: AccessRule): Promise<void> {
+        if (!req.session.account?.idTokenClaims) {
+            this.logger.error(ErrorMessages.ID_TOKEN_CLAIMS_NOT_FOUND);
+            return next(new Error(ErrorMessages.ID_TOKEN_CLAIMS_NOT_FOUND));
+        }
 
-    const silentRequest: SilentFlowRequest = {
-        account: req.session.account,
-        scopes: AccessControlConstants.GRAPH_MEMBER_SCOPES.split(" "),
-    };
+        const { _claim_names, _claim_sources, ...newIdTokenClaims } = req.session.account.idTokenClaims;
 
-    try {
-        // acquire token silently to be used in resource call
-        const tokenResponse = await this.msalClient.acquireTokenSilent(silentRequest);
+        const silentRequest: SilentFlowRequest = {
+            account: req.session.account,
+            scopes: AccessControlConstants.GRAPH_MEMBER_SCOPES.split(' '),
+        };
+
         try {
-            const graphResponse = await FetchManager.callApiEndpointWithToken(AccessControlConstants.GRAPH_MEMBERS_ENDPOINT, tokenResponse.accessToken);
+            // acquire token silently to be used in resource call
+            const tokenResponse = await this.msalClient.acquireTokenSilent(silentRequest);
 
-            /**
-             * Some queries against Microsoft Graph return multiple pages of data either due to server-side paging 
-             * or due to the use of the $top query parameter to specifically limit the page size in a request. 
-             * When a result set spans multiple pages, Microsoft Graph returns an @odata.nextLink property in 
-             * the response that contains a URL to the next page of results. Learn more at https://docs.microsoft.com/graph/paging
-             */
-            if (graphResponse[AccessControlConstants.PAGINATION_LINK]) {
-                try {
-                    const userGroups = await FetchManager.handlePagination(tokenResponse.accessToken, graphResponse[AccessControlConstants.PAGINATION_LINK]);
+            if (!tokenResponse) return res.redirect(this.webAppSettings.authRoutes.unauthorized);
 
+            try {
+                const graphResponse = await FetchManager.callApiEndpointWithToken(
+                    AccessControlConstants.GRAPH_MEMBERS_ENDPOINT,
+                    tokenResponse.accessToken
+                );
+
+                /**
+                 * Some queries against Microsoft Graph return multiple pages of data either due to server-side paging
+                 * or due to the use of the $top query parameter to specifically limit the page size in a request.
+                 * When a result set spans multiple pages, Microsoft Graph returns an @odata.nextLink property in
+                 * the response that contains a URL to the next page of results. Learn more at https://docs.microsoft.com/graph/paging
+                 */
+                if (graphResponse.data[AccessControlConstants.PAGINATION_LINK]) {
+                    try {
+                        const userGroups = await FetchManager.handlePagination(
+                            tokenResponse.accessToken,
+                            graphResponse.data[AccessControlConstants.PAGINATION_LINK]
+                        );
+
+                        req.session.account.idTokenClaims = {
+                            ...newIdTokenClaims,
+                            groups: userGroups,
+                        };
+
+                        if (
+                            !this.checkAccessRule(
+                                req.method,
+                                rule,
+                                req.session.account.idTokenClaims[AccessControlConstants.GROUPS] as string[],
+                                AccessControlConstants.GROUPS
+                            )
+                        ) {
+                            return res.redirect(this.webAppSettings.authRoutes.unauthorized);
+                        } else {
+                            return next();
+                        }
+                    } catch (error) {
+                        next(error);
+                    }
+                } else {
                     req.session.account.idTokenClaims = {
                         ...newIdTokenClaims,
-                        groups: userGroups
-                    }
+                        groups: graphResponse.data['value'].map((v: any) => v.id),
+                    };
 
-                    if (!this.checkAccessRule(req.method, rule, req.session.account.idTokenClaims[AccessControlConstants.GROUPS], AccessControlConstants.GROUPS)) {
-                        return res.redirect(this.appSettings.authRoutes.unauthorized);
+                    if (
+                        !this.checkAccessRule(
+                            req.method,
+                            rule,
+                            req.session.account.idTokenClaims[AccessControlConstants.GROUPS] as string[],
+                            AccessControlConstants.GROUPS
+                        )
+                    ) {
+                        return res.redirect(this.webAppSettings.authRoutes.unauthorized);
                     } else {
                         return next();
                     }
-                } catch (error) {
-                    next(error);
                 }
-            } else {
-                req.session.account.idTokenClaims = {
-                    ...newIdTokenClaims,
-                    groups: graphResponse["value"].map((v) => v.id)
-                }
-
-                if (!this.checkAccessRule(req.method, rule, req.session.account.idTokenClaims[AccessControlConstants.GROUPS], AccessControlConstants.GROUPS)) {
-                    return res.redirect(this.appSettings.authRoutes.unauthorized);
-                } else {
-                    return next();
-                }
+            } catch (error) {
+                next(error);
             }
         } catch (error) {
             next(error);
         }
-    } catch (error) {
-        next(error);
-    }
-}
+    };
 ```
 
 ## More information

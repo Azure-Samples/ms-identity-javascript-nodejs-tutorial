@@ -18,16 +18,12 @@ const SERVER_PORT = process.env.PORT || 4000;
 async function main() {
     const app = express();
 
-    app.set('views', path.join(__dirname, './views'));
-    app.set('view engine', 'ejs');
-
-    app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
-    app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
-
-    app.use(express.static(path.join(__dirname, './public')));
-
-    app.use(express.urlencoded({ extended: false }));
-    app.use(express.json());
+    /**
+     * In App Service, SSL termination happens at the network load balancers, so all HTTPS requests reach your app as unencrypted HTTP requests.
+     * The line below is needed for getting the correct absolute URL for redirectUri configuration. For more information, visit: 
+     * https://docs.microsoft.com/azure/app-service/configure-language-nodejs?pivots=platform-linux#detect-https-session
+     */
+    app.set('trust proxy', 1)
 
     /**
      * Using express-session middleware. Be sure to familiarize yourself with available options
@@ -42,12 +38,16 @@ async function main() {
         }
     }));
 
-    /**
-     * In App Service, SSL termination happens at the network load balancers, so all HTTPS requests reach your app as unencrypted HTTP requests.
-     * The line below is needed for getting the correct absolute URL for redirectUri configuration. For more information, visit: 
-     * https://docs.microsoft.com/azure/app-service/configure-language-nodejs?pivots=platform-linux#detect-https-session
-     */
-    app.set('trust proxy', 1)
+    app.use(express.urlencoded({ extended: false }));
+    app.use(express.json());
+
+    app.set('views', path.join(__dirname, './views'));
+    app.set('view engine', 'ejs');
+
+    app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
+    app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
+
+    app.use(express.static(path.join(__dirname, './public')));
 
     try {
         /**
