@@ -1,0 +1,58 @@
+{
+    "Sample": {
+        "Title": "Authenticate a user with BFF flow using MSAL Node and call Graph API",
+        "Level": 300,
+        "Client": "React",
+        "Service": "Node.js web API",
+        "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
+        "Endpoint": "AAD v2.0",
+        "Platform": "JavaScript",
+        "Languages": ["javascript", "react"],
+        "Description": "Authenticate a user with BFF flow using MSAL Node and call Graph API",
+        "products": ["azure-active-directory", "msal-js", "msal-node", "ms-graph"]
+    },
+    "AADApps": [
+        {
+            "Id": "service",
+            "Name": "msal-node-webapp",
+            "Kind": "WebApp",
+            "Audience": "AzureADMyOrg",
+            "HomePage": "http://localhost:3000",
+            "ReplyUrls": "http://localhost:3000/auth/redirect",
+            "SampleSubPath": "5-AdvancedScenarios\\1-call-graph-bff\\App",
+            "Sdk": "MsalNode",
+            "PasswordCredentials": "Auto",
+            "ManualSteps": [],
+            "OptionalClaims": {
+                "IdTokenClaims": ["acct"]
+            },
+            "RequiredResourcesAccess": [
+                {
+                    "Resource": "Microsoft Graph",
+                    "DelegatedPermissions": ["User.Read"]
+                }
+            ]
+        }
+    ],
+    "CodeConfiguration": [
+        {
+            "App": "service",
+            "SettingKind": "Replace",
+            "SettingFile": "\\..\\APP\\authConfig.js",
+            "Mappings": [
+                {
+                    "key": "Enter_the_Application_Id_Here",
+                    "value": ".AppId"
+                },
+                {
+                    "key": "Enter_the_Tenant_Id_Here",
+                    "value": "$tenantId"
+                },
+                {
+                    "key": "Enter_the_Client_Secret_Here",
+                    "value": "service.AppKey"
+                }
+            ]
+        }
+    ]
+}
