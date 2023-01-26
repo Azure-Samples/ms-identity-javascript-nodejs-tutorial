@@ -12,9 +12,18 @@ export const Profile = () => {
 
         if (account) {
             async function fetchProfileData() {
-                const response = await fetch('/auth/profile');
-                const resData = await response.json();
-                setGraphData(resData);
+                try {
+                    const response = await fetch('/auth/profile');
+                    const resData = await response.json();
+                    if (resData.error) {
+                        throw resData.error;
+                    }
+                    setGraphData(resData);
+                } 
+                catch (error) {
+                    window.location.href = 'http://localhost:4000/auth/login';
+                }
+
             }
             fetchProfileData();
         }

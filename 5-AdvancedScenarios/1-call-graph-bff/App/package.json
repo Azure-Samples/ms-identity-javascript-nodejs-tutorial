@@ -5,7 +5,9 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "node app.js"
+        "start": "node app.js",
+        "preinstall": "cd ./client && npm install",
+        "build": "cd ./client && npm run build"
     },
     "keywords": [],
     "author": "",
@@ -15,8 +17,6 @@
         "@microsoft/microsoft-graph-client": "^3.0.4",
         "express": "^4.18.2",
         "express-session": "^1.17.3",
-        "isomorphic-fetch": "^3.0.0",
-        "open": "^8.4.0",
-        "puppeteer": "^19.6.0"
+        "isomorphic-fetch": "^3.0.0"
     }
 }
