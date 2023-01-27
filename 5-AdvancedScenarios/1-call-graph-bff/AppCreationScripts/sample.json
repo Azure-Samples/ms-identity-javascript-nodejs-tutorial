@@ -59,7 +59,7 @@
                 },
                 {
                     "key": "PATH_TO_YOUR_PRIVATE_KEY_FILE",
-                    "value": "$certificateName"
+                    "value": "\"../AppCreationScripts/\"+$certificateName+\".key\""
                 }
             ]
         }
