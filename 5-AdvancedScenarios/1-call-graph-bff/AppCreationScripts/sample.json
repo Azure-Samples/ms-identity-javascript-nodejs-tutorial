@@ -8,7 +8,7 @@
         "Endpoint": "AAD v2.0",
         "Platform": "JavaScript",
         "SDK":"MsalNode",
-        "Languages": ["javascript", "react"],
+        "Languages": ["javascript"],
         "Description": "A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph on the user's behalf",
         "products": ["azure-active-directory", "msal-js", "msal-node", "ms-graph"]
     },
