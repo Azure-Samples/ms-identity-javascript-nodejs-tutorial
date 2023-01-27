@@ -38,14 +38,14 @@ extensions:
 
 ## Overview
 
-This sample demonstrates a React calling a Node.js web API that is secured using Azure AD.
+This sample demonstrates a React single-page application with an Express backend authenticating users and calling the Microsoft Graph API using the backend for frontend proxy pattern.
 
 > :information_source: To learn how to integrate a JavaScript React application with Azure AD, consider going through the recorded session: [Deep dive on using MSAL.js to integrate React single-page applications with Azure Active Directory](https://www.youtube.com/watch?v=7oPSL5wWeS0)
 
 ## Scenario
 
-1. The client React uses the  to sign-in a user and obtain a JWT [ID Token](https://aka.ms/id-tokens) and an [Access Token](https://aka.ms/access-tokens) from **Azure AD**.
-1. The **access token** is used as a *bearer* token to authorize the user to call the Node.js web API protected by **Azure AD**.
+1. The Express web app uses **msal-node** to sign-in a user and obtain a JWT ID Token and an Access Token from Azure AD..
+1. The access token is used as a bearer token to authorize the user to call the Microsoft Graph protected by Azure AD.
 
 ![Scenario Image](./ReadmeFiles/topology.png)
 
