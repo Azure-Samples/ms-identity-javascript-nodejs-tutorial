@@ -5,7 +5,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
     const [account, setAccount] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const getAccount = async () => {
         const response = await fetch('/auth/isAuthenticated');
