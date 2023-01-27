@@ -1,6 +1,6 @@
 {
     "Sample": {
-        "Title": "Authenticate a user with BFF flow using MSAL Node and call Graph API",
+        "Title": "React SPA with Express back-end calling Microsoft Graph using the backend for frontend proxy pattern",
         "Level": 300,
         "Client": "React",
         "Service": "Node.js web API",
@@ -8,7 +8,7 @@
         "Endpoint": "AAD v2.0",
         "Platform": "JavaScript",
         "Languages": ["javascript", "react"],
-        "Description": "Authenticate a user with BFF flow using MSAL Node and call Graph API",
+        "Description": "React SPA with Express back-end calling Microsoft Graph using the backend for frontend proxy pattern",
         "products": ["azure-active-directory", "msal-js", "msal-node", "ms-graph"]
     },
     "AADApps": [

@@ -1,7 +1,7 @@
 ---
 page_type: sample
-name: Authenticate a user with BFF flow using MSAL Node and call Graph API
-description: Authenticate a user with BFF flow using MSAL Node and call Graph API
+name: React SPA with Express back-end calling Microsoft Graph using the backend for frontend proxy pattern
+description: React SPA with Express back-end calling Microsoft Graph using the backend for frontend proxy pattern
 languages:
  - javascript
  - react
@@ -20,9 +20,7 @@ extensions:
 - service: Node.js web API
 ---
 
-# Authenticate a user with BFF flow using MSAL Node and call Graph API
-
-[![Build status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/AAD%20Samples/.NET%20client%20samples/ASP.NET%20Core%20Web%20App%20tutorial)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=XXX)
+# React SPA with Express back-end calling Microsoft Graph using the backend for frontend proxy pattern
 
 * [Overview](#overview)
 * [Scenario](#scenario)
@@ -51,13 +49,14 @@ This sample demonstrates a React single-page application with an Express backend
 
 ## Contents
 
-> Give a high-level folder structure of the sample. Emphasize the files that you want people to look at.
-
-| File/folder       | Description                                |
-|-------------------|--------------------------------------------|
-| `CHANGELOG.md`    | List of changes to the sample.             |
-| `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
-| `LICENSE`         | The license for the sample.                |
+| File/folder                      |                                Description                                 |
+|--------------------------------- |----------------------------------------------------------------------------|
+| `App/app.js`                     | Application entry point.                                                   |
+| `App/authConfig.js`              | Contains authentication configuration parameters.                          |
+| `auth/MsalWebAppWrapper`         | Authorization and Authentication logic .                                   |
+| `utils/graphClient`              | Instantiates Graph SDK client using a custom authentication provider.      |
+| `client/src/context/AuthContext` | React context to fetch user information from the server                    |
+| `client/src/pages/Profile`       | calls back-end `auth/profile` path to callMicrosoft Graph `/me` endpoint   |
 
 ## Prerequisites
 
