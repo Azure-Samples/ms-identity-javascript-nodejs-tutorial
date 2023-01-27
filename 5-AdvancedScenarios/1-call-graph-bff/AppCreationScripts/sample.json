@@ -1,14 +1,15 @@
 {
     "Sample": {
-        "Title": "React SPA with Express back-end calling Microsoft Graph using the backend for frontend proxy pattern",
+        "Title": "A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph",
         "Level": 300,
-        "Client": "React",
-        "Service": "Node.js web API",
+        "Client": "React SPA with Express backend",
+        "Service": "MS Graph",
         "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
         "Endpoint": "AAD v2.0",
         "Platform": "JavaScript",
+        "SDK":"MsalNode",
         "Languages": ["javascript", "react"],
-        "Description": "React SPA with Express back-end calling Microsoft Graph using the backend for frontend proxy pattern",
+        "Description": "A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph on the user's behalf",
         "products": ["azure-active-directory", "msal-js", "msal-node", "ms-graph"]
     },
     "AADApps": [

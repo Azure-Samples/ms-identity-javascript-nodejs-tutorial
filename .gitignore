@@ -104,3 +104,4 @@ typings/
 # VS Code cache
 .vscode/
 
+/.vs

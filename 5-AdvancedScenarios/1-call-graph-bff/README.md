@@ -1,7 +1,7 @@
 ---
 page_type: sample
-name: React SPA with Express back-end calling Microsoft Graph using the backend for frontend proxy pattern
-description: React SPA with Express back-end calling Microsoft Graph using the backend for frontend proxy pattern
+name: A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph
+description: A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph on the user's behalf
 languages:
  - javascript
  - react
@@ -16,11 +16,11 @@ extensions:
 - platform: JavaScript
 - endpoint: AAD v2.0
 - level: 300
-- client: React
-- service: Node.js web API
+- client: React SPA with Express backend
+- service: MS Graph
 ---
 
-# React SPA with Express back-end calling Microsoft Graph using the backend for frontend proxy pattern
+# A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph
 
 * [Overview](#overview)
 * [Scenario](#scenario)
@@ -36,14 +36,16 @@ extensions:
 
 ## Overview
 
-This sample demonstrates a React single-page application with an Express backend authenticating users and calling the Microsoft Graph API using the backend for frontend proxy pattern.
+A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph on the user's behalf
 
 > :information_source: To learn how to integrate a JavaScript React application with Azure AD, consider going through the recorded session: [Deep dive on using MSAL.js to integrate React single-page applications with Azure Active Directory](https://www.youtube.com/watch?v=7oPSL5wWeS0)
 
+> :information_source: To learn how applications integrate with [Microsoft Graph](https://aka.ms/graph), consider going through the recorded session:: [An introduction to Microsoft Graph for developers](https://www.youtube.com/watch?v=EBbnpFdB92A)
+
 ## Scenario
 
-1. The Express web app uses **msal-node** to sign-in a user and obtain a JWT ID Token and an Access Token from Azure AD..
-1. The access token is used as a bearer token to authorize the user to call the Microsoft Graph protected by Azure AD.
+1. The client React SPA with Express backend uses the  to authenticate a user and obtain a JWT [ID Token](https://aka.ms/id-tokens) and an [Access Token](https://aka.ms/access-tokens) from **Azure AD**.
+1. The **access token** is used as a *bearer* token to authorize the user to call the MS Graph protected by **Azure AD**.
 
 ![Scenario Image](./ReadmeFiles/topology.png)
 
@@ -94,10 +96,10 @@ or download and extract the repository *.zip* file.
 
 There is one project in this sample. To register it, you can:
 
-* follow the steps below for manually register your apps
-* or use PowerShell scripts that:
-  * **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
-  * modify the projects' configuration files.
+- follow the steps below for manually register your apps
+- or use PowerShell scripts that:
+  - **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
+  - modify the projects' configuration files.
 
 <details>
    <summary>Expand this section if you want to use this automation:</summary>
