@@ -21,6 +21,7 @@
             "ReplyUrls": "http://localhost:3000/auth/redirect",
             "SampleSubPath": "5-AdvancedScenarios\\1-call-graph-bff\\App",
             "Sdk": "MsalNode",
+            "Certificate": "Auto",
             "PasswordCredentials": "Auto",
             "ManualSteps": [],
             "OptionalClaims": {
@@ -51,6 +52,14 @@
                 {
                     "key": "Enter_the_Client_Secret_Here",
                     "value": "service.AppKey"
+                },
+                {
+                    "key": "YOUR_CERT_THUMBPRINT",
+                    "value": "$thumbprint"
+                },
+                {
+                    "key": "PATH_TO_YOUR_PRIVATE_KEY_FILE",
+                    "value": "$certificateName"
                 }
             ]
         }

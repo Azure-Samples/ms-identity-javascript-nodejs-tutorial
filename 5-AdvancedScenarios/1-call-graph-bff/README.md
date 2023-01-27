@@ -95,10 +95,10 @@ or download and extract the repository *.zip* file.
 
 There is one project in this sample. To register it, you can:
 
-- follow the steps below for manually register your apps
-- or use PowerShell scripts that:
-  - **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
-  - modify the projects' configuration files.
+* follow the steps below for manually register your apps
+* or use PowerShell scripts that:
+  * **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
+  * modify the projects' configuration files.
 
 <details>
    <summary>Expand this section if you want to use this automation:</summary>
@@ -186,13 +186,17 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 ```console
     cd 5-AdvancedScenarios\1-call-graph-bff\App
+    npm run build
     npm start
 ```
 
 ## Explore the sample
 
-> * Explain how to explore the sample.
-> * Insert a screenshot of the client application.
+1. Open your browser and navigate to `http://localhost:4000`.
+1. Select the **Sign In** button on the top right corner.
+1. Select the **Profile** button on the navigation bar. This will make a call to the Graph API.
+
+![Screenshot](./ReadmeFiles/screenshot.png)
 
 > :information_source: Did the sample not work for you as expected? Then please reach out to us using the [GitHub Issues](../../../../issues) page.
 
@@ -217,39 +221,6 @@ To provide feedback on or suggest features for Azure Active Directory, visit [Us
 
 > * Describe where the code uses auth libraries, or calls the graph
 > * Describe specific aspects (e.g. caching, validation etc.)
-
-
-### Deploying Web app to Azure App Service
-
-There is one web app in this sample. To deploy it to **Azure App Services**, you'll need to:
-
-- create an **Azure App Service**
-- publish the projects to the **App Services**, and
-- update its client(s) to call the website instead of the local environment.
-
-> :information_source: If you would like to use **VS Code Azure Tools** extension for deployment, [watch the tutorial](https://docs.microsoft.com/azure/developer/javascript/tutorial-vscode-azure-app-service-node-01) offered by Microsoft Docs.
-
-#### Deploy your files (msal-node-webapp)
-
-1. In the **VS Code** activity bar, select the **Azure** logo to show the **Azure App Service** explorer. Select **Sign in to Azure...** and follow the instructions. Once signed in, the explorer should show the name of your **Azure** subscription(s).
-2. On the **App Service** explorer section you will see an upward-facing arrow icon. Click on it publish your local files in the project folder to **Azure App Services** (use "Browse" option if needed, and locate the right folder).
-3. Choose a creation option based on the operating system to which you want to deploy. in this sample, we choose **Linux**.
-4. Select a **Node.js** version when prompted. An **LTS** version is recommended.
-5. Type a globally unique name for your web app and press Enter. The name must be unique across all of **Azure**. (e.g. `msal-node-webapp`)
-6. After you respond to all the prompts, **VS Code** shows the **Azure** resources that are being created for your app in its notification popup.
-7. Select **Yes** when prompted to update your configuration to run `npm install` on the target **Linux** server.
-
-#### Update the Azure AD app registration (msal-node-webapp)
-
-1. Navigate back to to the [Azure portal](https://portal.azure.com).
-In the left-hand navigation pane, select the **Azure Active Directory** service, and then select **App registrations (Preview)**.
-1. In the resulting screen, select the `msal-node-webapp` application.
-1. In the app's registration screen, select **Authentication** in the menu.
-    1. In the **Redirect URIs** section, update the reply URLs to match the site URL of your Azure deployment. For example:
-        1. `https://msal-node-webapp.azurewebsites.net/auth/redirect`
-
-> :warning: If your app is using an *in-memory* storage, **Azure App Services** will spin down your web site if it is inactive, and any records that your app was keeping will be empty. In addition, if you increase the instance count of your website, requests will be distributed among the instances. Your app's records, therefore, will not be the same on each instance.
-</details>
 
 ## Next Steps
 
