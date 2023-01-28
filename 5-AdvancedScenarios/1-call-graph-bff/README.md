@@ -4,7 +4,6 @@ name: A React SPA with a Node.Js (Express) back-end using the Backend For Fronte
 description: A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph on the user's behalf
 languages:
  - javascript
- - react
 products:
  - azure-active-directory
  - msal-js
@@ -96,35 +95,34 @@ or download and extract the repository *.zip* file.
 
 There is one project in this sample. To register it, you can:
 
-- follow the steps below for manually register your apps
-- or use PowerShell scripts that:
-  - **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
-  - modify the projects' configuration files.
+* follow the steps below for manually register your apps
+* or use PowerShell scripts that:
+  * **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
+  * modify the projects' configuration files.
 
 <details>
    <summary>Expand this section if you want to use this automation:</summary>
-
-    > :warning: If you have never used **Microsoft Graph PowerShell** before, we recommend you go through the [App Creation Scripts Guide](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
+> :warning: If you have never used **Microsoft Graph PowerShell** before, we recommend you go through the [App Creation Scripts Guide](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
   
-    1. On Windows, run PowerShell as **Administrator** and navigate to the root of the cloned directory
-    1. In PowerShell run:
+1. On Windows, run PowerShell as **Administrator** and navigate to the root of the cloned directory
+1. In PowerShell run:
 
-       ```PowerShell
-       Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
-       ```
+    ```PowerShell
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+    ```
 
-    1. Run the script to create your Azure AD application and configure the code of the sample application accordingly.
-    1. For interactive process -in PowerShell, run:
+1. Run the script to create your Azure AD application and configure the code of the sample application accordingly.
+1. For interactive process -in PowerShell, run:
 
-       ```PowerShell
-       cd .\AppCreationScripts\
-       .\Configure.ps1 -TenantId "[Optional] - your tenant id" -AzureEnvironmentName "[Optional] - Azure environment, defaults to 'Global'"
-       ```
+    ```PowerShell
+    cd .\AppCreationScripts\
+    .\Configure.ps1 -TenantId "[Optional] - your tenant id" -AzureEnvironmentName "[Optional] - Azure environment, defaults to 'Global'"
+    ```
 
-    > Other ways of running the scripts are described in [App Creation Scripts guide](./AppCreationScripts/AppCreationScripts.md). The scripts also provide a guide to automated application registration, configuration and removal which can help in your CI/CD scenarios.
-    
-        > :information_source: This sample can make use of client certificates. You can use **AppCreationScripts** to register an Azure AD application with certificates. See: [How to use certificates instead of client secrets](./README-use-certificate.md)
-    
+> Other ways of running the scripts are described in [App Creation Scripts guide](./AppCreationScripts/AppCreationScripts.md). The scripts also provide a guide to automated application registration, configuration and removal which can help in your CI/CD scenarios.
+
+> :information_source: This sample can make use of client certificates. You can use **AppCreationScripts** to register an Azure AD application with certificates. See: [How to use certificates instead of client secrets](./README-use-certificate.md)
+
 </details>
 
 #### Choose the Azure AD tenant where you want to create your applications
@@ -205,7 +203,6 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](Enter_Survey_Form_Link).
 
-
 ## Troubleshooting
 
 <details>
@@ -227,7 +224,7 @@ To provide feedback on or suggest features for Azure Active Directory, visit [Us
 
 Learn how to:
 
-> * Enter next steps (samples, docs) for your platform here
+* [Sign-in users interactively server-side (Node.js) and silently acquire a token for MS Graph from a React single-page app (SPA)](https://github.com/Azure-Samples/ms-identity-javascript-react-tutorial/tree/main/6-AdvancedScenarios/4-sign-in-hybrid)
 
 ## Contributing
 

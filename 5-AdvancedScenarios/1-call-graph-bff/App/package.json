@@ -7,7 +7,7 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node app.js",
         "preinstall": "cd ./client && npm install",
-        "build": "cd ./client && npm run build"
+        "prerestart": "cd ./client && npm run build"
     },
     "keywords": [],
     "author": "",
