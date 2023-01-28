@@ -102,6 +102,7 @@ There is one project in this sample. To register it, you can:
 
 <details>
    <summary>Expand this section if you want to use this automation:</summary>
+
 > :warning: If you have never used **Microsoft Graph PowerShell** before, we recommend you go through the [App Creation Scripts Guide](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
   
 1. On Windows, run PowerShell as **Administrator** and navigate to the root of the cloned directory
