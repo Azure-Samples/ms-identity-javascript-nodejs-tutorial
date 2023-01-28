@@ -186,7 +186,6 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 ```console
     cd 5-AdvancedScenarios\1-call-graph-bff\App
-    npm run build
     npm start
 ```
 
