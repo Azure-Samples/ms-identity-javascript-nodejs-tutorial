@@ -1,6 +1,6 @@
 import { Nav, Navbar, Button } from 'react-bootstrap';
 
-export const NavigationBar = ({ account }) => {
+export const NavigationBar = ({ account, login, logout }) => {
     return (
         <>
             <Navbar bg="primary" variant="dark" className="navbarStyle">
@@ -13,33 +13,29 @@ export const NavigationBar = ({ account }) => {
                             Profile
                         </Nav.Link>
                         <div className="collapse navbar-collapse justify-content-end">
-                            <form method="GET" action="/auth/logout">
-                                <Button
-                                    variant="warning"
-                                    className="ml-auto"
-                                    drop="start"
-                                    as="button"
-                                    type='submit'
-                                >
-                                    Sign out
-                                </Button>
-                            </form>
+                            <Button
+                                variant="warning"
+                                className="ml-auto"
+                                drop="start"
+                                as="button"
+                                onClick={() => { logout(); }}
+                            >
+                                Sign out
+                            </Button>
                         </div>
                     </>
                 ) : (
                     <>
                         <div className="collapse navbar-collapse justify-content-end">
-                            <form method="GET" action="/auth/login">
-                                <Button
-                                    variant="secondary"
-                                    className="ml-auto"
-                                    drop="start"
-                                    as="button"
-                                    type='submit'
-                                >
-                                    Sign in
-                                </Button>
-                            </form>
+                            <Button
+                                variant="secondary"
+                                className="ml-auto"
+                                drop="start"
+                                as="button"
+                                onClick={() => { login(); }}
+                            >
+                                Sign in
+                            </Button>
                         </div>
                     </>
                 )}

@@ -1,32 +1,40 @@
 import { useEffect, useState } from 'react';
 import { ProfileData } from '../components/DataDisplay';
-import { useAuth } from "../context/AuthContext"; 
+import { useAuth } from "../context/AuthContext";
 
 export const Profile = () => {
     const [graphData, setGraphData] = useState(null);
-    const { account } = useAuth();
+    const { account, login } = useAuth();
+
+    const fetchProfileData = async () => {
+        try {
+            const response = await fetch('/auth/profile');
+
+            if (response.ok) {
+                const resData = await response.json();
+                setGraphData(resData);
+            } else if (response.status === 401) {
+                const errorData = await response.json();
+
+                if (errorData.scopes) {
+                    login(window.location.href, errorData.scopes);
+                } else {
+                    login(window.location.href);
+                }
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
         if (!!graphData) {
             return;
         }
 
-        if (account) {
-            async function fetchProfileData() {
-                try {
-                    const response = await fetch('/auth/profile');
-                    const resData = await response.json();
-                    if (resData.error) {
-                        throw resData.error;
-                    }
-                    setGraphData(resData);
-                } 
-                catch (error) {
-                    window.location.href = 'http://localhost:4000/auth/login';
-                }
-
-            }
-            fetchProfileData();
-        }
+        fetchProfileData();
     }, [account, graphData]);
+
     return <>{graphData ? <ProfileData graphData={graphData} /> : null}</>;
 };

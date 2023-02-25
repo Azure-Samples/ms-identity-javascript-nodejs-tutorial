@@ -121,7 +121,7 @@ export const ContactsData = (props) => {
                 </div>
             </Row>
             <Row className="d-flex flex-row">
-                {!props.graphContacts.value  || props.graphContacts.value.length === 0 ? (
+                {!props.graphContacts.value || props.graphContacts.value.length === 0 ? (
                     <p className="text-center">You have 0 contacts</p>
                 ) : (
                     props.graphContacts.value.map((contact) => (

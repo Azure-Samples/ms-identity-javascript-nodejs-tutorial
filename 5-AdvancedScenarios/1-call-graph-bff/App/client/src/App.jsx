@@ -1,9 +1,11 @@
 import { PageLayout } from './components/PageLayout';
-import './styles/App.css';
 import { Routes, Route } from 'react-router-dom';
+
+import { AuthProvider } from './context/AuthContext';
 import { Home } from './pages/Home';
 import { Profile } from './pages/Profile';
-import { AuthProvider } from './context/AuthContext';
+
+import './styles/App.css';
 
 const Pages = () => {
     return (

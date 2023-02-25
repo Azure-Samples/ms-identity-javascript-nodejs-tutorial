@@ -17,4 +17,4 @@ const getGraphClient = (accessToken) => {
     return client;
 };
 
-module.exports =  getGraphClient;
+module.exports = getGraphClient;

@@ -8,11 +8,11 @@ export const PageLayout = (props) => {
      * msal-react provides 2 easy ways to do this. AuthenticatedTemplate and UnauthenticatedTemplate components will 
      * only render their children if a user is authenticated or unauthenticated, respectively.
      */
-    const { account } = useAuth();
-    
+    const { account, login, logout } = useAuth();
+
     return (
         <>
-            <NavigationBar account={account} />
+            <NavigationBar account={account} login={login} logout={logout} />
             <br />
             <h5>
                 <center>Microsoft Authentication Library For React - Tutorial</center>
@@ -27,6 +27,7 @@ export const PageLayout = (props) => {
                         <a
                             href="https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUMlRHSkc5U1NLUkxFNEtVN0dEOTFNQkdTWiQlQCN0PWcu"
                             target="_blank"
+                            rel="noreferrer"
                         >
                             {' '}
                             Share your experience!

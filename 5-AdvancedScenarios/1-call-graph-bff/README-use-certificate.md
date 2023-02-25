@@ -11,14 +11,13 @@ In production, you should purchase a certificate signed by a well-known certific
 <summary>:information_source: Expand this to use automation</summary>
 
 > :warning: Make sure you have OpenSSL installed on your machine. After installation, you may need to start a new command line instance for the `openssl` command to be available on system path.
-> 
+>
 > ```console
 > choco install openssl
 > ```
 
 Alternatively, download and build **OpenSSL** for your **OS** following the guide at [github.com/openssl](https://github.com/openssl/openssl#build-and-install). If you like to skip building and get a binary distributable from the community instead, check the [OpenSSL Wiki: Binaries](https://wiki.openssl.org/index.php/Binaries) page.
 
- 
 1. While inside *AppCreationScripts* folder, open a terminal.
 
 2. Run the [Cleanup-withCertCertificates.ps1](./Cleanup-withCertCertificates.ps1) script to delete any existing app registrations and certificates for the sample.
