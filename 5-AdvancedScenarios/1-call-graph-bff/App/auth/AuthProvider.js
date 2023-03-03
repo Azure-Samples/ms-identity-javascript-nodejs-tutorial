@@ -55,7 +55,9 @@ class AuthProvider {
         };
 
         /**
-         * 
+         * If the current msal configuration does not have cloudDiscoveryMetadata or authorityMetadata, we will 
+         * make a request to the relevant endpoints to retrieve the metadata. This allows MSAL to avoid making 
+         * metadata discovery calls, thereby improving performance of token acquisition process.
          */
         if (!this.config.msalConfig.auth.cloudDiscoveryMetadata || !this.config.msalConfig.auth.authorityMetadata) {
 
@@ -104,6 +106,12 @@ class AuthProvider {
         try {
             const authCodeUrlResponse = await msalInstance.getAuthCodeUrl(authCodeUrlRequest);
 
+            /**
+             * Web apps using OIDC form_post flow for authentication rely on cross-domain 
+             * cookies for security. Here we designate the cookie with sameSite=none to ensure we can retrieve 
+             * state after redirect from the Azure AD takes place. For more information, visit:
+             * https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-handle-samesite-cookie-changes-chrome-browser
+             */
             res.cookie(STATE_COOKIE_NAME, cookiePayload, { httpOnly: true, secure: true, sameSite: 'none' });
             res.redirect(authCodeUrlResponse);
         } catch (error) {
@@ -114,8 +122,8 @@ class AuthProvider {
     async handleRedirect(req, res, next) {
         const authCodeRequest = {
             ...req.cookies[STATE_COOKIE_NAME].authCodeRequest,
-            code: req.body.code,
             codeVerifier: req.cookies[STATE_COOKIE_NAME].pkceCodes.verifier,
+            code: req.body.code,
         }
 
         try {
@@ -130,7 +138,7 @@ class AuthProvider {
 
             const { redirectTo } = JSON.parse(this.cryptoProvider.base64Decode(req.body.state));
 
-            res.clearCookie(STATE_COOKIE_NAME, { httpOnly: true, secure: true, sameSite: 'none'});
+            res.clearCookie(STATE_COOKIE_NAME, { httpOnly: true, secure: true, sameSite: 'none'}); // discard the state cookie
             res.redirect(redirectTo);
         } catch (error) {
             next(error)

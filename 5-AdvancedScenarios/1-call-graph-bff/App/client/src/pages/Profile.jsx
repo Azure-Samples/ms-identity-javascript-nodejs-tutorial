@@ -17,6 +17,7 @@ export const Profile = () => {
                 const errorData = await response.json();
 
                 if (errorData.scopes) {
+                    // if the error response contain scopes, pass them to the next login request
                     login(window.location.href, errorData.scopes);
                 } else {
                     login(window.location.href);

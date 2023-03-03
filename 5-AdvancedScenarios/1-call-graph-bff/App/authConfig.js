@@ -21,7 +21,7 @@ const msalConfig = {
         //     thumbprint: 'YOUR_CERT_THUMBPRINT', // replace with thumbprint obtained during step 2 above
         //     privateKey: fs.readFileSync('PATH_TO_YOUR_PRIVATE_KEY_FILE'), // e.g. c:/Users/diego/Desktop/example.key
         // },
-        clientCapabilities: ['CP1'],
+        clientCapabilities: ['CP1'], // this let's the resource know this client is capable of handling claims challenges
     },
     system: {
         loggerOptions: {
@@ -29,7 +29,7 @@ const msalConfig = {
                 console.log(message);
             },
             piiLoggingEnabled: false,
-            logLevel: msal.LogLevel.Info,
+            logLevel: msal.LogLevel.Verbose,
         },
     },
 };

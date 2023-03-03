@@ -1,7 +1,7 @@
 ---
 page_type: sample
-name: A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph
-description: A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph on the user's behalf
+name: A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Azure AD and calling Microsoft Graph
+description: A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Azure AD and calling Microsoft Graph on the user's behalf
 languages:
  - javascript
 products:
@@ -19,7 +19,7 @@ extensions:
 - service: MS Graph
 ---
 
-# A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph
+# A React SPA with a Node.js (Express) web app using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Azure AD and call Microsoft Graph
 
 * [Overview](#overview)
 * [Scenario](#scenario)
@@ -35,29 +35,29 @@ extensions:
 
 ## Overview
 
-A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy pattern to authenticate users with Azure AD and calling Microsoft Graph on the user's behalf
+This sample demonstrates a React single-page application (SPA) with an Node.js Express backend that authenticates users and calls the Microsoft Graph API using the backend for frontend (BFF) proxy architecture. In this architecture, access tokens are retrieved and stored within the secure backend context, and the client side JavaScript application, which is served by the Express web app, is only indirectly involved in the authN/authZ process by routing the token and API requests to the backend. The trust between the frontend and backend is established via a secure cookie upon successful sign-in.
 
-> :information_source: To learn how to integrate a JavaScript React application with Azure AD, consider going through the recorded session: [Deep dive on using MSAL.js to integrate React single-page applications with Azure Active Directory](https://www.youtube.com/watch?v=7oPSL5wWeS0)
-
-> :information_source: To learn how applications integrate with [Microsoft Graph](https://aka.ms/graph), consider going through the recorded session:: [An introduction to Microsoft Graph for developers](https://www.youtube.com/watch?v=EBbnpFdB92A)
+> :information_source: To learn how applications integrate with [Microsoft Graph](https://aka.ms/graph), consider going through the recorded session: [An introduction to Microsoft Graph for developers](https://www.youtube.com/watch?v=EBbnpFdB92A)
 
 ## Scenario
 
-1. The client React SPA with Express backend uses the  to authenticate a user and obtain a JWT [ID Token](https://aka.ms/id-tokens) and an [Access Token](https://aka.ms/access-tokens) from **Azure AD**.
-1. The **access token** is used as a *bearer* token to authorize the user to call the MS Graph protected by **Azure AD**.
+1. The client-side React SPA initiates token acquisition by calling the login endpoint of the Express web app.
+1. Express web app uses **MSAL Node** to sign-in a user and obtain a JWT [ID Token](https://aka.ms/id-tokens) and an [Access Token](https://aka.ms/access-tokens) from **Azure AD**.
+1. Express web app uses the **access token** as a *bearer* token to authorize the user to call the Microsoft Graph API protected by **Azure AD**.
+1. Express web app returns the Microsoft Graph `/me` endpoint response back to the React SPA.
 
-![Scenario Image](./ReadmeFiles/topology.png)
+![Scenario Image](./ReadmeFiles/sequence.png)
 
 ## Contents
 
 | File/folder                      |                                Description                                 |
 |--------------------------------- |----------------------------------------------------------------------------|
-| `App/app.js`                     | Application entry point.                                                   |
-| `App/authConfig.js`              | Contains authentication configuration parameters.                          |
-| `auth/MsalWebAppWrapper`         | Authorization and Authentication logic .                                   |
+| `app.js`                         | Application entry point.                                                   |
+| `authConfig.js`                  | Contains authentication configuration parameters.                          |
+| `auth/AuthProvider.js`           | A custom wrapper around MSAL Node for authN/authZ.                         |
 | `utils/graphClient`              | Instantiates Graph SDK client using a custom authentication provider.      |
-| `client/src/context/AuthContext` | React context to fetch user information from the server                    |
-| `client/src/pages/Profile`       | calls back-end `auth/profile` path to callMicrosoft Graph `/me` endpoint   |
+| `client/src/context/AuthContext` | React context to fetch user information from the backend.                  |
+| `client/src/pages/Profile`       | Calls `auth/profile` route on backend to call the Microsoft Graph `/me` endpoint   |
 
 ## Prerequisites
 
@@ -67,8 +67,6 @@ A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BF
 * A modern web browser.
 * An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://docs.microsoft.com/azure/active-directory/develop/test-setup-environment#get-a-test-tenant)
 * A user account in your **Azure AD** tenant.
-
->This sample will not work with a **personal Microsoft account**. If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
 
 ## Setup the sample
 
@@ -120,7 +118,7 @@ There is one project in this sample. To register it, you can:
     .\Configure.ps1 -TenantId "[Optional] - your tenant id" -AzureEnvironmentName "[Optional] - Azure environment, defaults to 'Global'"
     ```
 
-> Other ways of running the scripts are described in [App Creation Scripts guide](./AppCreationScripts/AppCreationScripts.md). The scripts also provide a guide to automated application registration, configuration and removal which can help in your CI/CD scenarios.
+Other ways of running the scripts are described in [App Creation Scripts guide](./AppCreationScripts/AppCreationScripts.md). The scripts also provide a guide to automated application registration, configuration and removal which can help in your CI/CD scenarios.
 
 > :information_source: This sample can make use of client certificates. You can use **AppCreationScripts** to register an Azure AD application with certificates. See: [How to use certificates instead of client secrets](./README-use-certificate.md)
 
@@ -182,6 +180,9 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 1. Find the key `Enter_the_Tenant_Id_Here` and replace the existing value with your Azure AD tenant/directory ID.
 1. Find the key `Enter_the_Client_Secret_Here` and replace the existing value with the generated secret that you saved during the creation of `msal-node-webapp` copied from the Azure portal.
 
+1. Open the `App/app.js` file.
+1. Find the string `ENTER_YOUR_SECRET_HERE` and replace it with a secret that will be used when encrypting your app's session using the [express-session](https://www.npmjs.com/package/express-session) package.
+
 ### Step 4: Running the sample
 
 ```console
@@ -201,7 +202,7 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 ## We'd love your feedback!
 
-Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](Enter_Survey_Form_Link).
+Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUQkRCSVdRSk8wUjdZSkg2NEZGOFFaTkxQVyQlQCN0PWcu).
 
 ## Troubleshooting
 
@@ -210,21 +211,213 @@ Were we successful in addressing your learning objective? Consider taking a mome
 
 > * Use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) to get support from the community. Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
 Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
-Make sure that your questions or comments are tagged with [`azure-active-directory-b2c` `node` `ms-identity` `adal` `msal-js` `msal`].
+Make sure that your questions or comments are tagged with [`msal-node` `node` `ms-identity` `adal` `msal-js` `msal`].
 
 To provide feedback on or suggest features for Azure Active Directory, visit [User Voice page](https://feedback.azure.com/d365community/forum/79b1327d-d925-ec11-b6e6-000d3a4f06a4).
 </details>
 
 ## About the code
 
-> * Describe where the code uses auth libraries, or calls the graph
-> * Describe specific aspects (e.g. caching, validation etc.)
+### Login and logout
+
+In [AuthProvider.js](./App/auth/AuthProvider.js), MSAL Node **ConfidentialClientApplication** is configured to obtain tokens to call downstream web APIs (here, Microsoft Graph) using OAuth 2.0 authorization code grant:
+
+```javascript
+async acquireToken(req, res, next, options) {
+    const msalInstance = this.getMsalInstance();
+
+    try {
+        msalInstance.getTokenCache().deserialize(req.session.tokenCache);
+
+        const tokenResponse = await msalInstance.acquireTokenSilent({
+            account: req.session.account,
+            scopes: options.scopes || [],
+            claims: getClaims(req.session, this.config.msalConfig.auth.clientId),
+        });
+
+        req.session.tokenCache = msalInstance.getTokenCache().serialize();
+        req.session.accessToken = tokenResponse.accessToken;
+        req.session.idToken = tokenResponse.idToken;
+        req.session.account = tokenResponse.account;
+
+        return tokenResponse;
+    } catch (error) {
+        if (error instanceof InteractionRequiredAuthError) {
+            // handle interaction error
+        } else {
+            throw error;
+        }
+    }
+}
+```
+
+On the frontend side, the React SPA uses the [AuthContext](./App/client/src/context/AuthContext.js), which makes a GET call to the `/auth/login` endpoint of the Express web app.
+
+```javascript
+login = (postLoginRedirectUri) => {
+    let url = "api/auth/login";
+
+    const searchParams = new URLSearchParams({});
+
+    if (postLoginRedirectUri) {
+        searchParams.append('postLoginRedirectUri', encodeURIComponent(postLoginRedirectUri));
+    }
+
+    url = `${url}?${searchParams.toString()}`;
+
+    window.location.replace(url);
+}
+```
+
+The controller in [authController.js](./App/controllers/authController.js) processes the request and initiates a token request against Azure AD, using the [AuthProvider](./App/auth/AuthProvider.js) class which wraps MSAL Node for simplicity:
+
+```javascript
+exports.loginUser = async (req, res, next) => {
+    let postLoginRedirectUri;
+    let scopesToConsent;
+
+    if (req.query && req.query.postLoginRedirectUri) {
+        postLoginRedirectUri = decodeURIComponent(req.query.postLoginRedirectUri);
+    }
+
+    if (req.query && req.query.scopesToConsent) {
+        scopesToConsent = decodeURIComponent(req.query.scopesToConsent);
+    }
+
+    return authProvider.login(req, res, next, { postLoginRedirectUri, scopesToConsent });
+}
+```
+
+Once the authentication is successful, the authentication state can be shared with the frontend. The claims in the user's ID token is sent back to the frontend to update the UI via the `/auth/account` endpoint.
+
+### Cookie policies
+
+The sample makes use of HTTP only, strict cookies to secure the calls between the frontend and the backend. This is configured in [app.js](./App/app.js);
+
+```javascript
+const express = require('express');
+const session = require('express-session');
+
+const sessionConfig = {
+    name: SESSION_COOKIE_NAME,
+    secret: 'ENTER_YOUR_SECRET_HERE', // replace with your own secret
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        sameSite: 'strict',
+        httpOnly: true,
+        secure: false, // set this to true on production
+    },
+};
+
+if (app.get('env') === 'production') {
+    app.set('trust proxy', 1); // trust first proxy e.g. App Service
+    sessionConfig.cookie.secure = true; // serve secure cookies on production
+}
+
+app.use(session(sessionConfig));
+```
+
+### Handle Continuous Access Evaluation (CAE) challenge from Microsoft Graph
+
+Continuous access evaluation (CAE) enables applications to do just-in time token validation, for instance enforcing user session revocation in the case of password change/reset but there are other benefits. For details, see [Continuous access evaluation](https://docs.microsoft.com/azure/active-directory/conditional-access/concept-continuous-access-evaluation).
+
+Microsoft Graph is now CAE-enabled in Preview. This means that it can ask its client apps for more claims when conditional access policies require it. Your can enable your application to be ready to consume CAE-enabled APIs by:
+
+1. Declaring that the client app is capable of handling claims challenges.
+2. Processing these challenges when they are thrown by the web API
+
+#### Declare the CAE capability in the configuration
+
+This sample app declares that it's CAE-capable by adding the `clientCapabilities` property in the configuration in [authConfig.js](./App/authConfig.js):
+
+```javascript
+    const msalConfig = {
+        auth: {
+            clientId: 'Enter_the_Application_Id_Here', 
+            authority: 'https://login.microsoftonline.com/Enter_the_Tenant_Info_Here',
+            clientCapabilities: ["CP1"] // this lets the resource owner know that this client is capable of handling claims challenge.
+        }
+    }
+
+    const msalInstance = new ConfidentialClientApplication(msalConfig);
+```
+
+#### Processing the CAE challenge from Microsoft Graph
+
+When a CAE event occurs, the Graph service return a response with the WWW-Authenticate header and a 401 status code. You can parse this header and retrieve the claims challenge inside. Here, we set the challenge as a session variable, and a 401 status is sent to the frontend afterwards, indicating that another login request must be made. When that happens, the claims are retrieved back from the session:
+
+```javascript
+exports.getProfile = async (req, res, next) => {
+    try {
+        const tokenResponse = await authProvider.acquireToken(req, res, next, { scopes: ['User.Read']});
+        const graphResponse = await getGraphClient(tokenResponse.accessToken).api('/me').responseType('raw').get();
+        const graphData = await handleAnyClaimsChallenge(graphResponse);
+
+        res.status(200).json(graphData);
+    } catch (error) {
+        if (error.name === 'ClaimsChallengeAuthError') {
+            setClaims(req.session, msalConfig.auth.clientId, error.payload);
+            return res.status(401).json({ error: error.name });
+        }
+
+        next(error);
+    }
+}
+
+// ...
+
+const handleAnyClaimsChallenge = async (response) => {
+    if (response.status === 200) {
+        return await response.json();
+    }
+
+    if (response.status === 401) {
+        if (response.headers.get("WWW-Authenticate")) {
+            const authenticateHeader = response.headers.get("WWW-Authenticate");
+            const claimsChallenge = parseChallenges(authenticateHeader);
+            const err = new Error("A claims challenge has occurred");
+            err.payload = claimsChallenge.claims;
+            err.name = 'ClaimsChallengeAuthError';
+            throw err;
+        }
+
+        throw new Error(`Unauthorized: ${response.status}`);
+    }
+
+    throw new Error(`Something went wrong with the request: ${response.status}`);
+};
+```
+
+### Access token validation
+
+Clients should treat access tokens as opaque strings, as the contents of the token are intended for the **resource only** (such as a web API or Microsoft Graph). For validation and debugging purposes, developers can decode **JWT**s (*JSON Web Tokens*) using a site like [jwt.ms](https://jwt.ms).
+
+For more details on what's inside the access token, clients should use the token response data that's returned with the access token to your client. When your client requests an access token, the Microsoft identity platform also returns some metadata about the access token for your app's consumption. This information includes the expiry time of the access token and the scopes for which it's valid. For more details about access tokens, please see [Microsoft identity platform access tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens)
+
+### Calling the Microsoft Graph API
+
+[Microsoft Graph JavaScript SDK](https://github.com/microsoftgraph/msgraph-sdk-javascript) provides various utility methods to query the Graph API. While the SDK has a default authentication provider that can be used in basic scenarios, it can also be extended to use with a custom authentication provider such as MSAL. To do so, we will initialize the Graph SDK client with an [authProvider function](https://github.com/microsoftgraph/msgraph-sdk-javascript/blob/dev/docs/CreatingClientInstance.md#2-create-with-options). In this case, user has to provide their own implementation for getting and refreshing accessToken. A callback will be passed into this `authProvider` function, accessToken or error needs to be passed in to that callback.
+
+```javascript
+    export const getGraphClient = (accessToken) => {
+    // Initialize Graph client
+    const graphClient = Client.init({
+        // Use the provided access token to authenticate requests
+        authProvider: (done) => {
+            done(null, accessToken);
+        },
+    });
+
+    return graphClient;
+};
+```
 
 ## Next Steps
 
 Learn how to:
 
-* [Sign-in users interactively server-side (Node.js) and silently acquire a token for MS Graph from a React single-page app (SPA)](https://github.com/Azure-Samples/ms-identity-javascript-react-tutorial/tree/main/6-AdvancedScenarios/4-sign-in-hybrid)
+* [Sign-in users interactively server-side and silently acquire a token for MS Graph from a React single-page app](https://github.com/Azure-Samples/ms-identity-javascript-react-tutorial/tree/main/6-AdvancedScenarios/4-sign-in-hybrid)
 
 ## Contributing
 
