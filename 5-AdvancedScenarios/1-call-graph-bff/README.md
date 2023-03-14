@@ -143,7 +143,7 @@ To manually register the apps, as a first step you'll need to:
 1. In the app's registration screen, select the **Authentication** blade to the left.
 1. If you don't have a platform added, select **Add a platform** and select the **Web** option.
     1. In the **Redirect URI** section enter the following redirect URI:
-        1. `http://localhost:3000/auth/redirect`
+        1. `http://localhost:4000/auth/redirect`
     1. Click **Save** to save your changes.
 1. In the app's registration screen, select the **Certificates & secrets** blade in the left to open the page where you can generate secrets and upload certificates.
 1. In the **Client secrets** section, select **New client secret**:
