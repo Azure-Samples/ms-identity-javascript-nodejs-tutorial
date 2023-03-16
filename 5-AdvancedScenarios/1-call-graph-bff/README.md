@@ -35,7 +35,7 @@ extensions:
 
 ## Overview
 
-This sample demonstrates a React single-page application (SPA) with an Node.js Express backend that authenticates users and calls the Microsoft Graph API using the backend for frontend (BFF) proxy architecture. In this architecture, access tokens are retrieved and stored within the secure backend context, and the client side JavaScript application, which is served by the Express web app, is only indirectly involved in the authN/authZ process by routing the token and API requests to the backend. The trust between the frontend and backend is established via a secure cookie upon successful sign-in.
+This sample demonstrates a React single-page application (SPA) with an Node.js Express backend that authenticates users and calls the Microsoft Graph API using the [backend for frontend (BFF) proxy architecture](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps-12#name-backend-for-frontend-bff-pr). In this architecture, access tokens are retrieved and stored within the secure backend context, and the client side JavaScript application, which is served by the Express web app, is only indirectly involved in the authN/authZ process by routing the token and API requests to the backend. The trust between the frontend and backend is established via a secure cookie upon successful sign-in.
 
 > :information_source: To learn how applications integrate with [Microsoft Graph](https://aka.ms/graph), consider going through the recorded session: [An introduction to Microsoft Graph for developers](https://www.youtube.com/watch?v=EBbnpFdB92A)
 
