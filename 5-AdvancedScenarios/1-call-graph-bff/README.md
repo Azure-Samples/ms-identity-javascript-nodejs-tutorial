@@ -80,7 +80,7 @@ git clone https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutoria
 
 or download and extract the repository *.zip* file.
 
-> :warning: To avoid path length limitations on Windows, we recommend cloning into a directory near the root of your drive.
+> :warning: To avoid path length limitations on your operating systems, we recommend cloning into a directory near the root of your drive.
 
 ### Step 2: Install project dependencies
 
