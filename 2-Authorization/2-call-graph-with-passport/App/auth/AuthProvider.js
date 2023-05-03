@@ -147,9 +147,6 @@ class AuthProvider {
             req.session.account = tokenResponse.account;
             req.session.isAuthenticated = true;
             req.session.profile = this.makeProfileObject(tokenResponse.account.idTokenClaims);
-            const state = JSON.parse(this.cryptoProvider.base64Decode(req.body.state));
-            // res.redirect(state.redirectTo);
-            // return profile
             next();
         } catch (error) {
             console.log(error);

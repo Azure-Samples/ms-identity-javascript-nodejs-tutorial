@@ -1,7 +1,7 @@
 ---
 page_type: sample
-name: A Node.js & Express web app authenticating users against Azure AD with MSAL Node and call a protected ASP.NET Core web API
-description: This sample demonstrates a Node.js & Express web app authenticating users against Azure Active Directory (Azure AD) with Microsoft Authentication Library for Node (MSAL Node) and call Graph API
+name: A Node.js & Express web app authenticating users against Azure AD with MSAL Node and passport custom strategy to call Graph API.
+description: This sample demonstrates a Node.js & Express web app authenticating users against Azure Active Directory (Azure AD) with Microsoft Authentication Library for Node (MSAL Node) and passport custom strategy to call Graph API.
 languages:
  - javascript
  - typescript
@@ -20,9 +20,7 @@ extensions:
 - service: Microsoft Graph
 ---
 
-# A Node.js & Express web app authenticating users against Azure AD with MSAL Node and call a protected ASP.NET Core web API
-
-[![Build status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/AAD%20Samples/.NET%20client%20samples/ASP.NET%20Core%20Web%20App%20tutorial)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=XXX)
+# A Node.js & Express web app authenticating users against Azure AD with MSAL Node and passport custom strategy to call Graph API
 
 * [Overview](#overview)
 * [Scenario](#scenario)
@@ -38,9 +36,7 @@ extensions:
 
 ## Overview
 
-This sample demonstrates a Node.js & Express web app calling Microsoft Graph.
-
-> :information_source: To learn how applications integrate with [Microsoft Graph](https://aka.ms/graph), consider going through the recorded session:: [An introduction to Microsoft Graph for developers](https://www.youtube.com/watch?v=EBbnpFdB92A)
+This sample demonstrates a Node.js & Express web app authenticating users against Azure Active Directory (Azure AD) with [Microsoft Authentication Library for Node (MSAL Node)](https://github.com/AzureAD/microsoft-authentication-library-for-js?fbclid=IwAR0F-rtrVjHuv6fBiSrX6czZU7mrIcwn6I7iAsuQ9ZvP85xTFd0PSyRgtzE) and [passport custom strategy](https://www.passportjs.org/packages/passport-custom/) to call Graph API.
 
 ## Scenario
 
@@ -51,13 +47,13 @@ This sample demonstrates a Node.js & Express web app calling Microsoft Graph.
 
 ## Contents
 
-> Give a high-level folder structure of the sample. Emphasize the files that you want people to look at.
-
-| File/folder       | Description                                |
-|-------------------|--------------------------------------------|
-| `CHANGELOG.md`    | List of changes to the sample.             |
-| `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
-| `LICENSE`         | The license for the sample.                |
+| File/folder                 | Description                                                   |
+|-----------------------------|---------------------------------------------------------------|
+| `AppCreationScripts/`       | Contains Powershell scripts to automate app registration.     |
+| `App/authConfig.js`        | Authentication parameters and settings.                        |
+| `App/app.js`                | Application entry point.                                      |
+| `App/utils/graphClient.js` | Handles calls to Microsoft Graph using Graph JS SDK.           |
+| `App/auth/AuthProvider.js`  | Main authentication logic resides here.                       |
 
 ## Prerequisites
 
@@ -95,17 +91,17 @@ or download and extract the repository *.zip* file.
 
 There is one project in this sample. To register it, you can:
 
-- follow the steps below for manually register your apps
-- or use PowerShell scripts that:
-  - **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
-  - modify the projects' configuration files.
+* follow the steps below for manually register your apps
+* or use PowerShell scripts that:
+  * **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
+  * modify the projects' configuration files.
 
 <details>
    <summary>Expand this section if you want to use this automation:</summary>
 
 > :warning: If you have never used **Microsoft Graph PowerShell** before, we recommend you go through the [App Creation Scripts Guide](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
 
-1. Ensure that you have PowerShell 7 or later which can be installed at [this link]([this link](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3)).
+1. Ensure that you have PowerShell 7 or later which can be installed at [this link](https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3).
 1. Run the script to create your Azure AD application and configure the code of the sample application accordingly.
 1. For interactive process -in PowerShell, run:
 
@@ -115,7 +111,7 @@ There is one project in this sample. To register it, you can:
     ```
 
 > Other ways of running the scripts are described in [App Creation Scripts guide](./AppCreationScripts/AppCreationScripts.md). The scripts also provide a guide to automated application registration, configuration and removal which can help in your CI/CD scenarios.
-    
+
 > :information_source: This sample can make use of client certificates. You can use **AppCreationScripts** to register an Azure AD application with certificates. See: [How to use certificates instead of client secrets](./README-use-certificate.md)
 
 </details>
@@ -177,15 +173,17 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 ## Explore the sample
 
-> * Explain how to explore the sample.
-> * Insert a screenshot of the client application.
+1. Open your browser and navigate to `http://localhost:3000`.
+1. Select the **Sign In** link on the page.
+1. Select the **Profile** link on the page. This will make a call to the ToDoList web API.
+
+![Screenshot](./ReadmeFiles/screenshot.png)
 
 > :information_source: Did the sample not work for you as expected? Then please reach out to us using the [GitHub Issues](../../../../issues) page.
 
 ## We'd love your feedback!
 
-Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](Enter_Survey_Form_Link).
-
+Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us]([Enter_Survey_Form_Link](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR_ivMYEeUKlEq8CxnMPgdNZUNDlUTTk2NVNYQkZSSjdaTk5KT1o4V1VVNS4u)).
 
 ## Troubleshooting
 
@@ -201,9 +199,203 @@ To provide feedback on or suggest features for Azure Active Directory, visit [Us
 
 ## About the code
 
-> * Describe where the code uses auth libraries, or calls the graph
-> * Describe specific aspects (e.g. caching, validation etc.)
+### Sign-in
 
+The user clicks on the **sign-in** and routes to `auth/login`. From there, the [login()](../App/auth/AuthProvider.js) method in the `AuthProvider.js` takes over. It creates and encodes a state object to pass with an authorization code request. The object is passed to the `state` parameter as a means of controlling the application flow. For more information, see [Pass custom state in authentication requests using MSAL](https://docs.microsoft.com/azure/active-directory/develop/msal-js-pass-custom-state-authentication-request).
+
+```javascript
+async login(req, res, next, options = {}) {
+        // create a GUID for crsf
+        req.session.csrfToken = this.cryptoProvider.createNewGuid();
+
+        /**
+         * The MSAL Node library allows you to pass your custom state as state parameter in the Request object.
+         * The state parameter can also be used to encode information of the app's state before redirect.
+         * You can pass the user's state in the app, such as the page or view they were on, as input to this parameter.
+         */
+
+        const state = this.cryptoProvider.base64Encode(
+            JSON.stringify({
+                csrfToken: req.session.csrfToken,
+                redirectTo: '/',
+            })
+        );
+
+        const authCodeUrlRequestParams = {
+            state: state,
+
+            /**
+             * By default, MSAL Node will add OIDC scopes to the auth code url request. For more information, visit:
+             * https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
+             */
+            scopes: [],
+        };
+
+        const authCodeRequestParams = {
+            state: state,
+
+            /**
+             * By default, MSAL Node will add OIDC scopes to the auth code request. For more information, visit:
+             * https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
+             */
+            scopes: [],
+        };
+
+        /**
+         * If the current msal configuration does not have cloudDiscoveryMetadata or authorityMetadata, we will
+         * make a request to the relevant endpoints to retrieve the metadata. This allows MSAL to avoid making
+         * metadata discovery calls, thereby improving performance of token acquisition process.
+         */
+
+        if (!this.config.msalConfig.auth.cloudDiscoveryMetadata || !this.config.msalConfig.auth.authorityMetadata) {
+            const [cloudDiscoveryMetadata, authorityMetadata] = await Promise.all([
+                this.getCloudDiscoveryMetadata(),
+                this.getAuthorityMetadata(),
+            ]);
+
+            this.config.msalConfig.auth.cloudDiscoveryMetadata = JSON.stringify(cloudDiscoveryMetadata);
+            this.config.msalConfig.auth.authorityMetadata = JSON.stringify(authorityMetadata);
+        }
+
+        const msalInstance = this.getMsalInstance(this.config.msalConfig);
+
+        // trigger the first leg of auth code flow
+        return this.redirectToAuthCodeUrl(
+            req,
+            res,
+            next,
+            authCodeUrlRequestParams,
+            authCodeRequestParams,
+            msalInstance
+        );
+    }
+```
+
+The `redirectToAuthCodeUrl()` method assigns request parameters and calls the **MSAL Node**'s [getAuthCodeUrl()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#getAuthCodeUrl) API. It then redirects the app to auth code URL:
+
+```javascript
+async redirectToAuthCodeUrl(req, res, next, authCodeUrlRequestParams, authCodeRequestParams, msalInstance) {
+        // Generate PKCE Codes before starting the authorization flow
+        const { verifier, challenge } = await this.cryptoProvider.generatePkceCodes();
+
+        // Set generated PKCE codes and method as session vars
+        req.session.pkceCodes = {
+            challengeMethod: 'S256',
+            verifier: verifier,
+            challenge: challenge,
+        };
+
+        /**
+         * By manipulating the request objects below before each request, we can obtain
+         * auth artifacts with desired claims. For more information, visit:
+         * https://azuread.github.io/microsoft-authentication-library-for-js/ref/modules/_azure_msal_node.html#authorizationurlrequest
+         * https://azuread.github.io/microsoft-authentication-library-for-js/ref/modules/_azure_msal_node.html#authorizationcoderequest
+         **/
+
+        req.session.authCodeUrlRequest = {
+            ...authCodeUrlRequestParams,
+            redirectUri: this.config.redirectUri,
+            responseMode: 'form_post', // recommended for confidential clients
+            codeChallenge: req.session.pkceCodes.challenge,
+            codeChallengeMethod: req.session.pkceCodes.challengeMethod,
+        };
+
+        req.session.authCodeRequest = {
+            ...authCodeRequestParams,
+            redirectUri: this.config.redirectUri,
+            code: '',
+        };
+
+        try {
+            const authCodeUrlResponse = await msalInstance.getAuthCodeUrl(req.session.authCodeUrlRequest);
+            res.redirect(authCodeUrlResponse);
+        } catch (error) {
+            next(error);
+        }
+    }
+```
+
+After making an authorization code URL request, the user is redirected to the redirect route defined in the **Azure AD** app registration. Once redirected, the [handleRedirect()](../App/auth/AuthProvider.js) method takes over. It first checks for `csrfToken` parameter in state against *cross-site resource forgery* (CSRF) attacks, and then for the current app stage. Then, using the `code` in query parameters, an access and an ID token are requested using the **MSAL Node**'s [acquireTokenByCode()](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html#acquiretokenbycode) API, and the response is appended to the **express-session** variable.
+
+```javascript
+async handleRedirect(req, res, next) {
+        const authCodeRequest = {
+            ...req.session.authCodeRequest,
+            code: req.body.code, // authZ code
+            codeVerifier: req.session.pkceCodes.verifier, // PKCE Code Verifier
+        };
+
+        try {
+            const msalInstance = this.getMsalInstance(this.config.msalConfig);
+            msalInstance.getTokenCache().deserialize(req.session.tokenCache);
+
+            const tokenResponse = await msalInstance.acquireTokenByCode(authCodeRequest, req.body);
+            req.session.tokenCache = msalInstance.getTokenCache().serialize();
+
+            req.session.idToken = tokenResponse.idToken;
+            req.session.account = tokenResponse.account;
+            req.session.isAuthenticated = true;
+            req.session.profile = this.makeProfileObject(tokenResponse.account.idTokenClaims);
+            next();
+        } catch (error) {
+            console.log(error);
+            next(error);
+        }
+    }
+```
+
+After fetching the ID token from **Azure AD**, the app calls `makeProfileObject` method in the `AuthProvider.js` class to create the user passport profile object.
+
+```javascript
+makeProfileObject(idTokenClaims) {
+        let profile = {
+            sub: idTokenClaims.sub,
+            oid: idTokenClaims.oid,
+            upn: idTokenClaims.upn,
+            displayName: idTokenClaims.name,
+            name: {
+                familyName: idTokenClaims.family_name,
+                givenName: idTokenClaims.given_name,
+                middleName: idTokenClaims.middle_name,
+            },
+            emails: idTokenClaims.emails,
+            _raw: JSON.stringify(idTokenClaims),
+            _json: idTokenClaims,
+        };
+
+        return profile;
+    }
+```
+
+Then the `passport.authenticate('passport-custom-authentication-strategy)` middleware verifies the authenticated user with our custom strategy.
+
+```javascript
+passport.use(
+    'passport-custom-authentication-strategy',
+    new CustomStrategy(async function (req, callback) {
+        callback(null, req.session.profile);
+    })
+);
+```
+
+### Sign-out
+
+When the user clicks on the **sign-out** link it routes to `auth/logout`. From there, the [logout()](../App/auth/AuthProvider.js) method in the `AuthProvider.js` class constructs a logout URL following the [guide here](https://docs.microsoft.com/azure/active-directory/develop/v2-protocols-oidc#send-a-sign-out-request). Then, we destroy the current **express-session** and redirect the user to the **sign-out endpoint**:
+
+```javascript
+async logout(req, res, next) {
+        /**
+         * Construct a logout URI and redirect the user to end the
+         * session with Azure AD. For more information, visit:
+         * https://docs.microsoft.com/azure/active-directory/develop/v2-protocols-oidc#send-a-sign-out-request
+         */
+        const logoutUri = `${this.config.msalConfig.auth.authority}/oauth2/v2.0/logout?post_logout_redirect_uri=${this.config.postLogoutRedirectUri}`;
+
+        req.session.destroy(() => {
+            res.redirect(logoutUri);
+        });
+    }
+```
 
 ### Deploying Web app to Azure App Service
 
@@ -242,7 +434,8 @@ In the left-hand navigation pane, select the **Azure Active Directory** service,
 
 Learn how to:
 
-> * Enter next steps (samples, docs) for your platform here
+* [A Node.js & Express web app using App Roles to implement Role-Based Access Control](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/tree/main/4-AccessControl/1-app-roles)
+* [Node.js & Express web app using Security Groups to implement Role-Based Access Control](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/tree/main/4-AccessControl/2-security-groups)
 
 ## Contributing
 

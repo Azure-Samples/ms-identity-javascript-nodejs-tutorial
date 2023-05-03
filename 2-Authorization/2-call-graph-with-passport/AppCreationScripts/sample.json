@@ -1,6 +1,6 @@
 {
     "Sample": {
-        "Title": "A Node.js & Express web app authenticating users against Azure AD with MSAL Node and call a protected ASP.NET Core web API",
+        "Title": "A Node.js & Express web app authenticating users against Azure AD with MSAL Node and passport custom strategy to call Graph API.",
         "Level": 200,
         "Client": "Node.js & Express web app",
         "Languages": ["javascript", "typescript"],
@@ -9,7 +9,7 @@
         "Endpoint": "AAD v2.0",
         "Platform": "JavaScript",
         "Service": "Microsoft Graph",
-        "description": "This sample demonstrates a Node.js & Express web app authenticating users against Azure Active Directory (Azure AD) with Microsoft Authentication Library for Node (MSAL Node) and call Graph API"
+        "description": "This sample demonstrates a Node.js & Express web app authenticating users against Azure Active Directory (Azure AD) with Microsoft Authentication Library for Node (MSAL Node) and passport custom strategy to call Graph API."
     },
     "AADApps": [
         {

@@ -37,16 +37,31 @@ app.use(passport.session());
 
 const CustomStrategy = passportCustom.Strategy;
 
+
+//-----------------------------------------------------------------------------
+// To support persistent login sessions, Passport needs to be able to
+// serialize users into and deserialize users out of the session.  Typically,
+// this will be as simple as storing the user ID when serializing, and finding
+// the user by ID when deserializing.
+//-----------------------------------------------------------------------------
 passport.serializeUser(function (user, done) {
-    done(null, user);
+    process.nextTick(function() {
+        return done(null, user);
+    })
 });
 
 passport.deserializeUser(function (user, done) {
-    done(null, user);
+    process.nextTick(function() {
+        done(null, user);
+    })
 });
 
+/**
+ * Passport custom-strategy to authenticate users by custom logic in the case msal-node.
+ * The strategy requires a verify callback with the user profile information.
+ */
 passport.use(
-    'auth-test',
+    'passport-custom-authentication-strategy',
     new CustomStrategy(async function (req, callback) {
         callback(null, req.session.profile);
     })

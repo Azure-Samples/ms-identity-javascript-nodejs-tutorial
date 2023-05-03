@@ -10,10 +10,11 @@ var passport = require('passport');
 var authProvider = require("../auth/AuthProvider")
 
 router.get('/login', authController.login);
+
 router.post(
     '/redirect',
     authController.handleRedirect,
-    passport.authenticate('auth-test', { failureRedirect: '/auth/login', keepSessionInfo: true }),
+    passport.authenticate('passport-custom-authentication-strategy', { failureRedirect: '/auth/login', keepSessionInfo: true }),
     function (req, res, next) {
         const state = JSON.parse(authProvider.cryptoProvider.base64Decode(req.body.state));
         res.redirect(state.redirectTo);
