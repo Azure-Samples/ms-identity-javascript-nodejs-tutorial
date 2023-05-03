@@ -1,0 +1,14 @@
+<h3>Profile data</h3>
+<p>Acquired an <strong>Access Token </strong>for MS Graph with scope: <strong>user.read</strong></p>
+<p><strong>Endpoint:</strong> https://graph.microsoft.com/v1.0/me</p>
+<table>
+    <tbody>
+        {{#each graphData}}
+        <tr>
+            <td>{{@key}}</td>
+            <td>{{this}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+<a href="/">Go back</a>

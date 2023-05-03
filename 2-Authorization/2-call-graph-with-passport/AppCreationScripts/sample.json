@@ -1,0 +1,54 @@
+{
+    "Sample": {
+        "Title": "A Node.js & Express web app authenticating users against Azure AD with MSAL Node and call a protected ASP.NET Core web API",
+        "Level": 200,
+        "Client": "Node.js & Express web app",
+        "Languages": ["javascript", "typescript"],
+        "Products": ["azure-active-directory", "ms-graph", "msal-js", "msal-node"],
+        "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
+        "Endpoint": "AAD v2.0",
+        "Platform": "JavaScript",
+        "Service": "Microsoft Graph",
+        "description": "This sample demonstrates a Node.js & Express web app authenticating users against Azure Active Directory (Azure AD) with Microsoft Authentication Library for Node (MSAL Node) and call Graph API"
+    },
+    "AADApps": [
+        {
+            "Id": "client",
+            "Name": "msal-node-webapp",
+            "Kind": "WebApp",
+            "Audience": "AzureADMyOrg",
+            "HomePage": "http://localhost:3000",
+            "ReplyUrls": "http://localhost:3000, http://localhost:3000/auth/redirect",
+            "PasswordCredentials": "Auto",
+            "SDK": "MsalNode",
+            "SampleSubPath": "2-Authorization\\4-call-api-express\\APP",
+            "RequiredResourcesAccess": [
+                {
+                    "Resource": "Microsoft Graph",
+                    "DelegatedPermissions": ["User.Read"]
+                }
+            ]
+        }
+    ],
+    "CodeConfiguration": [
+        {
+            "App": "client",
+            "SettingKind": "Replace",
+            "SettingFile": "\\..\\APP\\authConfig.js",
+            "Mappings": [
+                {
+                    "key": "Enter_the_Application_Id_Here",
+                    "value": ".AppId"
+                },
+                {
+                    "key": "Enter_the_Tenant_Info_Here",
+                    "value": "$tenantId"
+                },
+                {
+                    "key": "Enter_the_Client_Secret_Here",
+                    "value": ".AppKey"
+                }
+            ]
+        }
+    ]
+}
