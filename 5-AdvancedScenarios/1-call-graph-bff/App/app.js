@@ -4,6 +4,7 @@ const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
+csrf = require('lusca').csrf;
 
 const mainRouter = require("./routes/mainRoutes");
 
@@ -15,6 +16,7 @@ const app = express();
 
 app.use(helmet());
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'client/build')));
 
@@ -36,7 +38,7 @@ if (app.get('env') === 'production') {
 }
 
 app.use(session(sessionConfig));
-app.use(cookieParser());
+csrf = require('lusca').csrf;
 
 app.use(function (err, req, res, next) {
     // set locals, only providing error in development

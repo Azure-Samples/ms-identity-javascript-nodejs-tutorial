@@ -46,7 +46,21 @@ This sample demonstrates a React single-page application (SPA) with an Node.js E
 1. Express web app uses the **access token** as a *bearer* token to authorize the user to call the Microsoft Graph API protected by **Azure AD**.
 1. Express web app returns the Microsoft Graph `/me` endpoint response back to the React SPA.
 
-![Scenario Image](./ReadmeFiles/sequence.png)
+```mermaid
+sequenceDiagram
+    participant Frontend
+    participant Backend
+    participant Azure AD
+    participant Graph
+    Frontend-)+Backend: /login
+    Backend-)+Azure AD: login.microsoftonline.com
+    Azure AD--)-Backend: token response
+    Backend--)-Frontend: /login response (auth state)
+    Frontend-)+Backend: /profile
+    Backend-)+Graph: graph.microsoft.com/v1.0/me
+    Graph--)-Backend: /me endpoint response
+    Backend--)-Frontend: /profile response (/me data)
+```
 
 ## Contents
 
