@@ -86,7 +86,7 @@ Please refer to each chapter's README for sample-specific recommendations.
 
 |                 |               |
 |-----------------|---------------|
-| <img src="./5-AdvancedScenarios/1-call-graph-bff/App/ReadmeFiles/topology.png" width="200"> | [**Authenticate With React and Express**](./5-AdvancedScenarios/1-call-graph-bff/App/README.md) </br> Authentication With React and Express utilizing msal-node and the BFF flow. |
+| <img src="./5-AdvancedScenarios/1-call-graph-bff/App/ReadmeFiles/sequence.png" width="200"> | [**Authenticate With React and Express**](./5-AdvancedScenarios/1-call-graph-bff/App/README.md) </br> Authentication With React and Express utilizing msal-node and the BFF flow. |
 
 ## We'd love your feedback
 
