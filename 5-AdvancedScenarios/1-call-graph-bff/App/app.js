@@ -1,14 +1,17 @@
 
-const path = require("path");
+const path = require('path');
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
-csrf = require('lusca').csrf;
+const csrf = require('lusca').csrf;
 
 const mainRouter = require("./routes/mainRoutes");
 
-const { SESSION_COOKIE_NAME } = require("./authConfig");
+const { 
+    SESSION_COOKIE_NAME, 
+    REDIRECT_URI 
+} = require('./authConfig');
 
 const PORT = process.env.PORT || 4000;
 
@@ -38,7 +41,9 @@ if (app.get('env') === 'production') {
 }
 
 app.use(session(sessionConfig));
-csrf = require('lusca').csrf;
+app.use(csrf({
+    blocklist: [new URL(REDIRECT_URI).pathname],
+}));
 
 app.use(function (err, req, res, next) {
     // set locals, only providing error in development
