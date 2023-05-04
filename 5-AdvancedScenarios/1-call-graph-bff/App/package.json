@@ -1,0 +1,26 @@
+{
+    "name": "app",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node app.js",
+        "preinstall": "cd ./client && npm install",
+        "prestart": "cd ./client && npm run build"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@azure/msal-node": "^1.17.2",
+        "@microsoft/microsoft-graph-client": "^3.0.4",
+        "axios": "^1.3.3",
+        "cookie-parser": "^1.4.6",
+        "express": "^4.18.2",
+        "express-session": "^1.17.3",
+        "helmet": "^6.1.5",
+        "isomorphic-fetch": "^3.0.0",
+        "lusca": "^1.7.0"
+    }
+}

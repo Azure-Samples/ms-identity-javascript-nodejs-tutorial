@@ -29,7 +29,7 @@ The [Microsoft identity platform](https://docs.microsoft.com/azure/active-direct
 
 This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) class in order to streamline routine authentication tasks such as login, logout, token acquisition. You can find the wrapper here: [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express). Fork it and customize as you need. Suggestions and contributions are welcome!
 
-> :warning: [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express) is for demo purposes only and is not suitable for production applications. 
+> :warning: [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express) is for demo purposes only and is not suitable for production applications.
 
 We recommend following the chapters in successive order. However, the code samples are self-contained, so feel free to pick samples by topics that you may need at the moment.
 
@@ -82,7 +82,13 @@ Please refer to each chapter's README for sample-specific recommendations.
 | <img src="./4-AccessControl/1-app-roles/ReadmeFiles/topology.png" width="200"> | [**Use App Roles for access control**](./4-AccessControl/1-app-roles/README.md) </br> Define App Roles and use roles claim in a token to implement Role-based Access Control (RBAC) for your web app. |
 | <img src="./4-AccessControl/2-security-groups/ReadmeFiles/topology.png" width="200"> | [**Use Security Groups for access control**](./4-AccessControl/2-security-groups/README.md) </br> Create Security Groups and use groups claim in a token to implement Role-based Access Control (RBAC) for your web app. Handle groups claim overage scenarios. |
 
-## We'd love your feedback!
+### Chapter 5: Dive into advanced scenarios
+
+|                 |               |
+|-----------------|---------------|
+| <img src="./5-AdvancedScenarios/1-call-graph-bff/App/ReadmeFiles/topology.png" width="200"> | [**Authenticate With React and Express**](./5-AdvancedScenarios/1-call-graph-bff/App/README.md) </br> Authentication With React and Express utilizing msal-node and the BFF flow. |
+
+## We'd love your feedback
 
 Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUQkRCSVdRSk8wUjdZSkg2NEZGOFFaTkxQVyQlQCN0PWcu).
 
@@ -118,7 +124,7 @@ To provide a recommendation, visit the following [User Voice page](https://feedb
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+the rights to use your contribution. For details, visit <https://cla.opensource.microsoft.com>.
 
 ## Code of Conduct
 
