@@ -1,13 +1,27 @@
+/*
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
+
 const appSettings = {
-    appCredentials: {
-        clientId: "Enter_the_Application_Id_Here",
-        tenantId: "Enter_the_Tenant_Info_Here",
-        clientSecret: "Enter_the_Client_Secret_Here"
+    authOptions: {
+        clientId: 'Enter_the_Application_Id_Here',
+        tenantId: 'Enter_the_Application_Id_Here',
+        clientSecret: 'Enter_the_Application_Id_Here',
     },
     authRoutes: {
-        redirect: "/redirect",
-        unauthorized: "/unauthorized" // the wrapper will redirect to this route in case of unauthorized access attempt.
-    }
-}
+        redirectUri: '/redirect',
+    },
+    loggerOptions: {
+        loggerCallback: (logLevel, message, containsPii) => {
+            if (containsPii) {
+                return;
+            }
+            console.log(message);
+        },
+        piiLoggingEnabled: false,
+        logLevel: 3,
+    },
+};
 
 module.exports = appSettings;

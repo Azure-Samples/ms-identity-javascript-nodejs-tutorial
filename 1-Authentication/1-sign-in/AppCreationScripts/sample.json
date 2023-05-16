@@ -1,10 +1,14 @@
 {
   "Sample": {
-    "Title": "A Node.js & Express web app authenticating users against Azure AD with MSAL Node",
-    "Level": 100,
-    "Client": "Node.js & Express web app",
-    "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
-    "Endpoint": "AAD v2.0"
+      "Title": "A Node.js & Express web app authenticating users against Azure AD with MSAL Node",
+      "Level": 100,
+      "Client": "Node.js & Express web app",
+      "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
+      "Endpoint": "AAD v2.0",
+      "Products": ["azure-active-directory", "msal-node"],
+      "Languages": ["javascript"],
+      "Platform": "JavaScript",
+      "description": "The sample demonstrates a Node.js & Express web app authenticating users against Azure AD with MSAL Node"
   },
   "AADApps": [
     {
@@ -14,7 +18,9 @@
       "Audience": "AzureADMyOrg",
       "HomePage": "http://localhost:4000",
       "ReplyUrls": "http://localhost:4000/redirect",
-      "PasswordCredentials": "Auto"
+      "PasswordCredentials": "Auto",
+      "SDK": "MsalNode",
+      "SampleSubPath": "1-Authentication\\1-sign-in\\App"
     }
   ],
   "CodeConfiguration": [
