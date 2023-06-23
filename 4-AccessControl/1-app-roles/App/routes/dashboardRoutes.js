@@ -1,5 +1,4 @@
 const express = require('express');
-
 const dashboardController = require('../controllers/dashboardController');
 
 // initialize router

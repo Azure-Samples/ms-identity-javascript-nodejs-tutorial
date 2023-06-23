@@ -15,7 +15,7 @@
     "ejs": "^3.1.8",
     "express": "^4.18.1",
     "express-session": "^1.17.3",
-    "microsoft-identity-express": "git+https://github.com/Azure-Samples/microsoft-identity-express.git#1.0.0-beta.7"
+    "msal-node-wrapper": "file:../../../shared/msal-node-wrapper"
   },
   "devDependencies": {
     "jest": "^27.0.6",

@@ -2,47 +2,44 @@ const express = require('express');
 
 const mainController = require('../controllers/mainController');
 const todolistRouter = require('./todolistRoutes');
+const todolistController = require('../controllers/todolistController');
 const dashboardRouter = require('./dashboardRoutes');
 
-const appSettings = require('../appSettings.js');
+// initialize router
+const router = express.Router();
 
-module.exports = (msid) => {
+router.get('/', mainController.getHomePage);
+router.get('/id', mainController.getIdPage);
 
-    // initialize router
-    const router = express.Router();
+// auth routes
+router.get(
+    '/signout',
+    (req, res, next) => {
+        return req.authContext.logout({
+            postLogoutRedirectUri: "/",
+        })(req, res, next);
+    }
+);
 
-    // app routes
-    router.get('/', (req, res, next) => res.redirect('/home'));
-    router.get('/home', mainController.getHomePage);
+router.get(
+    '/signin',
+    (req, res, next) => {
+        return req.authContext.login({
+            postLoginRedirectUri: "/",
+            postFailureRedirectUri: "/signin"
+        })(req, res, next);
+    }
+);
 
-    // authentication routes
-    router.get('/signin', msid.signIn({ postLoginRedirect: '/' }));
-    router.get('/signout', msid.signOut({ postLogoutRedirect: '/' }));
+// nested routes
+router.use(
+    '/todolist',
+    todolistRouter
+);
 
-    // secure routes
-    router.get('/id', msid.isAuthenticated(), mainController.getIdPage);
+router.use(
+    '/dashboard',
+    dashboardRouter
+);
 
-    router.use('/todolist',
-        msid.isAuthenticated(),
-        msid.hasAccess({
-            accessRule: appSettings.accessMatrix.todolist
-        }),
-        todolistRouter
-    );
-
-    router.use('/dashboard',
-        msid.isAuthenticated(),
-        msid.hasAccess({
-            accessRule: appSettings.accessMatrix.dashboard
-        }),
-        dashboardRouter
-    );
-
-    // unauthorized
-    router.get('/unauthorized', (req, res) => res.redirect('/401.html'));
-
-    // 404
-    router.get('*', (req, res) => res.status(404).redirect('/404.html'));
-
-    return router;
-}
+module.exports = router;

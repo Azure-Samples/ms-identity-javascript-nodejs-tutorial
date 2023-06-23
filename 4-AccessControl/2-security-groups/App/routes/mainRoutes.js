@@ -4,45 +4,33 @@ const mainController = require('../controllers/mainController');
 const todolistRouter = require('./todolistRoutes');
 const dashboardRouter = require('./dashboardRoutes');
 
-const appSettings = require('../appSettings.js');
+// initialize router
+const router = express.Router();
 
-module.exports = (msid) => {
+// app routes
+router.get('/', mainController.getHomePage);
 
-    // initialize router
-    const router = express.Router();
+// secure routes
+router.get('/id', mainController.getIdPage);
 
-    // app routes
-    router.get('/', (req, res, next) => res.redirect('/home'));
-    router.get('/home', mainController.getHomePage);
+// secure routes
+router.get(
+    '/signout',
+    (req, res, next) => {
+        return req.authContext.logout({
+            postLogoutRedirectUri: "/",
+        })(req, res, next);
+    }
+);
 
-    // authentication routes
-    router.get('/signin', msid.signIn({ postLoginRedirect: '/' }));
-    router.get('/signout', msid.signOut({ postLogoutRedirect: '/' }));
+router.use(
+    '/todolist',
+    todolistRouter
+);
 
-    // secure routes
-    router.get('/id', msid.isAuthenticated(), mainController.getIdPage);
+router.use(
+    '/dashboard',
+    dashboardRouter
+);
 
-    router.use('/todolist',
-        msid.isAuthenticated(),
-        msid.hasAccess({
-            accessRule: appSettings.accessMatrix.todolist
-        }),
-        todolistRouter
-    );
-
-    router.use('/dashboard',
-        msid.isAuthenticated(),
-        msid.hasAccess({
-            accessRule: appSettings.accessMatrix.dashboard
-        }),
-        dashboardRouter
-    );
-
-    // unauthorized
-    router.get('/unauthorized', (req, res) => res.redirect('/401.html'));
-
-    // 404
-    router.get('*', (req, res) => res.status(404).redirect('/404.html'));
-
-    return router;
-}
+module.exports = router;

@@ -17,7 +17,7 @@
     "express-session": "^1.17.3",
     "lowdb": "^1.0.0",
     "method-override": "^3.0.0",
-    "microsoft-identity-express": "git+https://github.com/Azure-Samples/microsoft-identity-express.git#1.0.0-beta.7",
+    "msal-node-wrapper": "file:../../../shared/msal-node-wrapper",
     "nanoid": "^3.3.2"
   },
   "devDependencies": {

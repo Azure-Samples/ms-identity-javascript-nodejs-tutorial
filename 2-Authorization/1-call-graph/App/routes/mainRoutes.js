@@ -2,45 +2,33 @@ const express = require('express');
 
 const mainController = require('../controllers/mainController');
 
-const appSettings = require('../appSettings.js');
+// initialize router
+const router = express.Router();
 
-module.exports = (msid) => {
+// app routes
+router.get('/', mainController.getHomePage);
 
-    // initialize router
-    const router = express.Router();
+// secure routes
+router.get('/id', mainController.getIdPage);
 
-    // app routes
-    router.get('/', (req, res, next) => res.redirect('/home'));
-    router.get('/home', mainController.getHomePage);
+// secure routes
+router.get(
+    '/signout',
+    (req, res, next) => {
+        return req.authContext.logout({
+            postLogoutRedirectUri: "/",
+        })(req, res, next);
+    }
+);
 
-    // authentication routes
-    router.get('/signin', msid.signIn({ postLoginRedirect: '/', failureRedirect: '/signin' }));
-    router.get('/signout', msid.signOut({ postLogoutRedirect: '/' }));
+router.get(
+    '/profile',
+    mainController.getProfilePage
+); // get token for this route to call web API
 
-    // secure routes
-    router.get('/id', msid.isAuthenticated(), mainController.getIdPage);
+router.get(
+    '/tenant',
+    mainController.getTenantPage
+); // get token for this route to call web API
 
-    router.get('/profile',
-        msid.isAuthenticated(), 
-        msid.getToken({
-            resource: appSettings.protectedResources.graphAPI
-        }), 
-        mainController.getProfilePage
-    );
-
-    router.get('/tenant',
-        msid.isAuthenticated(),
-        msid.getToken({
-            resource: appSettings.protectedResources.armAPI
-        }),
-        mainController.getTenantPage
-    );
-
-    // unauthorized
-    router.get('/unauthorized', (req, res) => res.redirect('/401.html'));
-
-    // 404
-    router.get('*', (req, res) => res.status(404).redirect('/404.html'));
-
-    return router;
-}
+module.exports = router;

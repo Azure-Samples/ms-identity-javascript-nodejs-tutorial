@@ -3,19 +3,22 @@
  * Licensed under the MIT License.
  */
 
-require('dotenv').config();
+require('dotenv').config( { path: __dirname + '/.env.example' });
 
+const path = require('path');
 const express = require('express');
 const session = require('express-session');
-const path = require('path');
+const { WebAppAuthProvider } = require('msal-node-wrapper');
 
-const MsIdExpress = require('microsoft-identity-express');
-const appSettings = require('./appSettings');
+const authConfig = require('./authConfig.js');
 const mainRouter = require('./routes/mainRoutes');
+
+const { getCredentialFromKeyVault } = require('./utils/keyVaultManager');
 
 const SERVER_PORT = process.env.PORT || 4000;
 
 async function main() {
+    // initialize express
     const app = express();
 
     /**
@@ -34,7 +37,8 @@ async function main() {
         resave: false,
         saveUninitialized: false,
         cookie: {
-            secure: true, 
+            httpOnly: true,
+            secure: false,
         }
     }));
 
@@ -50,27 +54,41 @@ async function main() {
     app.use(express.static(path.join(__dirname, './public')));
 
     try {
-        /**
-         * In order to initialize the wrapper with the credentials fetched from
-         * Azure Key Vault, we use the async builder pattern.
-         */
-        const msid = await new MsIdExpress.WebAppAuthClientBuilder(appSettings)
-            .withKeyVaultCredentials({
-                credentialType: "clientSecret",
-                credentialName: process.env["SECRET_NAME"],
-                keyVaultUrl: process.env["KEY_VAULT_URI"]
-            }).buildAsync();
+        console.log(process.env.KEY_VAULT_URI);
+        const clientSecret = await getCredentialFromKeyVault(process.env.KEY_VAULT_URI, process.env.SECRET_NAME);
+        
+        const authConfigWithSecret = {
+            ...authConfig,
+            authOptions: {
+                ...authConfig.authOptions,
+                clientSecret: clientSecret.value
+            }
+        }
 
-        app.use(msid.initialize());
+        const authProvider = await WebAppAuthProvider.initialize(authConfigWithSecret);
 
-        app.use(mainRouter(msid));
+        app.use(authProvider.authenticate({
+            protectAllRoutes: true,
+            acquireTokenForResources: {
+                "graph.microsoft.com": {
+                    scopes: ["User.Read"],
+                    routes: ["/profile"]
+                },
+            }
+        }));
 
-        app.listen(SERVER_PORT, () => console.log(`Server is listening on port ${SERVER_PORT}!`));
+        // pass the instance to your routers
+        app.use(mainRouter);
+
+        app.use(authProvider.interactionErrorHandler());
+
+        app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
     } catch (error) {
         console.log(error);
     }
 
-    module.exports = app;
 }
 
 main();
+
+module.exports = main;

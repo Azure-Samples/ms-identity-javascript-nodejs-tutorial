@@ -1,51 +1,59 @@
-const appSettings = require('../appSettings');
 const fetchManager = require('../utils/fetchManager');
 const graphManager = require('../utils/graphManager');
 
 exports.getHomePage = (req, res, next) => {
-    const isAuthenticated = req.session.isAuthenticated;
-    const username = req.session.account ? req.session.account.username : '';
-    res.render('home', { isAuthenticated: isAuthenticated, username: username });
+    const username = req.authContext.getAccount() ? req.authContext.getAccount().username : '';
+    res.render('home', { isAuthenticated: req.authContext.isAuthenticated(), username: username });
 }
 
 exports.getIdPage = (req, res, next) => {
+    const account = req.authContext.getAccount();
+
     const claims = {
-        name: req.session.account.idTokenClaims.name,
-        preferred_username: req.session.account.idTokenClaims.preferred_username,
-        oid: req.session.account.idTokenClaims.oid,
-        sub: req.session.account.idTokenClaims.sub
+        name: account.idTokenClaims.name,
+        preferred_username: account.idTokenClaims.preferred_username,
+        oid: account.idTokenClaims.oid,
+        sub: account.idTokenClaims.sub
     };
 
-    res.render('id', { isAuthenticated: req.session.isAuthenticated, claims: claims });
+    res.render('id', {isAuthenticated: req.authContext.isAuthenticated(), claims: claims});
 }
 
 exports.getProfilePage = async (req, res, next) => {
-    let profile;
-
     try {
-        const graphClient = graphManager.getAuthenticatedClient(req.session.protectedResources["graphAPI"].accessToken);
+        let accessToken = req.authContext.getCachedTokenForResource("graph.microsoft.com");
 
-        profile = await graphClient
+        if (!accessToken) {
+            const tokenResponse = await req.authContext.acquireToken({
+                scopes: ["User.Read"],
+                account: req.authContext.getAccount(),
+            })(req, res, next);
+
+            accessToken = tokenResponse.accessToken;
+        }
+
+        const graphClient = graphManager.getAuthenticatedClient(accessToken);
+
+        const profile = await graphClient
             .api('/me')
             .get();
 
+        res.render('profile', { isAuthenticated: req.authContext.isAuthenticated(), profile: profile });
     } catch (error) {
-        console.log(error)
         next(error);
     }
-
-    res.render('profile', { isAuthenticated: req.session.isAuthenticated, profile: profile });
 }
 
 exports.getTenantPage = async (req, res, next) => {
-    let tenant;
-
     try {
-        tenant = await fetchManager.callAPI(appSettings.protectedResources.armAPI.endpoint, req.session.protectedResources["armAPI"].accessToken);
+        const tokenResponse = await req.authContext.acquireToken({
+            scopes: ["https://management.azure.com/user_impersonation"],
+            account: req.authContext.getAccount(),
+        })(req, res, next);
+
+        const tenant = await fetchManager.callAPI("https://management.azure.com/tenants?api-version=2020-01-01", tokenResponse.accessToken);
+        res.render('tenant', { isAuthenticated: req.authContext.isAuthenticated(), tenant: tenant.value[0] });
     } catch (error) {
-        console.log(error)
         next(error);
     }
-
-    res.render('tenant', { isAuthenticated: req.session.isAuthenticated, tenant: tenant.value[0] });
 }
