@@ -1,8 +1,8 @@
 const authConfig = {
     authOptions: {
-        authority: "https://login.microsoftonline.com/cbaf2168-de14-4c72-9d88-f5f05366dbef/",
-        clientId: "82e01ead-82f8-4ec4-9c82-fea5347c33b2",
-        clientSecret: "yLl8Q~ssTFDlNRu~-PfrLwf32XCwEaVhyjJJhcov",
+        authority: "https://login.microsoftonline.com/Enter_the_Tenant_Info_Here",
+        clientId: "Enter_the_Application_Id_Here",
+        clientSecret: "Enter_the_Client_Secret_Here",
         redirectUri: "/redirect",
     },
     systemOptions: {
@@ -11,13 +11,12 @@ const authConfig = {
                 if (containsPii) {
                     return;
                 }
-
                 console.log(message);
             },
             piiLoggingEnabled: false,
             logLevel: 3,
         },
     }
-}
+};
 
 module.exports = authConfig;
