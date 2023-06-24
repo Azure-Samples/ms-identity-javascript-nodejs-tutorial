@@ -9,14 +9,14 @@ const session = require('express-session');
 const { WebAppAuthProvider } = require('msal-node-wrapper');
 
 const mainController = require('./controllers/mainController');
-const authConfig = require('./authConfig');
+const authConfig = require('./authConfig.js');
 
 const SERVER_PORT = process.env.PORT || 4000;
 
-async function main() {
+// initialize express
+const app = express();
 
-    // initialize express
-    const app = express();
+async function main() {
 
     /**
      * Using express-session middleware. Be sure to familiarize yourself with available options
@@ -28,7 +28,7 @@ async function main() {
         saveUninitialized: false,
         cookie: {
             httpOnly: true,
-            secure: false, // set this to true on production
+            secure: process.env.NODE_ENV === "production", // set this to true on production
         }
     }));
 
@@ -46,7 +46,7 @@ async function main() {
     // instantiate the wrapper
     const authProvider = await WebAppAuthProvider.initialize(authConfig);
 
-    // initialize the wrapper
+    // initialize the auth middleware
     app.use(authProvider.authenticate());
 
     // app routes
@@ -57,8 +57,7 @@ async function main() {
         '/signin',
         (req, res, next) => {
             return req.authContext.login({
-                postLoginRedirectUri: "/",
-                postFailureRedirectUri: "/"
+                postLoginRedirectUri: "/", // redirect here after login
             })(req, res, next);
         }
     );
@@ -67,7 +66,7 @@ async function main() {
         '/signout',
         (req, res, next) => {
             return req.authContext.logout({
-                postLogoutRedirectUri: "/",
+                postLogoutRedirectUri: "/", // redirect here after logout
             })(req, res, next);
         }
     );
@@ -75,11 +74,16 @@ async function main() {
     // secure routes
     app.get('/id',
         authProvider.guard({
-            forceLogin: true
+            forceLogin: true // force user to login if not authenticated
         }),
         mainController.getIdPage
     );
 
+    /**
+     * This error handler is needed to catch interaction_required errors thrown by MSAL.
+     * Make sure to add it to your middleware chain after all your routers, but before any other 
+     * error handlers.
+     */
     app.use(authProvider.interactionErrorHandler());
 
     app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
@@ -87,4 +91,4 @@ async function main() {
 
 main();
 
-module.exports = main;
+module.exports = app;

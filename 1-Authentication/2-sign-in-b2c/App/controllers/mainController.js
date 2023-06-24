@@ -8,8 +8,6 @@ exports.getIdPage = (req, res, next) => {
 
     const claims = {
         name: account.idTokenClaims.name,
-        preferred_username: account.idTokenClaims.preferred_username,
-        oid: account.idTokenClaims.oid,
         sub: account.idTokenClaims.sub
     };
 
