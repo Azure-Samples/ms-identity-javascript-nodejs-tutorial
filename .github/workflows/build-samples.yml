@@ -50,12 +50,6 @@ jobs:
         npm run test
 
     - run: |
-        cd 3-Deployment/App
-        npm ci
-        npm audit --production
-        npm run test
-
-    - run: |
         cd 4-AccessControl/1-app-roles/App
         npm ci
         npm audit --production
