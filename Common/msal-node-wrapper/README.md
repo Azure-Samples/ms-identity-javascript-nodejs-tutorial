@@ -117,7 +117,7 @@ You can access the current authentication context via `req.authContext` variable
 
 * `req.authContext.isAuthenticated()`: indicates if the current user is authenticated or not.
 * `req.authContext.getAccount()`: MSAL.js account object containing useful information like ID token claims (see [AccountInfo](https://azuread.github.io/microsoft-authentication-library-for-js/ref/modules/_azure_msal_common.html#accountinfo))
-* `req.authContext.getCachedTokenForResource(resourceName)`: returns the raw access token for the given resource from cache, if exists and still valid.
+* `req.authContext.getCachedTokenForResource(<resourceName>)`: returns the access token for the given resource from cache, if exists and not expired.
 
 ### Middleware
 
@@ -238,7 +238,7 @@ We recommend using [express-session](https://www.npmjs.com/package/express-sessi
 
 ### Caching
 
-MSAL Node has an in-memory cache by default. This wrapper adds support for storing msal cache in user session. As such, a session middleware is necessary for enabling cache persistence.
+MSAL Node has an in-memory cache by default. This wrapper adds support for storing MSAL cache in user session. As such, a session middleware is necessary for enabling cache persistence.
 
 ## Information
 

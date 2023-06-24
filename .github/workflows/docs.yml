@@ -23,20 +23,13 @@ jobs:
 
       - name: Use Node.js
         uses: actions/setup-node@v1
-
-      - name: Working directory
-        run: cd ./common/msal-node-wrapper
-
-      - name: Install
         env:
           RUNNING_NODE_CI: 1
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Generate
-        run: npm run docs
+      - run: |
+          cd common/msal-node-wrapper
+          npm ci
+          npm run build
+          npm run docs
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

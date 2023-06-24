@@ -2,7 +2,7 @@
     "entryPoints": [
         "src/index.ts",
     ],
-    "out": "./docs",
+    "out": "../../docs",
     "excludePrivate": true,
     "excludeProtected": true,
     "excludeExternals": true,
