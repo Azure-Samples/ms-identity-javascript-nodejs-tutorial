@@ -31,15 +31,15 @@ function authenticateMiddleware(
         next();
     });
 
-    appRouter.post(UrlUtils.getPathFromUrl(this.webAppAuthConfig.authOptions.redirectUri), redirectHandler.call(this));
+    appRouter.post(UrlUtils.getPathFromUrl(this.webAppAuthConfig.auth.redirectUri), redirectHandler.call(this));
 
-    if (this.webAppAuthConfig.authOptions.frontChannelLogoutUri) {
+    if (this.webAppAuthConfig.auth.frontChannelLogoutUri) {
         /**
          * Expose front-channel logout route. For more information, visit:
          * https://docs.microsoft.com/azure/active-directory/develop/v2-protocols-oidc#single-sign-out
          */
         appRouter.get(
-            UrlUtils.getPathFromUrl(this.webAppAuthConfig.authOptions.frontChannelLogoutUri),
+            UrlUtils.getPathFromUrl(this.webAppAuthConfig.auth.frontChannelLogoutUri),
             (req, res, next) => {
                 if (req.authContext.isAuthenticated()) {
                     return req.authContext.logout({

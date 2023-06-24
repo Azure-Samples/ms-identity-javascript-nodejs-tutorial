@@ -26,7 +26,7 @@ function loginHandler(
         const authUrlParams: AuthorizationUrlRequest = {
             state: this.getCryptoProvider().base64Encode(JSON.stringify(state)),
             redirectUri: UrlUtils.ensureAbsoluteUrl(
-                this.webAppAuthConfig.authOptions.redirectUri,
+                this.webAppAuthConfig.auth.redirectUri,
                 req.protocol,
                 req.get("host") || req.hostname
             ),

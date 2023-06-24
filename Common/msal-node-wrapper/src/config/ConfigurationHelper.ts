@@ -18,11 +18,11 @@ export class ConfigurationHelper {
     static getMsalConfiguration(authConfig: AuthConfig): Configuration {
         return {
             auth: {
-                ...authConfig.authOptions,
+                ...authConfig.auth,
             },
             system: {
-                ...authConfig.systemOptions,
-                loggerOptions: authConfig.systemOptions?.loggerOptions ? authConfig.systemOptions.loggerOptions : DEFAULT_LOGGER_OPTIONS,
+                ...authConfig.system,
+                loggerOptions: authConfig.system?.loggerOptions ? authConfig.system.loggerOptions : DEFAULT_LOGGER_OPTIONS,
             },
         };
     }
@@ -33,21 +33,30 @@ export class ConfigurationHelper {
      * @param {AppType} appType: type of application
      */
     static validateAuthConfig(authConfig: AuthConfig, appType: AppType): void {
-        if (StringUtils.isEmpty(authConfig.authOptions.clientId)) {
+        if (StringUtils.isEmpty(authConfig.auth.clientId)) {
             throw new Error(ConfigurationErrorMessages.NO_CLIENT_ID);
-        } else if (!ConfigurationHelper.isGuid(authConfig.authOptions.clientId)) {
+        } else if (!ConfigurationHelper.isGuid(authConfig.auth.clientId)) {
             throw new Error(ConfigurationErrorMessages.INVALID_CLIENT_ID);
         }
 
         switch (appType) {
             case AppType.WebApp:
-                if (StringUtils.isEmpty((<WebAppAuthConfig>authConfig).authOptions.redirectUri)) {
+                if (StringUtils.isEmpty((<WebAppAuthConfig>authConfig).auth.redirectUri)) {
                     throw new Error(ConfigurationErrorMessages.NO_REDIRECT_URI);
                 }
                 break;
             default:
                 break;
         }
+    }
+
+    /**
+     * Indicates whether the given authority is a B2C authority
+     * @param authority 
+     * @returns 
+     */
+    static isB2CAuthority(authority: string): boolean {
+        return authority.includes("b2clogin.com/");
     }
 
     /**

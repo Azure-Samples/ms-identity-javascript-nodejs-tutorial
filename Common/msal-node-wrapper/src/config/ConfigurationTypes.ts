@@ -6,13 +6,13 @@
 import { NodeAuthOptions, NodeSystemOptions, CacheOptions } from "@azure/msal-node";
 
 export type AuthConfig = {
-    authOptions: Omit<NodeAuthOptions, "azureCloudOptions" | "clientAssertion">;
-    systemOptions?: NodeSystemOptions,
-    cacheOptions?: CacheOptions
+    auth: Omit<NodeAuthOptions, "azureCloudOptions" | "clientAssertion">;
+    system?: NodeSystemOptions,
+    cache?: CacheOptions
 };
 
 export type WebAppAuthConfig = AuthConfig & {
-    authOptions: NodeAuthOptions & AuthRoutes;
+    auth: NodeAuthOptions & AuthRoutes;
 };
 
 export type AuthRoutes = {

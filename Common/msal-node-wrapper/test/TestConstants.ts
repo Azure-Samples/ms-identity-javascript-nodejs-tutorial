@@ -78,7 +78,7 @@ export const TEST_CONSTANTS = {
 };
 
 export const TEST_AUTH_CONFING = {
-    authOptions: {
+    auth: {
         authority: TEST_CONSTANTS.AUTHORITY,
         clientId: TEST_CONSTANTS.CLIENT_ID,
         clientSecret: TEST_CONSTANTS.CLIENT_SECRET,
@@ -90,10 +90,10 @@ export const TEST_AUTH_CONFING = {
 
 export const TEST_MSAL_CONFIG = {
     auth: {
-        clientId: TEST_AUTH_CONFING.authOptions.clientId,
+        clientId: TEST_AUTH_CONFING.auth.clientId,
         authority: TEST_CONSTANTS.AUTHORITY,
-        clientSecret: TEST_AUTH_CONFING.authOptions.clientSecret,
-        authorityMetadata: TEST_AUTH_CONFING.authOptions.authorityMetadata,
-        cloudDiscoveryMetadata: TEST_AUTH_CONFING.authOptions.cloudDiscoveryMetadata,
+        clientSecret: TEST_AUTH_CONFING.auth.clientSecret,
+        authorityMetadata: TEST_AUTH_CONFING.auth.authorityMetadata,
+        cloudDiscoveryMetadata: TEST_AUTH_CONFING.auth.cloudDiscoveryMetadata,
     },
 };

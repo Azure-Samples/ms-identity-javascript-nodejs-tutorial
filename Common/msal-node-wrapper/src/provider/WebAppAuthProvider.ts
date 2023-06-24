@@ -33,17 +33,20 @@ export class WebAppAuthProvider extends BaseAuthProvider {
         const msalConfig = ConfigurationHelper.getMsalConfiguration(authConfig);
 
         if (!msalConfig.auth.cloudDiscoveryMetadata && !msalConfig.auth.authorityMetadata) {
+            const isB2C = authConfig.auth.authority && ConfigurationHelper.isB2CAuthority(authConfig.auth.authority);
 
-            const tenantId = authConfig.authOptions.authority ? 
-                ConfigurationHelper.getTenantIdFromAuthority(authConfig.authOptions.authority) : "common";
+            if (!isB2C) {
+                const tenantId = authConfig.auth.authority ?
+                    ConfigurationHelper.getTenantIdFromAuthority(authConfig.auth.authority) : "common";
 
-            const [discoveryMetadata, authorityMetadata] = await Promise.all([
-                FetchManager.fetchCloudDiscoveryMetadata(tenantId),
-                FetchManager.fetchAuthorityMetadata(tenantId),
-            ]);
+                const [discoveryMetadata, authorityMetadata] = await Promise.all([
+                    FetchManager.fetchCloudDiscoveryMetadata(tenantId),
+                    FetchManager.fetchAuthorityMetadata(tenantId),
+                ]);
 
-            msalConfig.auth.cloudDiscoveryMetadata = discoveryMetadata;
-            msalConfig.auth.authorityMetadata = authorityMetadata;
+                msalConfig.auth.cloudDiscoveryMetadata = discoveryMetadata;
+                msalConfig.auth.authorityMetadata = authorityMetadata;
+            }
         }
 
         return new WebAppAuthProvider(authConfig, msalConfig);
