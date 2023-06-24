@@ -27,7 +27,7 @@ async function main() {
         saveUninitialized: false,
         cookie: {
             httpOnly: true,
-            secure: false, // set this to true on production
+            secure: process.env.NODE_ENV === "production", // set this to true on production
         }
     }));
 
@@ -45,19 +45,24 @@ async function main() {
     // initialize the wrapper
     const authProvider = await WebAppAuthProvider.initialize(authConfig);
 
+    // initialize the auth middleware before any route handlers
     app.use(authProvider.authenticate({
-        protectAllRoutes: true,
+        protectAllRoutes: true, // this will force login for all routes if the user is not already
         acquireTokenForResources: {
-            "graph.microsoft.com": {
+            "graph.microsoft.com": { // you can specify the resource name as you wish
                 scopes: ["User.Read"],
-                routes: ["/profile"]
+                routes: ["/profile"] // this will acquire a token for the graph on these routes
             },
         }
     }));
 
-    // pass the instance to your routers
     app.use(mainRouter);
 
+    /**
+     * This error handler is needed to catch interaction_required errors thrown by MSAL.
+     * Make sure to add it to your middleware chain after all your routers, but before any other 
+     * error handlers.
+     */
     app.use(authProvider.interactionErrorHandler());
 
     app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));

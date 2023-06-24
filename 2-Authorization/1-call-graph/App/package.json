@@ -17,7 +17,7 @@
     "express": "^4.18.1",
     "express-session": "^1.17.3",
     "isomorphic-fetch": "^3.0.0",
-    "msal-node-wrapper": "file:../../../shared/msal-node-wrapper"
+    "msal-node-wrapper": "file:../../../common/msal-node-wrapper"
   },
   "devDependencies": {
     "jest": "^27.0.6",

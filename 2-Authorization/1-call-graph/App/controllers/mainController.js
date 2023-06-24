@@ -21,9 +21,20 @@ exports.getIdPage = (req, res, next) => {
 
 exports.getProfilePage = async (req, res, next) => {
     try {
+        /**
+         * If you have configured your authenticate middleware accordingly, you should be 
+         * able to get the access token for the Microsoft Graph API from the cache. If not, 
+         * you will need to acquire and cache the token yourself.
+         */
         let accessToken = req.authContext.getCachedTokenForResource("graph.microsoft.com");
 
         if (!accessToken) {
+
+            /**
+             * You can acquire a token for the Microsoft Graph API as shown below. Note that
+             * if an interaction required error is thrown, you need to catch it and pass it 
+             * to the interactionErrorHandler middleware.
+             */
             const tokenResponse = await req.authContext.acquireToken({
                 scopes: ["User.Read"],
                 account: req.authContext.getAccount(),
@@ -40,6 +51,7 @@ exports.getProfilePage = async (req, res, next) => {
 
         res.render('profile', { isAuthenticated: req.authContext.isAuthenticated(), profile: profile });
     } catch (error) {
+        // pass error to error middleware for handling
         next(error);
     }
 }
