@@ -10,7 +10,6 @@ exports.getIdPage = (req, res, next) => {
         name: account.idTokenClaims.name,
         preferred_username: account.idTokenClaims.preferred_username,
         oid: account.idTokenClaims.oid,
-        sub: account.idTokenClaims.sub,
         groups: account.idTokenClaims.groups ? account.idTokenClaims.groups.join(' ') : "A groups overage has occurred. To learn more about how to handle group overages, please visit https://learn.microsoft.com/azure/active-directory/develop/id-token-claims-reference#groups-overage-claim"
     };
 

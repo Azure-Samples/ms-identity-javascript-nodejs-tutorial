@@ -3,7 +3,6 @@
         "Title": "Node.js & Express web app using Security Groups to implement Role-Based Access Control",
         "Level": 300,
         "Client": "Node.js & Express web app",
-        "Service": "Microsoft Graph",
         "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
         "Endpoint": "AAD v2.0"
     },
@@ -13,10 +12,12 @@
             "Name": "msal-node-webapp",
             "Kind": "WebApp",
             "Audience": "AzureADMyOrg",
-            "GroupMembershipClaims": "SecurityGroup",
-            "PasswordCredentials": "Auto",
             "HomePage": "http://localhost:4000",
             "ReplyUrls": "http://localhost:4000/redirect",
+            "GroupMembershipClaims": "SecurityGroup",
+            "PasswordCredentials": "Auto",
+            "Sdk": "MsalNode",
+            "SampleSubPath": "4-AccessControl\\2-security-groups\\App",
             "RequiredResourcesAccess": [
                 {
                     "Resource": "Microsoft Graph",
@@ -35,6 +36,17 @@
                     "Name": "GroupMember",
                     "Description": "User Security Group"
                 }
+            ],
+            "ManualSteps": [
+                {
+                    "Comment": "To support overage scenario, remember to provide admin consent for GroupMember.Read.All permission in the portal."
+                },
+                {
+                    "Comment": "This script has created a group named 'GroupAdmin' for you. On Azure portal, navigate to Azure AD > Groups blade and assign some users to it."
+                },
+                {
+                    "Comment": "This script has created a group named 'GroupMember' for you. On Azure portal, navigate to Azure AD > Groups blade and assign some users to it."
+                }
             ]
         }
     ],
@@ -42,7 +54,7 @@
         {
             "App": "client",
             "SettingKind": "Replace",
-            "SettingFile": "\\..\\App\\appSettings.js",
+            "SettingFile": "\\..\\App\\authConfig.js",
             "Mappings": [
                 {
                     "key": "Enter_the_Application_Id_Here",
@@ -55,14 +67,21 @@
                 {
                     "key": "Enter_the_Client_Secret_Here",
                     "value": ".AppKey"
-                },
+                }
+            ]
+        },
+        {
+            "App": "client",
+            "SettingKind": "Replace",
+            "SettingFile": "\\..\\App\\app.js",
+            "Mappings": [
                 {
                     "key": "Enter_the_ObjectId_of_GroupAdmin",
-                    "value": "$GroupAdmin.objectId"
+                    "value": "$GroupAdmin.Id"
                 },
                 {
                     "key": "Enter_the_ObjectId_of_GroupMember",
-                    "value": "$GroupMember.objectId"
+                    "value": "$GroupMember.Id"
                 }
             ]
         }

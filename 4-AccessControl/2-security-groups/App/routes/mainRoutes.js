@@ -9,11 +9,9 @@ const router = express.Router();
 
 // app routes
 router.get('/', mainController.getHomePage);
-
-// secure routes
 router.get('/id', mainController.getIdPage);
 
-// secure routes
+// auth routes
 router.get(
     '/signout',
     (req, res, next) => {
@@ -23,6 +21,7 @@ router.get(
     }
 );
 
+// nested routes
 router.use(
     '/todolist',
     todolistRouter
