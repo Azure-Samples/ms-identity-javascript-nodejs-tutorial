@@ -11,8 +11,6 @@ const { WebAppAuthProvider } = require('msal-node-wrapper');
 const authConfig = require('./authConfig.js');
 const mainRouter = require('./routes/mainRoutes');
 
-const SERVER_PORT = process.env.PORT || 4000;
-
 async function main() {
 
     // initialize express
@@ -55,8 +53,7 @@ async function main() {
         '/todolist',
         authProvider.guard({
             idTokenClaims: {
-                // require the user's ID token to have either of these group claims
-                groups: ["Enter_the_ObjectId_of_GroupAdmin", "Enter_the_ObjectId_of_GroupMember"],
+                groups: ["Enter_the_ObjectId_of_GroupAdmin", "Enter_the_ObjectId_of_GroupMember"], // require the user's ID token to have either of these group claims
             },
         })
     );
@@ -79,9 +76,7 @@ async function main() {
      */
     app.use(authProvider.interactionErrorHandler());
 
-    app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+    return app;
 }
-
-main();
 
 module.exports = main;

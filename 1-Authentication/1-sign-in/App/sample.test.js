@@ -1,5 +1,4 @@
 const request = require('supertest');
-const { v4: uuidv4 } = require('uuid');
 
 describe('Sanitize configuration object', () => {
     let authConfig;
@@ -29,25 +28,24 @@ describe('Sanitize configuration object', () => {
 });
 
 describe('Ensure pages served', () => {
-
     let app;
-    let authConfig;
-    let randomGuid;
-    
-    beforeAll(() => {
+
+    beforeAll(async () => {
         process.env.NODE_ENV = 'test';
 
-        authConfig = require('./authConfig.js');
-        randomGuid = uuidv4();
+        const authConfig = require('./authConfig.js');
+        const main = require('./app.js');
 
-        authConfig.auth.clientId = randomGuid;
-        authConfig.auth.authority = randomGuid;
+        authConfig.auth.authority = `https://login.microsoftonline.com/common`;
+        authConfig.auth.clientId = "11111111-2222-3333-4444-111111111111";
+        authConfig.auth.clientSecret = "11111111222233334444111111111111";
 
-        app = require('./app.js');
-    });
+        app = await main();
+        const SERVER_PORT = process.env.PORT || 4000;
+        app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+    })
 
     it('should serve home page', async () => {
-
         const res = await request(app)
             .get('/');
 

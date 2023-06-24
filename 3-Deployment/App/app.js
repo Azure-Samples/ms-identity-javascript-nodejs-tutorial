@@ -15,8 +15,6 @@ const mainRouter = require('./routes/mainRoutes');
 
 const { getCredentialFromKeyVault } = require('./utils/keyVaultManager');
 
-const SERVER_PORT = process.env.PORT || 4000;
-
 async function main() {
 
     // initialize express
@@ -54,47 +52,39 @@ async function main() {
 
     app.use(express.static(path.join(__dirname, './public')));
 
-    try {
-        console.log(process.env.KEY_VAULT_URI);
-        const clientSecret = await getCredentialFromKeyVault(process.env.KEY_VAULT_URI, process.env.SECRET_NAME);
+    const clientSecret = await getCredentialFromKeyVault(process.env.KEY_VAULT_URI, process.env.SECRET_NAME);
 
-        const authConfigWithSecret = {
-            ...authConfig,
-            auth: {
-                ...authConfig.auth,
-                clientSecret: clientSecret.value
-            }
+    const authConfigWithSecret = {
+        ...authConfig,
+        auth: {
+            ...authConfig.auth,
+            clientSecret: clientSecret.value
         }
-
-        const authProvider = await WebAppAuthProvider.initialize(authConfigWithSecret);
-
-        // initialize the auth middleware before any route handlers
-        app.use(authProvider.authenticate({
-            protectAllRoutes: true, // this will force login for all routes if the user is not already
-            acquireTokenForResources: {
-                "graph.microsoft.com": { // you can specify the resource name as you wish
-                    scopes: ["User.Read"],
-                    routes: ["/profile"] // this will acquire a token for the graph on these routes
-                },
-            }
-        }));
-
-        app.use(mainRouter);
-
-        /**
-         * This error handler is needed to catch interaction_required errors thrown by MSAL.
-         * Make sure to add it to your middleware chain after all your routers, but before any other 
-         * error handlers.
-         */
-        app.use(authProvider.interactionErrorHandler());
-
-        app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
-    } catch (error) {
-        console.log(error);
     }
 
-}
+    const authProvider = await WebAppAuthProvider.initialize(authConfigWithSecret);
 
-main();
+    // initialize the auth middleware before any route handlers
+    app.use(authProvider.authenticate({
+        protectAllRoutes: true, // this will force login for all routes if the user is not already
+        acquireTokenForResources: {
+            "graph.microsoft.com": { // you can specify the resource name as you wish
+                scopes: ["User.Read"],
+                routes: ["/profile"] // this will acquire a token for the graph on these routes
+            },
+        }
+    }));
+
+    app.use(mainRouter);
+
+    /**
+     * This error handler is needed to catch interaction_required errors thrown by MSAL.
+     * Make sure to add it to your middleware chain after all your routers, but before any other 
+     * error handlers.
+     */
+    app.use(authProvider.interactionErrorHandler());
+
+    return app;
+}
 
 module.exports = main;

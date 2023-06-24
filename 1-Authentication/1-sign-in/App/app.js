@@ -11,12 +11,10 @@ const { WebAppAuthProvider } = require('msal-node-wrapper');
 const mainController = require('./controllers/mainController');
 const authConfig = require('./authConfig.js');
 
-const SERVER_PORT = process.env.PORT || 4000;
-
-// initialize express
-const app = express();
-
 async function main() {
+
+    // initialize express
+    const app = express();
 
     /**
      * Using express-session middleware. Be sure to familiarize yourself with available options
@@ -47,7 +45,9 @@ async function main() {
     const authProvider = await WebAppAuthProvider.initialize(authConfig);
 
     // initialize the auth middleware before any route handlers
-    app.use(authProvider.authenticate());
+    app.use(authProvider.authenticate({
+        protectAllRoutes: false, // if true, it will force login for all routes if the user is not already
+    }));
 
     // app routes
     app.get('/', mainController.getHomePage);
@@ -86,9 +86,7 @@ async function main() {
      */
     app.use(authProvider.interactionErrorHandler());
 
-    app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+    return app;
 }
 
-main();
-
-module.exports = app;
+module.exports = main;

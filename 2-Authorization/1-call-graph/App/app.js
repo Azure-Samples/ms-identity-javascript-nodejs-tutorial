@@ -11,9 +11,8 @@ const { WebAppAuthProvider } = require('msal-node-wrapper');
 const authConfig = require('./authConfig.js');
 const mainRouter = require('./routes/mainRoutes');
 
-const SERVER_PORT = process.env.PORT || 4000;
-
 async function main() {
+    
     // initialize express
     const app = express();
 
@@ -65,9 +64,7 @@ async function main() {
      */
     app.use(authProvider.interactionErrorHandler());
 
-    app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+    return app;
 }
-
-main();
 
 module.exports = main;
