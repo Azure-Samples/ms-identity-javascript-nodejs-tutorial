@@ -27,9 +27,13 @@ urlFragment: "ms-identity-javascript-nodejs-tutorial"
 
 The [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview), along with [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and [Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/overview) (Azure AD B2C) are central to the **Azure** cloud ecosystem. This tutorial aims to take you through the fundamentals of modern authentication with Node.js, using the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js) (MSAL Node).
 
-This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) class in order to streamline routine authentication tasks such as login, logout, token acquisition. You can find the wrapper here: [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express). Fork it and customize as you need. Suggestions and contributions are welcome!
+This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) class in order to streamline routine authentication tasks such as login, logout, token acquisition. You can find the wrapper here: [msal-node-wrapper](./Shared/msal-node-wrapper). Fork it and customize as you need. Suggestions and contributions are welcome!
 
-> :warning: [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express) is for demo purposes only and is not suitable for production applications.
+> :warning: [msal-node-wrapper](./Shared/msal-node-wrapper) is for demo purposes only and is not recommended for production applications. If you're looking for using MSAL Node directly in your web app, please refer to:
+>
+> - [Express.js web app using MSAL Node to authenticate users with Azure AD and call Microsoft Graph](https://github.com/Azure-Samples/ms-identity-node)
+> - [Express.js web app using MSAL Node with a distributed token cache (TypeScript)](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/samples/msal-node-samples/auth-code-distributed-cache)
+> - [A React SPA on an Express.js web app using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Azure AD and call Microsoft Graph](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/tree/main/5-AdvancedScenarios/1-call-graph-bff)
 
 We recommend following the chapters in successive order. However, the code samples are self-contained, so feel free to pick samples by topics that you may need at the moment.
 
@@ -37,7 +41,7 @@ We recommend following the chapters in successive order. However, the code sampl
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/en/download/) (>= v14.x)
+- [Node.js](https://nodejs.org/en/download/) (>= v16.x)
 - [Express.js](https://expressjs.com/) (>= v4.x)
 - [Visual Studio Code](https://code.visualstudio.com/download)
 - [VS Code Azure Tools Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack)
