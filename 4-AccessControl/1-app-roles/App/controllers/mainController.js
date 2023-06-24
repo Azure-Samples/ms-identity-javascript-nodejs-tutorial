@@ -10,7 +10,6 @@ exports.getIdPage = (req, res, next) => {
         name: account.idTokenClaims.name,
         preferred_username: account.idTokenClaims.preferred_username,
         oid: account.idTokenClaims.oid,
-        sub: account.idTokenClaims.sub,
         roles: account.idTokenClaims.roles ? account.idTokenClaims.roles.join(' ') : null
     };
 

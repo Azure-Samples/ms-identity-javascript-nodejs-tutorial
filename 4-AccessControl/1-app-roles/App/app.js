@@ -14,6 +14,7 @@ const mainRouter = require('./routes/mainRoutes');
 const SERVER_PORT = process.env.PORT || 4000;
 
 async function main() {
+
     // initialize express
     const app = express();
 
@@ -27,7 +28,7 @@ async function main() {
         saveUninitialized: false,
         cookie: {
             httpOnly: true,
-            secure: false, // set this to true on production
+            secure: process.env.NODE_ENV === "production", // set this to true on production
         }
     }));
 
@@ -42,19 +43,18 @@ async function main() {
 
     app.use(express.static(path.join(__dirname, './public')));
 
-    // initialize the wrapper
+    // initialize the auth middleware before any route handlers
     const authProvider = await WebAppAuthProvider.initialize(authConfig);
 
     app.use(authProvider.authenticate({
-        protectAllRoutes: true,
+        protectAllRoutes: true, // enforce login for all routes
     }));
 
     app.get(
         '/todolist',
         authProvider.guard({
-            forceLogin: true,
             idTokenClaims: {
-                roles: ["TaskUser", "TaskAdmin"],
+                roles: ["TaskUser", "TaskAdmin"], // require the user's ID token to have either of these role claims
             },
         }),
     );
@@ -62,19 +62,18 @@ async function main() {
     app.get(
         '/dashboard',
         authProvider.guard({
-            forceLogin: true,
             idTokenClaims: {
-                roles: ["TaskAdmin"],
+                roles: ["TaskAdmin"], // require the user's ID token to have this role claim
             },
         })
     );
 
-    // pass the instance to your routers
     app.use(mainRouter);
 
     /**
-     * Add interaction auth error handler middleware after your routers, 
-     * but before any other error handlers.
+     * This error handler is needed to catch interaction_required errors thrown by MSAL.
+     * Make sure to add it to your middleware chain after all your routers, but before any other 
+     * error handlers.
      */
     app.use(authProvider.interactionErrorHandler());
 

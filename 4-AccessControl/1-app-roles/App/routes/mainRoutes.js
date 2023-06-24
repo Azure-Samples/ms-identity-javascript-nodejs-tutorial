@@ -2,12 +2,12 @@ const express = require('express');
 
 const mainController = require('../controllers/mainController');
 const todolistRouter = require('./todolistRoutes');
-const todolistController = require('../controllers/todolistController');
 const dashboardRouter = require('./dashboardRoutes');
 
 // initialize router
 const router = express.Router();
 
+// app routes
 router.get('/', mainController.getHomePage);
 router.get('/id', mainController.getIdPage);
 
