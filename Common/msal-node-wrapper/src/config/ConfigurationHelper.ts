@@ -33,12 +33,6 @@ export class ConfigurationHelper {
      * @param {AppType} appType: type of application
      */
     static validateAuthConfig(authConfig: AuthConfig, appType: AppType): void {
-        if (StringUtils.isEmpty(authConfig.auth.clientId)) {
-            throw new Error(ConfigurationErrorMessages.NO_CLIENT_ID);
-        } else if (!ConfigurationHelper.isGuid(authConfig.auth.clientId)) {
-            throw new Error(ConfigurationErrorMessages.INVALID_CLIENT_ID);
-        }
-
         switch (appType) {
             case AppType.WebApp:
                 if (StringUtils.isEmpty((<WebAppAuthConfig>authConfig).auth.redirectUri)) {
