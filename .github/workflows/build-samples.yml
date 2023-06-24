@@ -33,7 +33,7 @@ jobs:
 
     - run: |
         cd 1-Authentication/1-sign-in/App
-        npm ci
+        npm install
         npm audit --production
         npm run test
 
