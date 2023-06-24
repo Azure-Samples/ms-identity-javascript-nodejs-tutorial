@@ -1,10 +1,10 @@
 const authConfig = {
-    authOptions: {
+    auth: {
         authority: "https://login.microsoftonline.com/Enter_the_Tenant_Info_Here",
         clientId: "Enter_the_Application_Id_Here",
         redirectUri: "/redirect",
     },
-    systemOptions: {
+    system: {
         loggerOptions: {
             loggerCallback: (logLevel, message, containsPii) => {
                 if (containsPii) {

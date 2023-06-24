@@ -13,7 +13,7 @@
 
 ## Overview
 
-This sample demonstrates how to deploy a Node.js & Express web application to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). The application used in this sample is a slightly modified version of the web app from [**chapter 2.1**](../2-Authorization/1-call-graph/README.md). The steps here apply similarly to Azure AD and Azure AD B2C apps.
+This sample demonstrates how to deploy a Node.js & Express web application to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). The application used in this sample is a slightly modified version of the web app from [**chapter 2-1**](../2-Authorization/1-call-graph/README.md). The steps here apply similarly to Azure AD and Azure AD B2C apps.
 
 One of the principles of security is to place credentials like secrets and certificates out of your code and use it in a manner that allows them to be replaced or rotated without incurring a downtime. As such, this sample also uses the [Azure Key Vault](https://docs.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates) to store client secrets safely on the cloud.
 
@@ -59,7 +59,7 @@ Locate the root of the sample folder. Then:
 
 ### Register the app
 
-Use the same app registration credentials that you've obtained during [**chapter 2.1**](../2-Authorization/1-call-graph/README.md#registration). Leave out the `clientSecret`, however, as we will fetch secrets from **Azure Key Vault** instead.
+Use the same app registration credentials that you've obtained during [**chapter 2-1**](../2-Authorization/1-call-graph/README.md#registration). Leave out the `clientSecret`, however, as we will fetch secrets from **Azure Key Vault** instead.
 
 ## Deployment
 
@@ -175,106 +175,7 @@ Were we successful in addressing your learning objective? Consider taking a mome
 In [app.js](./App/app.js), we instantiate an **MsalWebAppAuthClient** object asynchronously using the [buildAsync](https://azure-samples.github.io/microsoft-identity-express/classes/WebAppAuthClientBuilder.html#buildasync) method of [WebAppAuthClientBuilder](https://azure-samples.github.io/microsoft-identity-express/classes/WebAppAuthClientBuilder.html). To do so, we need to start the express server asynchronously:
 
 ```javascript
-const express = require('express');
-const session = require('express-session');
-const MsIdExpress = require('microsoft-identity-express');
-const appSettings = require('./appSettings');
 
-async function main() {
-    const app = express();
-
-    app.set('trust proxy', 1);
-
-    app.use(session({
-        secret: 'ENTER_YOUR_SECRET_HERE',
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            secure: true, 
-        }
-    }));
-
-    app.use(express.urlencoded({ extended: false }));
-    app.use(express.json());
-
-    try {
-        const msid = await new MsIdExpress.WebAppAuthClientBuilder(appSettings)
-            .withKeyVaultCredentials({
-                credentialType: "clientSecret",
-                credentialName: process.env["SECRET_NAME"],
-                keyVaultUrl: process.env["KEY_VAULT_URI"]
-            }).buildAsync();
-
-        app.use(msid.initialize());
-
-        app.use(mainRouter(msid));
-
-        app.listen(SERVER_PORT, () => console.log(`Server is listening on port ${SERVER_PORT}!`));
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-main();
-```
-
-Under the hood, the wrapper calls the **Azure Key Vault** to access credentials needed for the application to authenticate with Azure AD using the [KeyVaultManager](https://azure-samples.github.io/microsoft-identity-express/classes/KeyVaultManager.html) class. This class is leveraging the [@azure/identity](https://www.npmjs.com/package/@azure/identity) and [@azure/key-vault](https://www.npmjs.com/package/@azure/keyvault-secrets) packages:
-
-```typescript
-import { DefaultAzureCredential } from "@azure/identity";
-import { CertificateClient, KeyVaultCertificate } from "@azure/keyvault-certificates";
-import { KeyVaultSecret, SecretClient } from "@azure/keyvault-secrets";
-
-import { KeyVaultCredential, ClientCertificate } from "../config/AppSettings";
-import { KeyVaultCredentialTypes } from "../utils/Constants";
-
-export type KeyVaultCredentialResponse = {
-    type: KeyVaultCredentialTypes.SECRET | KeyVaultCredentialTypes.CERTIFICATE,
-    value: string & ClientCertificate
-}
-
-export class KeyVaultManager {
-    async getCredentialFromKeyVault(keyVaultCredential: KeyVaultCredential): Promise<KeyVaultCredentialResponse> {
-
-        const credential = new DefaultAzureCredential();
-
-        switch (keyVaultCredential.credentialType) {
-            case KeyVaultCredentialTypes.SECRET: {
-                try {
-                    const secretResponse = await this.getSecretCredential(keyVaultCredential, credential);
-
-                    return {
-                        type: KeyVaultCredentialTypes.SECRET,
-                        value: secretResponse.value,
-                    } as KeyVaultCredentialResponse;
-
-                } catch (error) {
-                    console.log(error);
-                }
-                break;
-            }
-
-            // ...
-
-            default:
-                break;
-        }
-    };
-
-    async getSecretCredential(keyVaultCredential: KeyVaultCredential, credential: DefaultAzureCredential): Promise<KeyVaultSecret> {
-
-        // Initialize secretClient with credentials
-        const secretClient = new SecretClient(keyVaultCredential.keyVaultUrl, credential);
-
-        try {
-            const keyVaultSecret = await secretClient.getSecret(keyVaultCredential.credentialName);
-            return keyVaultSecret;
-        } catch (error) {
-            console.log(error);
-            return error;
-        }
-    }
-}
 ```
 
 ## More information
