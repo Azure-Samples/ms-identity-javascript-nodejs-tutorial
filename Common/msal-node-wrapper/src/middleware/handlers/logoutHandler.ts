@@ -9,24 +9,28 @@ import { LogoutOptions } from "../MiddlewareOptions";
 import { UrlUtils } from "../../utils/UrlUtils";
 
 function logoutHandler(
-    this: WebAppAuthProvider, 
+    this: WebAppAuthProvider,
     options: LogoutOptions
 ): RequestHandler {
     return async (req: Request, res: Response): Promise<void> => {
         this.getLogger().trace("logoutHandler called");
-        
+
         const shouldLogoutFromIdp = options.idpLogout ? options.idpLogout : true;
         let logoutUri = options.postLogoutRedirectUri || "/";
 
-        try {
-            const tokenCache = this.getMsalClient().getTokenCache();
-            const cachedAccount = await tokenCache.getAccountByHomeId(req.authContext.getAccount().homeAccountId);
+        const account = req.authContext.getAccount();
 
-            if (cachedAccount) {
-                await tokenCache.removeAccount(cachedAccount);
+        if (account) {
+            try {
+                const tokenCache = this.getMsalClient().getTokenCache();
+                const cachedAccount = await tokenCache.getAccountByHomeId(account.homeAccountId);
+
+                if (cachedAccount) {
+                    await tokenCache.removeAccount(cachedAccount);
+                }
+            } catch (error) {
+                this.logger.error(`Error occurred while clearing cache for user: ${JSON.stringify(error)}`);
             }
-        } catch (error) {
-            this.logger.error(`Error occurred while clearing cache for user: ${JSON.stringify(error)}`);
         }
 
         if (shouldLogoutFromIdp) {
@@ -34,6 +38,7 @@ function logoutHandler(
              * Construct a logout URI and redirect the user to end the
              * session with Azure AD. For more information, visit:
              * (AAD) https://docs.microsoft.com/azure/active-directory/develop/v2-protocols-oidc#send-a-sign-out-request
+             * (B2C) https://docs.microsoft.com/azure/active-directory-b2c/openid-connect#send-a-sign-out-request
              */
 
             const postLogoutRedirectUri = UrlUtils.ensureAbsoluteUrl(
@@ -41,15 +46,12 @@ function logoutHandler(
                 req.protocol,
                 req.get("host") || req.hostname
             );
-
-            // TODO: need to make use of endSessionRequest options
-
-            // FIXME: need the canonical uri (ending with slash) && esnure absolute url
-            logoutUri = `${this.getMsalConfig().auth.authority}/oauth2/v2.0/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`;
+            
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            logoutUri = `${UrlUtils.enforceTrailingSlash(this.getMsalConfig().auth.authority!)}/oauth2/v2.0/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`;
         }
 
         req.session.destroy(() => {
-            // TODO: remove/expire cookie?
             res.redirect(logoutUri);
         });
     };

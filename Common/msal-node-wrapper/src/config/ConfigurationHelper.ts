@@ -19,6 +19,7 @@ export class ConfigurationHelper {
         return {
             auth: {
                 ...authConfig.auth,
+                authority: authConfig.auth?.authority ? authConfig.auth.authority : "https://login.microsoftonline.com/common",
             },
             system: {
                 ...authConfig.system,

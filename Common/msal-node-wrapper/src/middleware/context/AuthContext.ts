@@ -67,8 +67,8 @@ export class AuthContext {
      * Returns the current user account from session
      * @returns {AccountInfo} account object
      */
-    getAccount(): AccountInfo {
-        return this.context.req.session.account!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    getAccount(): AccountInfo | undefined {
+        return this.context.req.session.account || undefined; // eslint-disable-line @typescript-eslint/no-non-null-assertion
     }
 
     /**

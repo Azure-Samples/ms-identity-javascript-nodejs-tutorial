@@ -7,7 +7,7 @@ import { InteractionRequiredAuthError } from "@azure/msal-node";
 import { LoginOptions, TokenRequestOptions } from "../middleware/MiddlewareOptions";
 
 /**
- * Token Validation library error class thrown for configuration errors
+ * Error thrown when user interaction is required.
  */
 export class InteractionRequiredError extends InteractionRequiredAuthError {
     requestOptions: LoginOptions;

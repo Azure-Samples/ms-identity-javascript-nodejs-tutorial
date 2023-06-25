@@ -6,6 +6,7 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import { WebAppAuthProvider } from "../provider/WebAppAuthProvider";
 import { RouteGuardOptions } from "./MiddlewareOptions";
+import { AccessDeniedError } from "../error/AccessDeniedError";
 
 function guardMiddleware(
     this: WebAppAuthProvider,
@@ -20,7 +21,7 @@ function guardMiddleware(
                 })(req, res, next);
             }
 
-            return res.status(401).send("Unauthorized");
+            return next(AccessDeniedError.createUnauthorizedAccessError(req.originalUrl, req.authContext.getAccount()));
         }
 
         if (options.idTokenClaims) {
@@ -53,7 +54,7 @@ function guardMiddleware(
             });
 
             if (!hasClaims) {
-                return res.status(403).send("Forbidden");
+                return next(AccessDeniedError.createForbiddenAccessError(req.originalUrl, req.authContext.getAccount()));
             }
         }
 

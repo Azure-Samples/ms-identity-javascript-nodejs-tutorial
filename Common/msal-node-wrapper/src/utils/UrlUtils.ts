@@ -65,11 +65,20 @@ export class UrlUtils {
     };
 
     /**
-     * Ensures that the URL contains a trailing slash at the end
+     * Ensures that the path contains a leading slash at the start
      * @param {string} path: a given path
      * @returns {string}
      */
     static enforceLeadingSlash = (path: string): string => {
         return path.split("")[0] === "/" ? path : "/" + path;
+    };
+
+    /**
+     * Ensures that the URL contains a trailing slash at the end
+     * @param {string} url: a given path
+     * @returns {string}
+     */
+    static enforceTrailingSlash = (url: string): string => {
+        return url.endsWith("/") ? url : url + "/";
     };
 }
