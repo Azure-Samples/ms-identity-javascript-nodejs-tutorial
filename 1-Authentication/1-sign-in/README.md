@@ -8,7 +8,6 @@
  1. [Registration](#registration)
  1. [Running the sample](#running-the-sample)
  1. [Explore the sample](#explore-the-sample)
- 1. [About the code](#about-the-code)
  1. [More information](#more-information)
  1. [Community Help and Support](#community-help-and-support)
  1. [Contributing](#contributing)
@@ -157,99 +156,6 @@ Locate the root of the sample folder. Then:
 ## We'd love your feedback!
 
 Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUQkRCSVdRSk8wUjdZSkg2NEZGOFFaTkxQVyQlQCN0PWcu).
-
-## About the code
-
-### Initialization
-
-In [app.js](./App/app.js), we initialize the [WebAppAuthProvider]() class. Once initialized, **WebAppAuthProvider** exposes the [authenticate()]() middleware, which sets the default routes for handling redirect response from Azure AD and etc.
-
-```javascript
-    const { WebAppAuthProvider } = require('msal-node-wrapper');
-
-    const authConfig = require('./authConfig.js');
-
-    const SERVER_PORT = process.env.PORT || 4000;
-
-    // initialize express
-    const app = express();
-
-    // ...
-
-    // instantiate the wrapper
-    const authProvider = await WebAppAuthProvider.initialize(authConfig);
-
-    // initialize the auth middleware
-    app.use(authProvider.authenticate());
-
-    // ...
-
-    app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
-```
-
-The `authProvider` object exposes several middleware that you can use in your routes for authN/authZ tasks:
-
-```javascript
-    // authentication routes
-    app.get(
-        '/signin',
-        (req, res, next) => {
-            return req.authContext.login({
-                postLoginRedirectUri: "/", // redirect here after login
-            })(req, res, next);
-        }
-    );
-
-    app.get(
-        '/signout',
-        (req, res, next) => {
-            return req.authContext.logout({
-                postLogoutRedirectUri: "/", // redirect here after logout
-            })(req, res, next);
-        }
-    );
-
-    // secure routes
-    app.get('/id',
-        authProvider.guard({
-            forceLogin: true // force user to login if not authenticated
-        }),
-        mainController.getIdPage
-    );
-
-    /**
-     * This error handler is needed to catch interaction_required errors thrown by MSAL.
-     * Make sure to add it to your middleware chain after all your routers, but before any other 
-     * error handlers.
-     */
-    app.use(authProvider.interactionErrorHandler());
-```
-
-Under the hood, the wrapper creates an **MSAL Node** [configuration object](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/configuration.md) and instantiates the MSAL Node [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) class by passing it.
-
-### Sign-in
-
-The user clicks on the **sign-in** button and navigates to `/signin` route. From there, the [login()]() middleware takes over. It creates and encodes a state object to pass with an authorization code request. The login middleware takes several optional configuration parameters.
-
-### Secure routes
-
-Simply add the [guard()]() middleware to your route, before the controller that displays the page you want to be secure. This would require any user to be authenticated to access this route:
-
-```javascript
-// secure routes
-app.get('/id', 
-   msid.isAuthenticated(), 
-   mainController.getIdPage
-);
-```
-
-### Sign-out
-
-To sign out, the wrapper's [signOut()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#signOut) middleware constructs a logout URL following the [guide here](https://docs.microsoft.com/azure/active-directory/develop/v2-protocols-oidc#send-a-sign-out-request). Then, we clear the cache, destroy the current **express-session** and redirect the user to the **sign-out endpoint**:
-
-```javascript
-
-```
 
 ## More information
 

@@ -8,7 +8,6 @@
  1. [Registration](#registration)
  1. [Running the sample](#running-the-sample)
  1. [Explore the sample](#explore-the-sample)
- 1. [About the code](#about-the-code)
  1. [More information](#more-information)
  1. [Community Help and Support](#community-help-and-support)
  1. [Contributing](#contributing)
@@ -232,8 +231,6 @@ You have two different options available to you on how you can further configure
 ## We'd love your feedback!
 
 Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUQkRCSVdRSk8wUjdZSkg2NEZGOFFaTkxQVyQlQCN0PWcu).
-
-## About the code
 
 ### Implementing role-based access control
 
