@@ -13,11 +13,11 @@ products:
 - azure-active-directory
 - azure-active-directory-b2c
 - microsoft-identity-platform
-description: "Tutorial: Enable your Node.js web app to sign-in users and call APIs with the Microsoft identity platform"
+description: "Tutorial: Enable your Node.js & Express web app to sign-in users and call APIs with the Microsoft identity platform"
 urlFragment: "ms-identity-javascript-nodejs-tutorial"
 ---
 
-# Tutorial: Enable your Node.js web app to sign-in users and call APIs with the Microsoft identity platform
+# Tutorial: Enable your Node.js & Express web app to sign-in users and call APIs with the Microsoft identity platform
 
 [![Build](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/node.js.yml/badge.svg)](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/node.js.yml)
 [![Code Scan](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/codeql.yml/badge.svg)](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/codeql.yml)
