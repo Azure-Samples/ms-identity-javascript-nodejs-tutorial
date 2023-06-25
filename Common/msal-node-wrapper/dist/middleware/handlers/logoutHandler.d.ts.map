@@ -1,0 +1,1 @@
+{"version":3,"file":"logoutHandler.d.ts","sourceRoot":"","sources":["../../../src/middleware/handlers/logoutHandler.ts"],"names":[],"mappings":"AAKA,OAAO,EAAqB,cAAc,EAAE,MAAM,SAAS,CAAC;AAC5D,OAAO,EAAE,kBAAkB,EAAE,MAAM,mCAAmC,CAAC;AACvE,OAAO,EAAE,aAAa,EAAE,MAAM,sBAAsB,CAAC;AAGrD,iBAAS,aAAa,CAClB,IAAI,EAAE,kBAAkB,EACxB,OAAO,EAAE,aAAa,GACvB,cAAc,CA4ChB;AAED,eAAe,aAAa,CAAC"}

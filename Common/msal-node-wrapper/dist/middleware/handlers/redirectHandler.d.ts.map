@@ -1,0 +1,1 @@
+{"version":3,"file":"redirectHandler.d.ts","sourceRoot":"","sources":["../../../src/middleware/handlers/redirectHandler.ts"],"names":[],"mappings":"AAKA,OAAO,EAAmC,cAAc,EAAE,MAAM,SAAS,CAAC;AAG1E,OAAO,EAAE,kBAAkB,EAAE,MAAM,mCAAmC,CAAC;AAIvE,iBAAS,eAAe,CAAC,IAAI,EAAE,kBAAkB,GAAG,cAAc,CA0CjE;AAED,eAAe,eAAe,CAAC"}
