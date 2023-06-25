@@ -44,10 +44,8 @@ async function main() {
     // instantiate the wrapper
     const authProvider = await WebAppAuthProvider.initialize(authConfig);
 
-    // initialize the auth middleware before any route handlers
-    app.use(authProvider.authenticate({
-        protectAllRoutes: false, // if true, it will force login for all routes if the user is not already
-    }));
+    // add the auth middleware before any route handlers
+    app.use(authProvider.authenticate());
 
     // app routes
     app.get('/', mainController.getHomePage);
