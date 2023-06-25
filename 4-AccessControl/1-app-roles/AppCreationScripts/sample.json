@@ -3,7 +3,6 @@
         "Title": "A Node.js & Express web app using App Roles to implement Role-Based Access Control",
         "Level": 300,
         "Client": "Node.js & Express web app",
-        "Service": "Microsoft Graph",
         "RepositoryUrl": "ms-identity-javascript-nodejs-tutorial",
         "Endpoint": "AAD v2.0"
     },
@@ -16,16 +15,18 @@
             "HomePage": "http://localhost:4000",
             "ReplyUrls": "http://localhost:4000/redirect",
             "PasswordCredentials": "Auto",
+            "Sdk": "MsalNode",
+            "SampleSubPath": "4-AccessControl\\1-app-roles\\App",
             "AppRoles": [
                 {
-                    "Types": [
+                    "AllowedMemberTypes": [
                         "User"
                     ],
                     "Name": "TaskAdmin",
                     "Description": "Admins can read any user's todo list"
                 },
                 {
-                    "Types": [
+                    "AllowedMemberTypes": [
                         "User"
                     ],
                     "Name": "TaskUser",
@@ -38,7 +39,7 @@
         {
             "App": "client",
             "SettingKind": "Replace",
-            "SettingFile": "\\..\\App\\appSettings.js",
+            "SettingFile": "\\..\\App\\authConfig.js",
             "Mappings": [
                 {
                     "key": "Enter_the_Application_Id_Here",

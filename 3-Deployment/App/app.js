@@ -3,19 +3,21 @@
  * Licensed under the MIT License.
  */
 
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env.example' });
 
+const path = require('path');
 const express = require('express');
 const session = require('express-session');
-const path = require('path');
+const { WebAppAuthProvider } = require('msal-node-wrapper');
 
-const MsIdExpress = require('microsoft-identity-express');
-const appSettings = require('./appSettings');
+const authConfig = require('./authConfig.js');
 const mainRouter = require('./routes/mainRoutes');
 
-const SERVER_PORT = process.env.PORT || 4000;
+const { getCredentialFromKeyVault } = require('./utils/keyVaultManager');
 
 async function main() {
+
+    // initialize express
     const app = express();
 
     /**
@@ -34,7 +36,8 @@ async function main() {
         resave: false,
         saveUninitialized: false,
         cookie: {
-            secure: true, 
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // set this to true on production
         }
     }));
 
@@ -49,28 +52,39 @@ async function main() {
 
     app.use(express.static(path.join(__dirname, './public')));
 
-    try {
-        /**
-         * In order to initialize the wrapper with the credentials fetched from
-         * Azure Key Vault, we use the async builder pattern.
-         */
-        const msid = await new MsIdExpress.WebAppAuthClientBuilder(appSettings)
-            .withKeyVaultCredentials({
-                credentialType: "clientSecret",
-                credentialName: process.env["SECRET_NAME"],
-                keyVaultUrl: process.env["KEY_VAULT_URI"]
-            }).buildAsync();
+    const clientSecret = await getCredentialFromKeyVault(process.env.KEY_VAULT_URI, process.env.SECRET_NAME);
 
-        app.use(msid.initialize());
-
-        app.use(mainRouter(msid));
-
-        app.listen(SERVER_PORT, () => console.log(`Server is listening on port ${SERVER_PORT}!`));
-    } catch (error) {
-        console.log(error);
+    const authConfigWithSecret = {
+        ...authConfig,
+        auth: {
+            ...authConfig.auth,
+            clientSecret: clientSecret.value
+        }
     }
 
-    module.exports = app;
+    const authProvider = await WebAppAuthProvider.initialize(authConfigWithSecret);
+
+    // initialize the auth middleware before any route handlers
+    app.use(authProvider.authenticate({
+        protectAllRoutes: true, // this will force login for all routes if the user is not already
+        acquireTokenForResources: {
+            "graph.microsoft.com": { // you can specify the resource name as you wish
+                scopes: ["User.Read"],
+                routes: ["/profile"] // this will acquire a token for the graph on these routes
+            },
+        }
+    }));
+
+    app.use(mainRouter);
+
+    /**
+     * This error handler is needed to catch interaction_required errors thrown by MSAL.
+     * Make sure to add it to your middleware chain after all your routers, but before any other 
+     * error handlers.
+     */
+    app.use(authProvider.interactionErrorHandler());
+
+    return app;
 }
 
-main();
+module.exports = main;

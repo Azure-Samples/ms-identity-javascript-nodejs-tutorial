@@ -1,17 +1,17 @@
 exports.getHomePage = (req, res, next) => {
-    const isAuthenticated = req.session.isAuthenticated;
-    const username = req.session.account ? req.session.account.username : '';
-    res.render('home', { isAuthenticated: isAuthenticated, username: username });
+    const username = req.authContext.getAccount() ? req.authContext.getAccount().username : '';
+    res.render('home', { isAuthenticated: req.authContext.isAuthenticated(), username: username });
 }
 
 exports.getIdPage = (req, res, next) => {
+    const account = req.authContext.getAccount();
+
     const claims = {
-        name: req.session.account.idTokenClaims.name,
-        preferred_username: req.session.account.idTokenClaims.preferred_username,
-        oid: req.session.account.idTokenClaims.oid,
-        sub: req.session.account.idTokenClaims.sub,
-        groups: req.session.account.idTokenClaims.groups ? req.session.account.idTokenClaims.groups.join(' ') : "Overage!"
+        name: account.idTokenClaims.name,
+        preferred_username: account.idTokenClaims.preferred_username,
+        oid: account.idTokenClaims.oid,
+        groups: account.idTokenClaims.groups ? account.idTokenClaims.groups.join(' ') : "A groups overage has occurred. To learn more about how to handle group overages, please visit https://learn.microsoft.com/azure/active-directory/develop/id-token-claims-reference#groups-overage-claim"
     };
 
-    res.render('id', { isAuthenticated: req.session.isAuthenticated, claims: claims });
+    res.render('id', {isAuthenticated: req.authContext.isAuthenticated(), claims: claims});
 }
