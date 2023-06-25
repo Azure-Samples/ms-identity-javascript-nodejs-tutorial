@@ -15,14 +15,16 @@
       "Audience": "AzureADandPersonalMicrosoftAccount",
       "HomePage": "http://localhost:4000",
       "ReplyUrls": "http://localhost:4000/redirect",
-      "PasswordCredentials": "Auto"
+      "PasswordCredentials": "Auto",
+      "Sdk": "MsalNode",
+      "SampleSubPath": "1-Authentication\\2-sign-in-b2c\\App" 
     }
   ],
   "CodeConfiguration": [
     {
       "App": "client",
       "SettingKind": "Replace",
-      "SettingFile": "\\..\\App\\appSettings.js",
+      "SettingFile": "\\..\\App\\authConfig.js",
       "Mappings": [
         {
           "key": "Enter_the_Application_Id_Here",

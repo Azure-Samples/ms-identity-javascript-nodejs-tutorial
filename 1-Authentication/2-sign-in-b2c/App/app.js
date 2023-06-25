@@ -3,83 +3,88 @@
  * Licensed under the MIT License.
  */
 
+const path = require('path');
 const express = require('express');
 const session = require('express-session');
-const path = require('path');
-
-const MsIdExpress = require('microsoft-identity-express');
-const appSettings = require('./appSettings.js');
+const { WebAppAuthProvider } = require('msal-node-wrapper');
 
 const mainController = require('./controllers/mainController');
+const authConfig = require('./authConfig.js');
 
-const SERVER_PORT = process.env.PORT || 4000;
+async function main() {
 
-// initialize express
-const app = express();
+    // initialize express
+    const app = express();
 
-/**
- * Using express-session middleware. Be sure to familiarize yourself with available options
- * and set them as desired. Visit: https://www.npmjs.com/package/express-session
- */
- app.use(session({
-    secret: 'ENTER_YOUR_SECRET_HERE',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: false, // set this to true on production
-    }
-}));
+    /**
+     * Using express-session middleware. Be sure to familiarize yourself with available options
+     * and set them as desired. Visit: https://www.npmjs.com/package/express-session
+     */
+    app.use(session({
+        secret: 'ENTER_YOUR_SECRET_HERE',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // set this to true on production
+        }
+    }));
 
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+    app.use(express.urlencoded({ extended: false }));
+    app.use(express.json());
 
-app.set('views', path.join(__dirname, './views'));
-app.set('view engine', 'ejs');
+    app.set('views', path.join(__dirname, './views'));
+    app.set('view engine', 'ejs');
 
-app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
-app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
+    app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
+    app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
-app.use(express.static(path.join(__dirname, './public')));
+    app.use(express.static(path.join(__dirname, './public')));
 
-// instantiate the wrapper
-const msid = new MsIdExpress.WebAppAuthClientBuilder(appSettings).build();
+    // instantiate the wrapper
+    const authProvider = await WebAppAuthProvider.initialize(authConfig);
 
-// initialize the wrapper
-app.use(msid.initialize());
+    // add the auth middleware before any route handlers
+    app.use(authProvider.authenticate());
 
-// app routes
-app.get('/', (req, res) => res.redirect('/home'));
-app.get('/home', mainController.getHomePage);
+    // app routes
+    app.get('/', mainController.getHomePage);
 
-// authentication routes
-app.get('/signin', 
-    msid.signIn({
-        postLoginRedirect: '/',
-        failureRedirect: '/signin'
-    }
-));
+    // authentication routes
+    app.get(
+        '/signin',
+        (req, res, next) => {
+            return req.authContext.login({
+                postLoginRedirectUri: "/", // redirect here after login
+            })(req, res, next);
+        }
+    );
 
-app.get('/signout', 
-    msid.signOut({
-        postLogoutRedirect: '/'
-    }
-));
+    app.get(
+        '/signout',
+        (req, res, next) => {
+            return req.authContext.logout({
+                postLogoutRedirectUri: "/", // redirect here after logout
+            })(req, res, next);
+        }
+    );
 
-// secure routes
-app.get('/id', 
-    msid.isAuthenticated(), 
-    mainController.getIdPage
-);
+    // secure routes
+    app.get('/id',
+        authProvider.guard({
+            forceLogin: true // force user to login if not authenticated
+        }),
+        mainController.getIdPage
+    );
 
-// unauthorized
-app.get('/error', (req, res) => res.redirect('/500.html'));
+    /**
+     * This error handler is needed to catch interaction_required errors thrown by MSAL.
+     * Make sure to add it to your middleware chain after all your routers, but before any other 
+     * error handlers.
+     */
+    app.use(authProvider.interactionErrorHandler());
 
-// error
-app.get('/unauthorized', (req, res) => res.redirect('/401.html'));
+    return app;
+}
 
-// 404
-app.get('*', (req, res) => res.status(404).redirect('/404.html'));
-
-app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
-
-module.exports = app;
+module.exports = main;

@@ -19,7 +19,7 @@
         <div class="table-area-div">
             <form action='/todolist' method='POST'>
                 <input type='text' name='name'>
-                <button type='submit'>Add</button>
+                <button class="btn btn-primary" type='submit'>Add</button>
             </form>
         </div>
 
@@ -32,7 +32,7 @@
                             <td>
                                 <form action='/todolist?_method=DELETE' method='POST'>
                                     <input type='hidden' name='id' value='<%= todos[i]["id"] %>'>
-                                    <button type='submit'>Delete</button>
+                                    <button class="btn btn-primary" type='submit'>Delete</button>
                                 </form>
                             </td>
                         </tr>

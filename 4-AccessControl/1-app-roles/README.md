@@ -8,7 +8,6 @@
 - [Registration](#registration)
 - [Running the sample](#running-the-sample)
 - [Explore the sample](#explore-the-sample)
-- [About the code](#about-the-code)
 - [More information](#more-information)
 - [Community Help and Support](#community-help-and-support)
 - [Contributing](#contributing)
@@ -23,7 +22,7 @@ Access control in Azure AD can be done with **Security Groups** as well, as we w
 
 ## Scenario
 
-1. The client application uses **MSAL Node** (via [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express)) to sign-in a user and obtain an **ID Token** from **Azure AD**.
+1. The client application uses **MSAL Node** (via [msal-node-wrapper](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/tree/main/Common/msal-node-wrapper)) to sign-in a user and obtain an **ID Token** from **Azure AD**.
 2. The **ID Token** contains the [roles claim](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#declare-roles-for-an-application) that is used to control access to protected routes.
 
 ![Overview](./ReadmeFiles/topology.png)
@@ -34,8 +33,7 @@ Access control in Azure AD can be done with **Security Groups** as well, as we w
 |-----------------------------|---------------------------------------------------------------|
 | `AppCreationScripts/`       | Contains Powershell scripts to automate app registration.     |
 | `ReadmeFiles/`              | Contains illustrations and screenshots.                       |
-| `App/appSettings.js`      | Authentication parameters and settings.                       |
-| `App/data/db.json`          | Stores todo list data.                                        |
+| `App/authConfig.js`         | Authentication parameters and settings.                       |
 | `App/app.js`                | Application entry point.                                      |
 
 ## Prerequisites
@@ -45,7 +43,7 @@ Access control in Azure AD can be done with **Security Groups** as well, as we w
 - [VS Code Azure Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack) extension is recommended for interacting with Azure through VS Code Interface.
 - A modern web browser. This sample uses **ES6** conventions and will not run on **Internet Explorer**.
 - An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://docs.microsoft.com/azure/active-directory/develop/quickstart-create-new-tenant)
-- A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**.  If you're signed in to the [Azure portal](https://portal.azure.com) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
+- A user account in your **Azure AD** tenant.
 
 ## Setup
 
@@ -78,28 +76,22 @@ There is one project in this sample. To register it, you can:
   - modify the projects' configuration files.
 
 <details>
-  <summary>Expand this section if you want to use this automation:</summary>
+   <summary>Expand this section if you want to use this automation:</summary>
 
-> :warning: If you have never used **Azure AD Powershell** before, we recommend you go through the [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
+> :warning: If you have never used **Microsoft Graph PowerShell** before, we recommend you go through the [App Creation Scripts Guide](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
 
-1. On Windows, run PowerShell as **Administrator** and navigate to the root of the cloned directory
-1. If you have never used Azure AD Powershell before, we recommend you go through the [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
-1. In PowerShell run:
-
-   ```PowerShell
-   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
-   ```
-
+1. Ensure that you have [PowerShell 7](https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3) or later.
 1. Run the script to create your Azure AD application and configure the code of the sample application accordingly.
-1. In PowerShell run:
+1. For interactive process -in PowerShell, run:
 
-   ```PowerShell
-   cd .\AppCreationScripts\
-   .\Configure.ps1
-   ```
+    ```PowerShell
+    cd .\AppCreationScripts\
+    .\Configure.ps1 -TenantId "[Optional] - your tenant id" -AzureEnvironmentName "[Optional] - Azure environment, defaults to 'Global'"
+    ```
 
-   > Other ways of running the scripts are described in [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md)
-   > The scripts also provide a guide to automated application registration, configuration and removal which can help in your CI/CD scenarios.
+> Other ways of running the scripts are described in [App Creation Scripts guide](./AppCreationScripts/AppCreationScripts.md). The scripts also provide a guide to automated application registration, configuration and removal which can help in your CI/CD scenarios.
+
+> :information_source: This sample can make use of client certificates. You can use **AppCreationScripts** to register an Azure AD application with certificates. See: [How to use certificates instead of client secrets](./README-use-certificate.md)
 
 </details>
 
@@ -124,27 +116,26 @@ There is one project in this sample. To register it, you can:
    - Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
    - The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
    - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
+    > :warning: For enhanced security, consider using **certificates** instead of client secrets. See: [How to use certificates instead of secrets](./README-use-certificate.md).
 
 ### Define Application Roles
 
 1. Still on the same app registration, select the **App roles** blade to the left.
 1. Select **Create app role**:
-    - For **Display name**, enter a suitable name, for instance **TaskAdmin**.
-    - For **Allowed member types**, choose **User**.
-    - For **Value**, enter **TaskAdmin**.
-    - For **Description**, enter **Admins can read any user's todo list**.
-1. Select **Create app role**:
-    - For **Display name**, enter a suitable name, for instance **TaskUser**.
-    - For **Allowed member types**, choose **User**.
-    - For **Value**, enter **TaskUser**.
-    - For **Description**, enter **Users can read and modify their todo lists**.
-1. Select **Apply** to save your changes.
+    1. For **Display name**, enter a suitable name, for instance **TaskAdmin**.
+    1. For **Allowed member types**, choose **User**.
+    1. For **Value**, enter **TaskAdmin**.
+    1. For **Description**, enter **Admins can read any user's todo list**.
+    > Repeat the steps above for another role named **TaskUser**
+    1. Select **Apply** to save your changes.
 
 To add users to this app role, follow the guidelines here: [Assign users and groups to roles](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#assign-users-and-groups-to-roles).
 
 > :bulb: **Important security tip**
 >
-> When you set **User assignment required?** to **Yes**, Azure AD will check that only users assigned to your application in the **Users and groups** blade are able to sign-in to your app. You can assign users directly or by assigning security groups they belong to.
+> When you set **User assignment required?** to **Yes**, Azure AD will check that only users assigned to your application in the **Users and groups** blade are able to sign-in to your app.To enable this, follow the instructions [here](https://docs.microsoft.com/azure/active-directory/manage-apps/assign-user-or-group-access-portal#configure-an-application-to-require-user-assignment). You can assign users directly or by assigning security groups they belong to.
+
+For more information, see: [How to: Add app roles in your application and receive them in the token](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps)
 
 #### Configure the client app (msal-node-webapp) to use your app registration
 
@@ -152,11 +143,13 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
-1. Open the `App\appSettings.json` file.
+1. Open the `App/authConfig.js` file.
 1. Find the key `clientId` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
 1. Find the key `tenantId` and replace the existing value with your Azure AD tenant ID.
 1. Find the key `clientSecret` and replace the existing value with the key you saved during the creation of `msal-node-webapp` copied from the Azure portal.
-1. Find the key `redirect` and replace the existing value with the **redirect URI** for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
+1. Find the key `redirectUri` and replace the existing value with the Redirect URI for `msal-node-webapp`. (by default `http://localhost:4000/redirect`).
+
+> :information_source: For `redirectUri`, you can simply enter the path component of the URI instead of the full URI. For example, instead of `http://localhost:4000/redirect`, you can simply enter `/redirect`. This may come in handy in deployment scenarios.
 
 1. Open the `App/app.js` file.
 1. Find the string `ENTER_YOUR_SECRET_HERE` and replace it with a secret that will be used when encrypting your app's session using the [express-session](https://www.npmjs.com/package/express-session) package.
@@ -181,154 +174,6 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 ## We'd love your feedback!
 
 Were we successful in addressing your learning objective? Consider taking a moment to [share your experience with us](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUQkRCSVdRSk8wUjdZSkg2NEZGOFFaTkxQVyQlQCN0PWcu).
-
-## About the code
-
-### Implementing role-based access control
-
-In [appSettings.js](./App/appSettings.js), we create an access matrix that defines the required roles and allowed HTTP methods for each route that we like to grant role-based access:
-
-```js
-{
-    accessMatrix: {
-        todolist: {
-            methods: ["GET", "POST", "DELETE"],
-            groups: ["TaskAdmin", "TaskUser"]
-        },
-        dashboard: {
-            methods: ["GET"],
-            groups: ["TaskAdmin"]
-        }
-    }
-}
-```
-
-Then, in [app.js](./App/app.js), we create an instance of the [MsalWebAppAuthClient](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html) class.
-
-```javascript
-const express = require('express');
-const session = require('express-session');
-const MsIdExpress = require('microsoft-identity-express');
-
-const appSettings = require('./appSettings.js');
-const mainRouter = require('./routes/mainRoutes');
-
-const SERVER_PORT = process.env.PORT || 4000;
-
-// initialize express
-const app = express(); 
-
-app.use(session({
-    secret: 'ENTER_YOUR_SECRET_HERE',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: false, // set this to true on production
-    }
-}));
-
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
-// instantiate the wrapper
-const msid = new MsIdExpress.WebAppAuthClientBuilder(appSettings).build();
-
-// initialize the wrapper
-app.use(msid.initialize());
-
-// pass the instance to your routers
-app.use(mainRouter(msid));
-
-app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
-```
-
-The `msid` object exposes the middleware we can use to protect our app routes. This can be seen in [mainRoutes.js](./App/routes/mainRoutes.js):
-
-```javascript
-const express = require('express');
-
-module.exports = (msid) => {
-
-    // initialize router
-    const router = express.Router();
-
-    // app routes
-    router.get('/', (req, res, next) => res.redirect('/home'));
-    router.get('/home', mainController.getHomePage);
-
-    // authentication routes
-    router.get('/signin', msid.signIn({ postLoginRedirect: '/' }));
-    router.get('/signout', msid.signOut({ postLogoutRedirect: '/' }));
-
-    // secure routes
-    router.get('/id', msid.isAuthenticated(), mainController.getIdPage);
-
-    router.use('/todolist',
-        msid.isAuthenticated(),
-        msid.hasAccess({
-            accessRule: appSettings.accessMatrix.todolist
-        }),
-        todolistRouter
-    );
-
-    router.use('/dashboard',
-        msid.isAuthenticated(),
-        msid.hasAccess({
-            accessRule: appSettings.accessMatrix.dashboard
-        }),
-        dashboardRouter
-    );
-
-    return router;
-}
-```
-
-Under the hood, the wrapper's [hasAccess()](https://azure-samples.github.io/microsoft-identity-express/classes/MsalWebAppAuthClient.html#hasAccess) middleware checks the signed-in user's ID token's `roles` claim to determine whether she has access to this route given the access matrix provided in [appSettings.js](./App/appSettings.js):
-
-```typescript
-    hasAccess(options: GuardOptions): RequestHandler {
-        return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-            if (!this.webAppSettings.accessMatrix) {
-                this.logger.error(ConfigurationErrorMessages.NO_ACCESS_MATRIX_CONFIGURED);
-                return next(new Error(ConfigurationErrorMessages.NO_ACCESS_MATRIX_CONFIGURED));
-            }
-
-            if (!req.session.account?.idTokenClaims) {
-                this.logger.error(ErrorMessages.ID_TOKEN_CLAIMS_NOT_FOUND);
-                return next(new Error(ErrorMessages.ID_TOKEN_CLAIMS_NOT_FOUND));
-            }
-
-            const checkFor = options.accessRule.hasOwnProperty(AccessControlConstants.GROUPS)
-                ? AccessControlConstants.GROUPS
-                : AccessControlConstants.ROLES;
-
-            switch (checkFor) {
-                case AccessControlConstants.GROUPS:
-                    // ...
-                    break;
-
-                case AccessControlConstants.ROLES:
-                    if (!req.session.account.idTokenClaims[AccessControlConstants.ROLES]) {
-                        return res.redirect(this.webAppSettings.authRoutes.unauthorized);
-                    } else {
-                        const roles = req.session.account.idTokenClaims[AccessControlConstants.ROLES] as string[];
-
-                        if (
-                            !this.checkAccessRule(req.method, options.accessRule, roles, AccessControlConstants.ROLES)
-                        ) {
-                            return res.redirect(this.webAppSettings.authRoutes.unauthorized);
-                        }
-                    }
-
-                    next();
-                    break;
-
-                default:
-                    break;
-            }
-        };
-    };
-```
 
 ## More information
 

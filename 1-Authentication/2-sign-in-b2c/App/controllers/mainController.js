@@ -1,18 +1,15 @@
 exports.getHomePage = (req, res, next) => {
-    const isAuthenticated = req.session.isAuthenticated;
-    const username = req.session.account ? req.session.account.username : '';
-    res.render('home', { isAuthenticated: isAuthenticated, username: username });
+    const username = req.authContext.getAccount() ? req.authContext.getAccount().username : '';
+    res.render('home', { isAuthenticated: req.authContext.isAuthenticated(), username: username });
 }
 
 exports.getIdPage = (req, res, next) => {
-    const isAuthenticated = req.session.isAuthenticated;
+    const account = req.authContext.getAccount();
 
     const claims = {
-        name: req.session.account.idTokenClaims.name,
-        preferred_username: req.session.account.idTokenClaims.preferred_username,
-        oid: req.session.account.idTokenClaims.oid,
-        sub: req.session.account.idTokenClaims.sub
+        name: account.idTokenClaims.name,
+        sub: account.idTokenClaims.sub
     };
 
-    res.render('id', {isAuthenticated: isAuthenticated, claims: claims});
+    res.render('id', {isAuthenticated: req.authContext.isAuthenticated(), claims: claims});
 }
