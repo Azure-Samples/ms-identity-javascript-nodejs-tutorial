@@ -32,6 +32,12 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - run: |
+        cd Common/msal-node-wrapper
+        npm ci
+        npm audit --production
+        npm build --if-present
+
+    - run: |
         cd 1-Authentication/1-sign-in/App
         npm install
         npm audit --production
