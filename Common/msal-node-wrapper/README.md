@@ -1,4 +1,4 @@
-# msal-node-wrapper
+# MSAL Node wrapper for Express.js
 
 This project illustrates a simple wrapper around the [ConfidentialClientApplication](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html) class of the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node#microsoft-authentication-library-for-node-msal-node) (MSAL Node), in order to streamline routine authentication tasks, such as login, logout and token acquisition, as well as securing routes and controlling access. This can be used in web apps built with Express.js, or frameworks that are based on Express.js.
 
@@ -29,7 +29,7 @@ or download and extract the repository *.zip* file.
 
 ```console
     git clone https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial.git
-    cd ms-identity-javascript-nodejs-tutorial/shared/msal-node-wrapper
+    cd ms-identity-javascript-nodejs-tutorial/Common/msal-node-wrapper
     npm install
     npm run build
 ```
@@ -41,22 +41,28 @@ or download and extract the repository *.zip* file.
 1. Initialize the wrapper by providing a configuration object. The object looks like the follows:
 
 ```javascript
+const { WebAppAuthProvider } = require('msal-node-wrapper');
+
 const authConfig = {
-    authOptions: {
+    auth: {
         authority: "https://login.microsoftonline.com/Enter_the_Tenant_Info_Here",
         clientId: "Enter_the_Application_Id_Here",
-        clientSecret: "Enter_the_Client_Secret_Here",
+        clientSecret: "Enter_the_Client_Secret_Here", // use certificates instead for enhanced security
         redirectUri: "/redirect",
     }
 };
 
-// initialize the wrapper
-const authProvider = await WebAppAuthProvider.initialize(authConfig);
+try {
+    // initialize the wrapper
+    const authProvider = await WebAppAuthProvider.initialize(authConfig);
+} catch (error) {
+    console.log(error)
+}
 ```
 
 ### Integration with Express.js
 
-Import the package and instantiate [MsalWebAppAuthClient](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/msalwebappauthclient.html) class, via the *WebAppAuthClientBuilder*, which exposes the middleware you can use in your routes. The constructor takes the settings object and an (optional) persistent cache:
+Import the package and initialize the [WebAppAuthProvider](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/msalwebappauthclient.html). The [initialize()]() method takes a configuration object.
 
 ```javascript
 const express = require('express');
@@ -89,25 +95,29 @@ async function main() {
     app.use(express.urlencoded({ extended: false }));
     app.use(express.json());
 
-    // initialize the wrapper
-    const authProvider = await WebAppAuthProvider.initialize(authConfig);
-
-    app.use(authProvider.authenticate({
-        protectAllRoutes: true,
-        acquireTokenForResources: {
-            "graph.microsoft.com": {
-                scopes: ["User.Read"],
-                routes: ["/profile"]
-            },
-        }
-    }));
-
-    // pass the instance to your routers
-    app.use(mainRouter);
-
-    app.use(authProvider.interactionErrorHandler());
-
-    app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+    try {
+        // initialize the wrapper
+        const authProvider = await WebAppAuthProvider.initialize(authConfig);
+    
+        app.use(authProvider.authenticate({
+            protectAllRoutes: true, // force user to authenticate for all routes
+            acquireTokenForResources: { // acquire an access token for this resource
+                "graph.microsoft.com": { // you can specify the resource name as you like
+                    scopes: ["User.Read"],
+                    routes: ["/profile"] // triggers when 
+                },
+            }
+        }));
+    
+        app.use(mainRouter);
+    
+        app.use(authProvider.interactionErrorHandler()); // this middleware handles interaction required errors
+    
+        app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
 }
 
 main();
@@ -123,7 +133,7 @@ You can access the current authentication context via `req.authContext` variable
 
 #### Authentication
 
-Add [login()]() and [logout()]() middleware to routes that you want to trigger a login/logout:
+Add [login()]() and [logout()]() middleware to routes that you want to trigger a login/logout with Azure AD:
 
 ```javascript
 app.get(
@@ -134,14 +144,6 @@ app.get(
         })(req, res, next);
     }
 );
-```
-
-Alternatively, you can require authentication for all routes in your application using the authenticate() middleware:
-
-```javascript
-    app.use(authProvider.authenticate({
-        protectAllRoutes: true,
-    }));
 ```
 
 ```javascript
@@ -155,9 +157,17 @@ app.get(
 );
 ```
 
+Alternatively, you can require authentication for all routes in your application using the [authenticate()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/WebAppAuthProvider.html#authenticate) middleware:
+
+```javascript
+    app.use(authProvider.authenticate({
+        protectAllRoutes: true,
+    }));
+```
+
 #### Securing routes
 
-Simply add the [isAuthenticated()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/msalwebappauthclient.html#isauthenticated) middleware before the controller that serves the page you would like to secure:
+Simply add the [guard()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/WebAppAuthProvider.html#guard) middleware before the controller that serves the page you would like to secure:
 
 ```javascript
     app.get('/id',
@@ -175,46 +185,29 @@ Simply add the [isAuthenticated()](https://azure-samples.github.io/ms-identity-j
 
 #### Acquiring tokens
 
-[acquireToken()]() can be used before middleware that calls a web API. The access token will be available via 
+[acquireToken()]() can be used in controllers to 
 
 ```javascript
-    router.get('/profile',
-        msid.isAuthenticated(),
-        msid.getToken({
-            resource: {
-                endpoint: "https://graph.microsoft.com/v1.0/me",
-                scopes: [ "User.Read" ]
-            }
-        }),
-        async(req, res, next) => {        
-            try {
-                // use axios or a similar alternative
-                const response = await axios.default.get("https://graph.microsoft.com/v1.0/me", {
-                    headers: {
-                        Authorization: `Bearer ${req.session["graphAPI"].accessToken}`
-                    }
-                });
 
-                res.render('profile', { isAuthenticated: req.session.isAuthenticated, profile: response.data });
-            } catch (error) {
-                console.log(error);
-                next(error);
-            }
-        }
-    ); // get token for this route to call web API
+```
+
+If you have configured the [authenticate()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/WebAppAuthProvider.html#authenticate) middelware before, you can 
+
+```javascript
+
 ```
 
 #### Controlling access
 
-Use [guard()]() middleware to control access for Azure AD App Roles and/or Security Groups:
+Use the [guard()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/WebAppAuthProvider.html#guard) middleware to control access for a certain claim or claims in the user's ID token.
 
 ```javascript
     app.get(
         '/todolist',
         authProvider.guard({
-            forceLogin: true,
+            forceLogin: true, // ensure that the user is authenticated before accessing this route
             idTokenClaims: {
-                roles: ["TaskUser", "TaskAdmin"],
+                roles: ["TaskUser", "TaskAdmin"], // grant access to the route only if user has one of these claims
             },
         }),
     );
@@ -222,7 +215,7 @@ Use [guard()]() middleware to control access for Azure AD App Roles and/or Secur
     app.get(
         '/dashboard',
         authProvider.guard({
-            forceLogin: true,
+            forceLogin: false, // if user is not authenticated, an error will be thrown instead
             idTokenClaims: {
                 roles: ["TaskAdmin"],
             },

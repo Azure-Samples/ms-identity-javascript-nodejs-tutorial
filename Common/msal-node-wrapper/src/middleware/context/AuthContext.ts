@@ -12,7 +12,7 @@ import loginHandler from "../handlers/loginHandler";
 import logoutHandler from "../handlers/logoutHandler";
 import acquireTokenHandler from "../handlers/acquireTokenHandler";
 
-type RequestContext = { req: Request, res: Response, next: NextFunction };
+export type RequestContext = { req: Request, res: Response, next: NextFunction };
 
 export class AuthContext {
     private provider: WebAppAuthProvider;
