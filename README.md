@@ -19,7 +19,7 @@ urlFragment: "ms-identity-javascript-nodejs-tutorial"
 
 # Tutorial: Enable your Node.js & Express web app to sign-in users and call APIs with the Microsoft identity platform
 
-[![Build](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/node.js.yml/badge.svg)](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/node.js.yml)
+[![Build](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/node.js.yml/badge.svg)](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/build.yml)
 [![Code Scan](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/codeql.yml/badge.svg)](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/codeql.yml)
 ![GitHub issues](https://img.shields.io/github/issues/Azure-Samples/ms-identity-javascript-nodejs-tutorial)
 ![npm](https://img.shields.io/npm/v/@azure/msal-node?label=msal-node)
@@ -32,7 +32,6 @@ This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialC
 > :warning: [msal-node-wrapper](./Shared/msal-node-wrapper) is for demo purposes only and is not recommended for production applications. If you're looking for using MSAL Node directly in your web app, please refer to:
 >
 > - [Express.js web app using MSAL Node to authenticate users with Azure AD and call Microsoft Graph](https://github.com/Azure-Samples/ms-identity-node)
-> - [Express.js web app using MSAL Node with a distributed token cache (TypeScript)](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/samples/msal-node-samples/auth-code-distributed-cache)
 > - [A React SPA on an Express.js web app using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Azure AD and call Microsoft Graph](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/tree/main/5-AdvancedScenarios/1-call-graph-bff)
 
 We recommend following the chapters in successive order. However, the code samples are self-contained, so feel free to pick samples by topics that you may need at the moment.
@@ -84,7 +83,7 @@ Please refer to each chapter's README for sample-specific recommendations.
 |                 |               |
 |-----------------|---------------|
 | <img src="./4-AccessControl/1-app-roles/ReadmeFiles/topology.png" width="200"> | [**Use App Roles for access control**](./4-AccessControl/1-app-roles/README.md) </br> Define App Roles and use roles claim in a token to implement Role-based Access Control (RBAC) for your web app. |
-| <img src="./4-AccessControl/2-security-groups/ReadmeFiles/topology.png" width="200"> | [**Use Security Groups for access control**](./4-AccessControl/2-security-groups/README.md) </br> Create Security Groups and use groups claim in a token to implement Role-based Access Control (RBAC) for your web app. Handle groups claim overage scenarios. |
+| <img src="./4-AccessControl/2-security-groups/ReadmeFiles/topology.png" width="200"> | [**Use Security Groups for access control**](./4-AccessControl/2-security-groups/README.md) </br> Create Security Groups and use groups claim in a token to implement Role-based Access Control (RBAC) for your web app. |
 
 ### Chapter 5: Dive into advanced scenarios
 
