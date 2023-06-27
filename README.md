@@ -89,7 +89,7 @@ Please refer to each chapter's README for sample-specific recommendations.
 
 |                 |               |
 |-----------------|---------------|
-| <img src="./5-AdvancedScenarios/1-call-graph-bff/ReadmeFiles/sequence.png" width="200"> | [**Authenticate using Backend for Frontend proxy**](./5-AdvancedScenarios/1-call-graph-bff/App/README.md) </br> Sign-in users via the Backend for Frontend proxy pattern in a React SPA hosted on top of a Node.js & Express web app using MSAL Node. |
+| <img src="./5-AdvancedScenarios/1-call-graph-bff/ReadmeFiles/sequence.png" width="200"> | [**Authenticate using Backend for Frontend proxy**](./5-AdvancedScenarios/1-call-graph-bff/README.md) </br> Sign-in users via the Backend for Frontend proxy pattern in a React SPA hosted on top of a Node.js & Express web app using MSAL Node. |
 
 ## We'd love your feedback
 
