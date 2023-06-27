@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/Azure-Samples/msal-node-wrapper.git"
+    "url": "git://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial.git"
   },
   "scripts": {
     "build": "rollup -c --strictDeprecations --bundleConfigAsCjs",

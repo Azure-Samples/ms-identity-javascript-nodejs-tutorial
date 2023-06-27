@@ -11,6 +11,7 @@
   "author": "derisen",
   "license": "MIT",
   "dependencies": {
+    "@azure/msal-node": "^1.17.3",
     "@microsoft/microsoft-graph-client": "^3.0.2",
     "bootstrap": "^4.6.0",
     "ejs": "^3.1.8",
