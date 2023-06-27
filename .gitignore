@@ -64,6 +64,7 @@ typings/
 
 # Output of 'npm pack'
 *.tgz
+!msal-node-wrapper-1.0.0-beta.tgz
 
 # Yarn Integrity file
 .yarn-integrity

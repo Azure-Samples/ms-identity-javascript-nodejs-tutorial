@@ -53,8 +53,10 @@ async function main() {
     app.use(express.static(path.join(__dirname, './public')));
 
     try {
+        // get the secret from key vault
         const clientSecret = await getCredentialFromKeyVault(process.env.KEY_VAULT_URI, process.env.SECRET_NAME);
 
+        // update the config object with secret
         const authConfigWithSecret = {
             ...authConfig,
             auth: {
