@@ -12,9 +12,6 @@ on:
     paths:
       - Common/msal-node-wrapper/**
 
-permissions:
-  contents: write
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -25,7 +22,7 @@ jobs:
           fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
       - name: Use Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         env:
           RUNNING_NODE_CI: 1
       - run: |
