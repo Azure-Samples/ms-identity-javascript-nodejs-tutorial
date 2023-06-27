@@ -5,13 +5,16 @@ on:
     branches:
       - main
     paths:
-      - ./Common/msal-node-wrapper
+      - Common/msal-node-wrapper
   pull_request:
     branches:
       - main
     paths:
-      - ./Common/msal-node-wrapper
+      - Common/msal-node-wrapper
 
+permissions:
+  contents: write
+  
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -26,7 +29,7 @@ jobs:
         env:
           RUNNING_NODE_CI: 1
       - run: |
-          cd common/msal-node-wrapper
+          cd Common/msal-node-wrapper
           npm ci
           npm run build
           npm run docs
