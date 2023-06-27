@@ -5,16 +5,16 @@ on:
     branches:
       - main
     paths:
-      - Common/msal-node-wrapper
+      - Common/msal-node-wrapper/**
   pull_request:
     branches:
       - main
     paths:
-      - Common/msal-node-wrapper
+      - Common/msal-node-wrapper/**
 
 permissions:
   contents: write
-  
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
