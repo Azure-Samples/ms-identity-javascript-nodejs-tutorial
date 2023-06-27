@@ -41,41 +41,46 @@ async function main() {
 
     app.use(express.static(path.join(__dirname, './public')));
 
-    // initialize the auth middleware before any route handlers
-    const authProvider = await WebAppAuthProvider.initialize(authConfig);
+    try {
+        // initialize the auth middleware before any route handlers
+        const authProvider = await WebAppAuthProvider.initialize(authConfig);
 
-    app.use(authProvider.authenticate({
-        protectAllRoutes: true, // enforce login for all routes
-    }));
+        app.use(authProvider.authenticate({
+            protectAllRoutes: true, // enforce login for all routes
+        }));
 
-    app.get(
-        '/todolist',
-        authProvider.guard({
-            idTokenClaims: {
-                roles: ["TaskUser", "TaskAdmin"], // require the user's ID token to have either of these role claims
-            },
-        }),
-    );
+        app.get(
+            '/todolist',
+            authProvider.guard({
+                idTokenClaims: {
+                    roles: ["TaskUser", "TaskAdmin"], // require the user's ID token to have either of these role claims
+                },
+            }),
+        );
 
-    app.get(
-        '/dashboard',
-        authProvider.guard({
-            idTokenClaims: {
-                roles: ["TaskAdmin"], // require the user's ID token to have this role claim
-            },
-        })
-    );
+        app.get(
+            '/dashboard',
+            authProvider.guard({
+                idTokenClaims: {
+                    roles: ["TaskAdmin"], // require the user's ID token to have this role claim
+                },
+            })
+        );
 
-    app.use(mainRouter);
+        app.use(mainRouter);
 
-    /**
-     * This error handler is needed to catch interaction_required errors thrown by MSAL.
-     * Make sure to add it to your middleware chain after all your routers, but before any other 
-     * error handlers.
-     */
-    app.use(authProvider.interactionErrorHandler());
+        /**
+         * This error handler is needed to catch interaction_required errors thrown by MSAL.
+         * Make sure to add it to your middleware chain after all your routers, but before any other 
+         * error handlers.
+         */
+        app.use(authProvider.interactionErrorHandler());
 
-    return app;
+        return app;
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
 }
 
 module.exports = main;

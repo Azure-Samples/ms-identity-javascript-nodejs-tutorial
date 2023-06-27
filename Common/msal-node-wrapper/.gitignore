@@ -104,3 +104,6 @@ typings/
 
 # e2e test screenshots
 screenshots/
+
+# distributables
+dist/

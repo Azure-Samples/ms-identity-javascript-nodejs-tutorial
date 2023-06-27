@@ -1,18 +1,15 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: "Build-Samples"
+name: Build & Test
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
-    paths:
-      - 1-Authentication/**
-      - 2-Authorization/**
-      - 3-Deployment/**
-      - 4-AccessControl/**
-      - 5-AdvancedScenarios/**
 
 jobs:
   build:
@@ -32,31 +29,38 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - run: |
-        cd 1-Authentication/1-sign-in/App
+        cd Common/msal-node-wrapper
         npm ci
+        npm audit --production
+        npm run build --if-present
+        npm run test
+
+    - run: |
+        cd 1-Authentication/1-sign-in/App
+        npm install
         npm audit --production
         npm run test
 
     - run: |
         cd 1-Authentication/2-sign-in-b2c/App
-        npm ci
+        npm install
         npm audit --production
         npm run test
 
     - run: |
         cd 2-Authorization/1-call-graph/App
-        npm ci
+        npm install
         npm audit --production
         npm run test
 
     - run: |
         cd 4-AccessControl/1-app-roles/App
-        npm ci
+        npm install
         npm audit --production
         npm run test
 
     - run: |
         cd 4-AccessControl/2-security-groups/App
-        npm ci
+        npm install
         npm audit --production
         npm run test

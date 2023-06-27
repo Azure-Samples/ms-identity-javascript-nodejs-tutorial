@@ -12,7 +12,7 @@ const authConfig = require('./authConfig.js');
 const mainRouter = require('./routes/mainRoutes');
 
 async function main() {
-    
+
     // initialize express
     const app = express();
 
@@ -41,30 +41,35 @@ async function main() {
 
     app.use(express.static(path.join(__dirname, './public')));
 
-    // initialize the wrapper
-    const authProvider = await WebAppAuthProvider.initialize(authConfig);
+    try {
+        // initialize the wrapper
+        const authProvider = await WebAppAuthProvider.initialize(authConfig);
 
-    // initialize the auth middleware before any route handlers
-    app.use(authProvider.authenticate({
-        protectAllRoutes: true, // this will force login for all routes if the user is not already
-        acquireTokenForResources: {
-            "graph.microsoft.com": { // you can specify the resource name as you wish
-                scopes: ["User.Read"],
-                routes: ["/profile"] // this will acquire a token for the graph on these routes
-            },
-        }
-    }));
+        // initialize the auth middleware before any route handlers
+        app.use(authProvider.authenticate({
+            protectAllRoutes: true, // this will force login for all routes if the user is not already
+            acquireTokenForResources: {
+                "graph.microsoft.com": { // you can specify the resource name as you wish
+                    scopes: ["User.Read"],
+                    routes: ["/profile"] // this will acquire a token for the graph on these routes
+                },
+            }
+        }));
 
-    app.use(mainRouter);
+        app.use(mainRouter);
 
-    /**
-     * This error handler is needed to catch interaction_required errors thrown by MSAL.
-     * Make sure to add it to your middleware chain after all your routers, but before any other 
-     * error handlers.
-     */
-    app.use(authProvider.interactionErrorHandler());
+        /**
+         * This error handler is needed to catch interaction_required errors thrown by MSAL.
+         * Make sure to add it to your middleware chain after all your routers, but before any other 
+         * error handlers.
+         */
+        app.use(authProvider.interactionErrorHandler());
 
-    return app;
+        return app;
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
 }
 
 module.exports = main;

@@ -41,42 +41,47 @@ async function main() {
 
     app.use(express.static(path.join(__dirname, './public')));
 
-    // initialize the wrapper
-    const authProvider = await WebAppAuthProvider.initialize(authConfig);
+    try {
+        // initialize the wrapper
+        const authProvider = await WebAppAuthProvider.initialize(authConfig);
 
-    // initialize the auth middleware before any route handlers
-    app.use(authProvider.authenticate({
-        protectAllRoutes: true, // enforce login for all routes
-    }));
+        // initialize the auth middleware before any route handlers
+        app.use(authProvider.authenticate({
+            protectAllRoutes: true, // enforce login for all routes
+        }));
 
-    app.get(
-        '/todolist',
-        authProvider.guard({
-            idTokenClaims: {
-                groups: ["Enter_the_ObjectId_of_GroupAdmin", "Enter_the_ObjectId_of_GroupMember"], // require the user's ID token to have either of these group claims
-            },
-        })
-    );
+        app.get(
+            '/todolist',
+            authProvider.guard({
+                idTokenClaims: {
+                    groups: ["Enter_the_ObjectId_of_GroupAdmin", "Enter_the_ObjectId_of_GroupMember"], // require the user's ID token to have either of these group claims
+                },
+            })
+        );
 
-    app.get(
-        '/dashboard',
-        authProvider.guard({
-            idTokenClaims: {
-                groups: ["Enter_the_ObjectId_of_GroupAdmin"]  // require the user's ID token to have this group claim
-            },
-        })
-    );
+        app.get(
+            '/dashboard',
+            authProvider.guard({
+                idTokenClaims: {
+                    groups: ["Enter_the_ObjectId_of_GroupAdmin"]  // require the user's ID token to have this group claim
+                },
+            })
+        );
 
-    app.use(mainRouter);
+        app.use(mainRouter);
 
-    /**
-     * This error handler is needed to catch interaction_required errors thrown by MSAL.
-     * Make sure to add it to your middleware chain after all your routers, but before any other 
-     * error handlers.
-     */
-    app.use(authProvider.interactionErrorHandler());
+        /**
+         * This error handler is needed to catch interaction_required errors thrown by MSAL.
+         * Make sure to add it to your middleware chain after all your routers, but before any other 
+         * error handlers.
+         */
+        app.use(authProvider.interactionErrorHandler());
 
-    return app;
+        return app;
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
 }
 
 module.exports = main;

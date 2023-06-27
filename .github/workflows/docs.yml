@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - ./Common/msal-node-wrapper
+      - Common/msal-node-wrapper/**
   pull_request:
     branches:
       - main
     paths:
-      - ./Common/msal-node-wrapper
+      - Common/msal-node-wrapper/**
 
 jobs:
   deploy:
@@ -22,11 +22,11 @@ jobs:
           fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
       - name: Use Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         env:
           RUNNING_NODE_CI: 1
       - run: |
-          cd common/msal-node-wrapper
+          cd Common/msal-node-wrapper
           npm ci
           npm run build
           npm run docs

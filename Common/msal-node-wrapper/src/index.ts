@@ -30,17 +30,18 @@ export {
     NodeSystemOptions, 
     AuthError, 
     Logger, 
-    AccountInfo 
+    AccountInfo
 } from "@azure/msal-node";
 
 export { WebAppAuthProvider } from "./provider/WebAppAuthProvider";
+export { AuthContext, RequestContext } from "./middleware/context/AuthContext";
 
 export {
     WebAppAuthConfig,
     AuthConfig,
     AuthRoutes,
     ProtectedResourceParams,
-    ProtectedResourcesMap
+    ProtectedResourcesMap,
 } from "./config/ConfigurationTypes";
 
 export {
@@ -50,7 +51,11 @@ export {
     LogoutOptions,
     TokenRequestOptions,
     AppState,
-    IdTokenClaims
+    IdTokenClaims,
 } from "./middleware/MiddlewareOptions";
+
+export { AccessDeniedError } from "./error/AccessDeniedError";
+
+export { InteractionRequiredError } from "./error/InteractionRequiredError";
 
 export { packageVersion } from "./packageMetadata";
