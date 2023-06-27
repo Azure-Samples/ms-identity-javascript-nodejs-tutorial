@@ -1,6 +1,6 @@
 # MSAL Node wrapper for Express.js
 
-This project illustrates a simple wrapper around the [ConfidentialClientApplication](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html) class of the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node#microsoft-authentication-library-for-node-msal-node) (MSAL Node), in order to streamline routine authentication tasks, such as login, logout and token acquisition, as well as securing routes and controlling access. This can be used in web apps built with Express.js, or frameworks that are based on Express.js.
+This project illustrates a simple wrapper around the [ConfidentialClientApplication](https://azuread.github.io/microsoft-authentication-library-for-js/ref/classes/_azure_msal_node.confidentialclientapplication.html) class of the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-node#microsoft-authentication-library-for-node-msal-node) (MSAL Node) for web applications built with Express.js, in order to streamline routine authentication tasks, such as login, logout and token acquisition, as well as securing routes and controlling access.
 
 This is an open source project. [Suggestions](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/issues/new) and [contributions](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/blob/main/CONTRIBUTING.md) are welcome!
 
@@ -12,10 +12,9 @@ This is an open source project. [Suggestions](https://github.com/Azure-Samples/m
 
 ## Prerequisites
 
-* [Node](https://nodejs.org/en/) 16 LTS or higher
+* [Node](https://nodejs.org/en/) v16 LTS or higher
 * [Express.js](https://expressjs.com/) 4.x or higher
-* [@azure/msal-node](https://www.npmjs.com/package/@azure/msal-node)
-* [express-session](https://www.npmjs.com/package/express-session) (or a similar session solution)
+* [express-session](https://www.npmjs.com/package/express-session)
 
 ## Installation
 
@@ -36,45 +35,21 @@ or download and extract the repository *.zip* file.
 
 ## Getting started
 
-### Configuration
+### Initialization
 
-1. Initialize the wrapper by providing a configuration object. The object looks like the follows:
+Import the package and initialize the [WebAppAuthProvider](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/msalwebappauthclient.html). The [initialize()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/WebAppAuthProvider.html#initialize) method takes a [configuration](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/types/AuthConfig.html) object.
 
-```javascript
-const { WebAppAuthProvider } = require('msal-node-wrapper');
-
-const authConfig = {
-    auth: {
-        authority: "https://login.microsoftonline.com/Enter_the_Tenant_Info_Here",
-        clientId: "Enter_the_Application_Id_Here",
-        clientSecret: "Enter_the_Client_Secret_Here", // use certificates instead for enhanced security
-        redirectUri: "/redirect",
-    }
-};
-
-try {
-    // initialize the wrapper
-    const authProvider = await WebAppAuthProvider.initialize(authConfig);
-} catch (error) {
-    console.log(error)
-}
-```
-
-### Integration with Express.js
-
-Import the package and initialize the [WebAppAuthProvider](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/msalwebappauthclient.html). The [initialize()]() method takes a configuration object.
+Below is a basic web application using **WebAppAuthProvider**:
 
 ```javascript
 const express = require('express');
 const session = require('express-session');
 const { WebAppAuthProvider } = require('msal-node-wrapper');
 
-const authConfig = require('./authConfig.js');
-const mainRouter = require('./routes/mainRoutes');
-
 const SERVER_PORT = process.env.PORT || 4000;
 
 async function main() {
+
     // initialize express
     const app = express();
 
@@ -97,19 +72,26 @@ async function main() {
 
     try {
         // initialize the wrapper
-        const authProvider = await WebAppAuthProvider.initialize(authConfig);
+        const authProvider = await WebAppAuthProvider.initialize({
+            auth: {
+                authority: "https://login.microsoftonline.com/Enter_the_Tenant_Info_Here",
+                clientId: "Enter_the_Application_Id_Here",
+                clientSecret: "Enter_the_Client_Secret_Here", // use certificates instead for enhanced security
+                redirectUri: "/redirect",
+            }
+        });
     
         app.use(authProvider.authenticate({
             protectAllRoutes: true, // force user to authenticate for all routes
             acquireTokenForResources: { // acquire an access token for this resource
                 "graph.microsoft.com": { // you can specify the resource name as you like
-                    scopes: ["User.Read"],
-                    routes: ["/profile"] // triggers when 
+                    scopes: ["User.Read"], // scopes for the resource that you want to acquire a token for
+                    routes: ["/profile"] // acquire a token before the user hits these routes
                 },
             }
         }));
     
-        app.use(mainRouter);
+        // add your routers/controllers here...
     
         app.use(authProvider.interactionErrorHandler()); // this middleware handles interaction required errors
     
@@ -133,7 +115,7 @@ You can access the current authentication context via `req.authContext` variable
 
 #### Authentication
 
-Add [login()]() and [logout()]() middleware to routes that you want to trigger a login/logout with Azure AD:
+Add [login()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/AuthContext.html#login) and [logout()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/AuthContext.html#logout) middleware to routes that you want to trigger a login/logout with Azure AD:
 
 ```javascript
 app.get(
@@ -165,6 +147,45 @@ Alternatively, you can require authentication for all routes in your application
     }));
 ```
 
+#### Acquiring tokens
+
+[acquireToken()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/AuthContext.html#acquireToken) can be used in controllers to acquire a token silently from cache or network using the refresh token. If this is not possible, acquireToken will throw an **interaction required** error. To handle this error, make sure you have added the [interactionErrorHandler](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/WebAppAuthProvider.html#interactionErrorHandler) to the end of your middleware chain.
+
+If you have configured the [authenticate()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/WebAppAuthProvider.html#authenticate) middleware before, you can also use the [getCachedTokenForResource()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/AuthContext.html#getCachedTokenForResource) method to retrieve a non-expired access token for the resource from cache directly.
+
+```javascript
+exports.getProfilePage = async (req, res, next) => {
+    try {
+        /**
+         * If you have configured your authenticate middleware accordingly, you should be 
+         * able to get the access token for the Microsoft Graph API from the cache. If not, 
+         * you will need to acquire and cache the token yourself.
+         */
+        let accessToken = req.authContext.getCachedTokenForResource("graph.microsoft.com");
+
+        if (!accessToken) {
+
+            /**
+             * You can acquire a token for the Microsoft Graph API as shown below. Note that
+             * if an interaction required error is thrown, you need to catch it and pass it 
+             * to the interactionErrorHandler middleware.
+             */
+            const tokenResponse = await req.authContext.acquireToken({
+                scopes: ["User.Read"],
+                account: req.authContext.getAccount(),
+            })(req, res, next);
+
+            accessToken = tokenResponse.accessToken;
+        }
+
+        // ...
+
+    } catch (error) {
+        next(error); // pass errors to error middleware for handling
+    }
+}
+```
+
 #### Securing routes
 
 Simply add the [guard()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/WebAppAuthProvider.html#guard) middleware before the controller that serves the page you would like to secure:
@@ -172,7 +193,7 @@ Simply add the [guard()](https://azure-samples.github.io/ms-identity-javascript-
 ```javascript
     app.get('/id',
         authProvider.guard({
-            forceLogin: true
+            forceLogin: true // ensure that the user is authenticated before accessing this route
         }),
         (req, res, next) => {
             res.render('id', {
@@ -183,23 +204,9 @@ Simply add the [guard()](https://azure-samples.github.io/ms-identity-javascript-
     );
 ```
 
-#### Acquiring tokens
-
-[acquireToken()]() can be used in controllers to 
-
-```javascript
-
-```
-
-If you have configured the [authenticate()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/WebAppAuthProvider.html#authenticate) middelware before, you can 
-
-```javascript
-
-```
-
 #### Controlling access
 
-Use the [guard()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/WebAppAuthProvider.html#guard) middleware to control access for a certain claim or claims in the user's ID token.
+Use the [guard()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/WebAppAuthProvider.html#guard) middleware to control access for a certain claim or claims in the user's ID token:
 
 ```javascript
     app.get(
