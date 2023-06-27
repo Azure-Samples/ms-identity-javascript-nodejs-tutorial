@@ -41,50 +41,54 @@ async function main() {
 
     app.use(express.static(path.join(__dirname, './public')));
 
-    // instantiate the wrapper
-    const authProvider = await WebAppAuthProvider.initialize(authConfig);
+    try {
+        // instantiate the wrapper
+        const authProvider = await WebAppAuthProvider.initialize(authConfig);
+        // add the auth middleware before any route handlers
+        app.use(authProvider.authenticate());
 
-    // add the auth middleware before any route handlers
-    app.use(authProvider.authenticate());
+        // app routes
+        app.get('/', mainController.getHomePage);
 
-    // app routes
-    app.get('/', mainController.getHomePage);
+        // authentication routes
+        app.get(
+            '/signin',
+            (req, res, next) => {
+                return req.authContext.login({
+                    postLoginRedirectUri: "/", // redirect here after login
+                })(req, res, next);
+            }
+        );
 
-    // authentication routes
-    app.get(
-        '/signin',
-        (req, res, next) => {
-            return req.authContext.login({
-                postLoginRedirectUri: "/", // redirect here after login
-            })(req, res, next);
-        }
-    );
+        app.get(
+            '/signout',
+            (req, res, next) => {
+                return req.authContext.logout({
+                    postLogoutRedirectUri: "/", // redirect here after logout
+                })(req, res, next);
+            }
+        );
 
-    app.get(
-        '/signout',
-        (req, res, next) => {
-            return req.authContext.logout({
-                postLogoutRedirectUri: "/", // redirect here after logout
-            })(req, res, next);
-        }
-    );
+        // secure routes
+        app.get('/id',
+            authProvider.guard({
+                forceLogin: true // force user to login if not authenticated
+            }),
+            mainController.getIdPage
+        );
 
-    // secure routes
-    app.get('/id',
-        authProvider.guard({
-            forceLogin: true // force user to login if not authenticated
-        }),
-        mainController.getIdPage
-    );
+        /**
+         * This error handler is needed to catch interaction_required errors thrown by MSAL.
+         * Make sure to add it to your middleware chain after all your routers, but before any other 
+         * error handlers.
+         */
+        app.use(authProvider.interactionErrorHandler());
 
-    /**
-     * This error handler is needed to catch interaction_required errors thrown by MSAL.
-     * Make sure to add it to your middleware chain after all your routers, but before any other 
-     * error handlers.
-     */
-    app.use(authProvider.interactionErrorHandler());
-
-    return app;
+        return app;
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
 }
 
 module.exports = main;
