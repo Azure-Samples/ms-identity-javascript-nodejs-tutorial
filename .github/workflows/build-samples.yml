@@ -35,7 +35,7 @@ jobs:
         cd Common/msal-node-wrapper
         npm ci
         npm audit --production
-        npm build --if-present
+        npm run build --if-present
 
     - run: |
         cd 1-Authentication/1-sign-in/App
