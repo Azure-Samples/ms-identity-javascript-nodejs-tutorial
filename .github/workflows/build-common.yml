@@ -59,7 +59,7 @@ jobs:
 
     - run: |
         cd 4-AccessControl/1-app-roles/App
-        npm installi
+        npm install
         npm audit --production
         npm run test
 
