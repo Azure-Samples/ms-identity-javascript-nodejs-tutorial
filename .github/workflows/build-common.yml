@@ -8,12 +8,12 @@ on:
     branches:
       - main
     paths:
-      - ./Common/msal-node-wrapper
+      - Common/msal-node-wrapper/**
   pull_request:
     branches:
       - main
     paths:
-      - ./Common/msal-node-wrapper
+      - Common/msal-node-wrapper/**
 
 jobs:
   build:
