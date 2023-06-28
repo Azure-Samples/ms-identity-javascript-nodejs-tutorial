@@ -19,7 +19,7 @@ urlFragment: "ms-identity-javascript-nodejs-tutorial"
 
 # Tutorial: Enable your Node.js & Express web app to sign-in users and call APIs with the Microsoft identity platform
 
-[![Build](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/node.js.yml/badge.svg)](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/build.yml)
+[![Build](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/build.yml/badge.svg)](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/build.yml)
 [![Code Scan](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/codeql.yml/badge.svg)](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/actions/workflows/codeql.yml)
 ![GitHub issues](https://img.shields.io/github/issues/Azure-Samples/ms-identity-javascript-nodejs-tutorial)
 ![npm](https://img.shields.io/npm/v/@azure/msal-node?label=msal-node)
