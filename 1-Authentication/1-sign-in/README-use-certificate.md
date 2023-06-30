@@ -26,7 +26,7 @@ Alternatively, download and build **OpenSSL** for your **OS** following the guid
     .\Cleanup-withCertCertificates.ps1
 ```
 
-3. Run the [Configure-withCertCertificates.ps1](./Configure-withCertCertificates.ps1) script to re-create the App Registration. The script will also create `.pfx` file(s) (e.g. msal-node-webapp.pfx) that you can upload to Key Vault later. When asked about a password, do remember it - you will need the password when uploading the certificate.
+3. Run the [Configure-withCertCertificates.ps1](./Configure-withCertCertificates.ps1) script to re-create the App Registration. The script will also create `.pfx` file(s) (e.g. `msal-node-webapp.pfx`) that you can upload to Key Vault later. When asked about a password, do remember it - you will need the password when uploading the certificate.
 
 ```console
     .\Configure-withCertCertificates.ps1
@@ -140,26 +140,21 @@ Finally, you need to modify the app's configuration files.
 2. *Comment out* the line for `clientSecret`:
 
 ```javaScript
-    const msal = require('@azure/msal-node');
-
-    const msalConfig = {
+    const authConfig = {
         auth: {
             clientId: "YOUR_CLIENT_ID",
             authority: "https://login.microsoftonline.com/YOUR_TENANT_ID",
             //clientSecret: "YOUR_CLIENT_SECRET"
         }
     };
-
-    const cca = new msal.ConfidentialClientApplication(msalConfig);
 ```
 
 3. *Un-comment* the lines for `clientCertificate` and replace the default values:
 
 ```javaScript
-    const msal = require('@azure/msal-node');
     const fs = require('fs'); // import the fs module for reading the key file
 
-    const msalConfig = {
+    const authConfig = {
         auth: {
             clientId: "YOUR_CLIENT_ID",
             authority: "https://login.microsoftonline.com/YOUR_TENANT_ID",
@@ -170,13 +165,11 @@ Finally, you need to modify the app's configuration files.
             }
         }
     };
-
-    const cca = new msal.ConfidentialClientApplication(msalConfig);
 ```
 
 > :information_source: For more details, see: [initializing-msal-node-with-certificates](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/certificate-credentials.md#initializing-msal-node-with-certificates)
 
-You can now start the application as instructed in the [README](./README#setup-the-sample).
+You can now start the application as instructed in the [README](./README).
 
 #### Using an existing certificate from Key Vault
 
@@ -186,17 +179,13 @@ You can now start the application as instructed in the [README](./README#setup-t
 2. *Comment out* the line for `clientSecret`:
 
 ```javaScript
-    const msal = require('@azure/msal-node');
-
-    const msalConfig = {
+    const authConfig = {
         auth: {
             clientId: "YOUR_CLIENT_ID",
             authority: "https://login.microsoftonline.com/YOUR_TENANT_ID",
             //clientSecret: "YOUR_CLIENT_SECRET"
         }
     };
-
-    const cca = new msal.ConfidentialClientApplication(msalConfig);
 ```
 
 3. Install **[Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli)**. Then, type the following to sign-in:
@@ -214,7 +203,6 @@ You can now start the application as instructed in the [README](./README#setup-t
 5. Update the code as shown below:
 
 ```javaScript
-    const msal = require('@azure/msal-node');
     const identity = require("@azure/identity");
     const keyvaultCert = require("@azure/keyvault-certificates");
     const keyvaultSecret = require('@azure/keyvault-secrets');
@@ -239,7 +227,7 @@ You can now start the application as instructed in the [README](./README#setup-t
         // secretResponse contains both public and private key, but we only need the private key
         const privateKey = secretResponse.value.split('-----BEGIN CERTIFICATE-----\n')[0]
 
-        const msalConfig = {
+        const authConfig = {
             auth: {
                 clientId: "YOUR_CLIENT_ID",
                 authority: "https://login.microsoftonline.com/YOUR_TENANT_ID",
@@ -251,7 +239,7 @@ You can now start the application as instructed in the [README](./README#setup-t
             }
         };
 
-        const cca = new msal.ConfidentialClientApplication(msalConfig);
+        // Pass config object to msal-node...
     }
 
     main();
@@ -259,7 +247,7 @@ You can now start the application as instructed in the [README](./README#setup-t
 
 > :information_source: For more details, see: [Get certificate from your Key Vault in Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/key-vault-managed-identity.md#get-certificate-from-your-vault-in-nodejs)
 
-You can now start the application as instructed in the [README](./README#setup-the-sample).
+You can now start the application as instructed in the [README](./README).
 
 ## Using Managed Identity
 

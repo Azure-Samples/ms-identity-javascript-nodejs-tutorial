@@ -15,6 +15,7 @@
       "HomePage": "http://localhost:4000",
       "ReplyUrls": "http://localhost:4000/redirect",
       "PasswordCredentials": "Auto",
+      "Certificate": "Auto",
       "Sdk": "MsalNode",
       "SampleSubPath": "2-Authorization\\1-call-graph\\App",
       "RequiredResourcesAccess": [
@@ -30,7 +31,10 @@
             "user_impersonation"
           ]
         }
-      ]
+      ],
+      "OptionalClaims": {
+        "AccessTokenClaims": ["acct"]
+      }
     }
   ],
   "CodeConfiguration": [

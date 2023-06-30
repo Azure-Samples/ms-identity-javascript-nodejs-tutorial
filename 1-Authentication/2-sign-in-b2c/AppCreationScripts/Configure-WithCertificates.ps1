@@ -110,23 +110,6 @@ Function ReplaceInTextFile([string] $configFilePath, [System.Collections.HashTab
 
 
 <#.Description
-   This function takes a string as input and creates an instance of an Optional claim object
-#> 
-Function CreateOptionalClaim([string] $name)
-{
-    <#.Description
-    This function creates a new Azure AD optional claims  with default and provided values
-    #>  
-
-    $appClaim = New-Object Microsoft.Graph.PowerShell.Models.MicrosoftGraphOptionalClaim
-    $appClaim.AdditionalProperties =  New-Object System.Collections.Generic.List[string]
-    $appClaim.Source =  $null
-    $appClaim.Essential = $false
-    $appClaim.Name = $name
-    return $appClaim
-}
-
-<#.Description
    Primary entry method to create and configure app registrations
 #> 
 Function ConfigureApplications
@@ -170,10 +153,6 @@ Function ConfigureApplications
 
    # Create the client AAD application
    Write-Host "Creating the AAD application (msal-node-webapp)"
-   # Get a 6 months application key for the client Application
-   $fromDate = [DateTime]::Now;
-   $key = CreateAppKey -fromDate $fromDate -durationInMonths 6
-   
    # create the application 
    $clientAadApplication = New-MgApplication -DisplayName "msal-node-webapp" `
                                                       -Web `
@@ -181,18 +160,46 @@ Function ConfigureApplications
                                                           RedirectUris = "http://localhost:4000/redirect"; `
                                                           HomePageUrl = "http://localhost:4000"; `
                                                         } `
-                                                       -SignInAudience AzureADMyOrg `
+                                                       -SignInAudience AzureADandPersonalMicrosoftAccount `
                                                       #end of command
-
-    #add a secret to the application
-    $pwdCredential = Add-MgApplicationPassword -ApplicationId $clientAadApplication.Id -PasswordCredential $key
-    $clientAppKey = $pwdCredential.SecretText
 
     $currentAppId = $clientAadApplication.AppId
     $currentAppObjectId = $clientAadApplication.Id
 
     $tenantName = (Get-MgApplication -ApplicationId $currentAppObjectId).PublisherDomain
     #Update-MgApplication -ApplicationId $currentAppObjectId -IdentifierUris @("https://$tenantName/msal-node-webapp")
+    # Generate a certificate
+
+    Write-Host "Creating the client application (msal-node-webapp)"
+
+    $certificateName = 'msal-node-webapp'
+
+    $certificate=New-SelfSignedCertificate -Subject $certificateName `
+                                            -CertStoreLocation "Cert:\CurrentUser\My" `
+                                            -KeyExportPolicy Exportable `
+                                            -KeySpec Signature
+
+    $thumbprint = $certificate.Thumbprint
+   
+    $unsecureCertificatePassword = Read-Host -Prompt "Enter password for your certificate (Please remember the password, you will need it when uploading to Key Vault): " 
+    $certificatePassword = ConvertTo-SecureString $unsecureCertificatePassword -AsPlainText -Force
+
+    Write-Host "Exporting certificate as a PFX file"
+    Export-PfxCertificate -Cert "Cert:\Currentuser\My\$thumbprint" -FilePath "$pwd\$certificateName.pfx" -ChainOption EndEntityCertOnly -NoProperties -Password $certificatePassword
+    Write-Host "PFX written to:"
+    Write-Host "$pwd\$certificateName.pfx"
+
+    # Add a Azure Key Credentials from the certificate for the application
+    $clientKeyCredentials = Update-MgApplication -ApplicationId $currentAppObjectId `
+        -KeyCredentials @(@{Type = "AsymmetricX509Cert"; Usage = "Verify"; Key= $certificate.RawData; StartDateTime = $certificate.NotBefore; EndDateTime = $certificate.NotAfter;})    
+
+
+    openssl pkcs12 -in "$pwd\$certificateName.pfx" -nocerts -out "$pwd\$certificateName.key" -nodes -password pass:$unsecureCertificatePassword
+    (Get-Content $pwd\$certificateName.key) | Select-Object -Skip 6 | Set-Content $pwd\$certificateName.key
+    
+    openssl pkcs12 -in "$pwd\$certificateName.pfx" -nokeys -out "$pwd\$certificateName.cer" -password pass:$unsecureCertificatePassword
+    (Get-Content $pwd\$certificateName.cer) | Select-Object -Skip 6 | Set-Content $pwd\$certificateName.cer
+
     
     # create the service principal of the newly created application     
     $clientServicePrincipal = New-MgServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
@@ -204,19 +211,6 @@ Function ConfigureApplications
         New-MgApplicationOwnerByRef -ApplicationId $currentAppObjectId  -BodyParameter @{"@odata.id" = "https://graph.microsoft.com/v1.0/directoryObjects/$user.ObjectId"}
         Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($clientServicePrincipal.DisplayName)'"
     }
-
-    # Add Claims
-
-    $optionalClaims = New-Object Microsoft.Graph.PowerShell.Models.MicrosoftGraphOptionalClaims
-    $optionalClaims.AccessToken = New-Object System.Collections.Generic.List[Microsoft.Graph.PowerShell.Models.MicrosoftGraphOptionalClaim]
-    $optionalClaims.IdToken = New-Object System.Collections.Generic.List[Microsoft.Graph.PowerShell.Models.MicrosoftGraphOptionalClaim]
-    $optionalClaims.Saml2Token = New-Object System.Collections.Generic.List[Microsoft.Graph.PowerShell.Models.MicrosoftGraphOptionalClaim]
-
-    # Add Optional Claims
-
-    $newClaim =  CreateOptionalClaim  -name "acct" 
-    $optionalClaims.AccessToken += ($newClaim)
-    Update-MgApplication -ApplicationId $currentAppObjectId -OptionalClaims $optionalClaims
     Write-Host "Done creating the client application (msal-node-webapp)"
 
     # URL of the AAD application in the Azure portal

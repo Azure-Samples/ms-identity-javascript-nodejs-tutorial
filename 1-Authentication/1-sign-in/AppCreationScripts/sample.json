@@ -14,9 +14,13 @@
       "Audience": "AzureADMyOrg",
       "HomePage": "http://localhost:4000",
       "ReplyUrls": "http://localhost:4000/redirect",
+      "Certificate": "Auto",
       "PasswordCredentials": "Auto",
       "Sdk": "MsalNode",
-      "SampleSubPath": "1-Authentication\\1-sign-in\\App" 
+      "SampleSubPath": "1-Authentication\\1-sign-in\\App",
+      "OptionalClaims": {
+        "AccessTokenClaims": ["acct"]
+      }
     }
   ],
   "CodeConfiguration": [
