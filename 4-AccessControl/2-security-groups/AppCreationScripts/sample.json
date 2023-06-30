@@ -16,6 +16,7 @@
             "ReplyUrls": "http://localhost:4000/redirect",
             "GroupMembershipClaims": "SecurityGroup",
             "PasswordCredentials": "Auto",
+            "Certificate": "Auto",
             "Sdk": "MsalNode",
             "SampleSubPath": "4-AccessControl\\2-security-groups\\App",
             "RequiredResourcesAccess": [
@@ -37,6 +38,9 @@
                     "Description": "User Security Group"
                 }
             ],
+            "OptionalClaims": {
+                "AccessTokenClaims": ["acct"]
+            },
             "ManualSteps": [
                 {
                     "Comment": "To support overage scenario, remember to provide admin consent for GroupMember.Read.All permission in the portal."

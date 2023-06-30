@@ -170,10 +170,6 @@ Function ConfigureApplications
 
    # Create the client AAD application
    Write-Host "Creating the AAD application (msal-node-webapp)"
-   # Get a 6 months application key for the client Application
-   $fromDate = [DateTime]::Now;
-   $key = CreateAppKey -fromDate $fromDate -durationInMonths 6
-   
    # create the application 
    $clientAadApplication = New-MgApplication -DisplayName "msal-node-webapp" `
                                                       -Web `
@@ -184,15 +180,43 @@ Function ConfigureApplications
                                                        -SignInAudience AzureADMyOrg `
                                                       #end of command
 
-    #add a secret to the application
-    $pwdCredential = Add-MgApplicationPassword -ApplicationId $clientAadApplication.Id -PasswordCredential $key
-    $clientAppKey = $pwdCredential.SecretText
-
     $currentAppId = $clientAadApplication.AppId
     $currentAppObjectId = $clientAadApplication.Id
 
     $tenantName = (Get-MgApplication -ApplicationId $currentAppObjectId).PublisherDomain
     #Update-MgApplication -ApplicationId $currentAppObjectId -IdentifierUris @("https://$tenantName/msal-node-webapp")
+    # Generate a certificate
+
+    Write-Host "Creating the client application (msal-node-webapp)"
+
+    $certificateName = 'msal-node-webapp'
+
+    $certificate=New-SelfSignedCertificate -Subject $certificateName `
+                                            -CertStoreLocation "Cert:\CurrentUser\My" `
+                                            -KeyExportPolicy Exportable `
+                                            -KeySpec Signature
+
+    $thumbprint = $certificate.Thumbprint
+   
+    $unsecureCertificatePassword = Read-Host -Prompt "Enter password for your certificate (Please remember the password, you will need it when uploading to Key Vault): " 
+    $certificatePassword = ConvertTo-SecureString $unsecureCertificatePassword -AsPlainText -Force
+
+    Write-Host "Exporting certificate as a PFX file"
+    Export-PfxCertificate -Cert "Cert:\Currentuser\My\$thumbprint" -FilePath "$pwd\$certificateName.pfx" -ChainOption EndEntityCertOnly -NoProperties -Password $certificatePassword
+    Write-Host "PFX written to:"
+    Write-Host "$pwd\$certificateName.pfx"
+
+    # Add a Azure Key Credentials from the certificate for the application
+    $clientKeyCredentials = Update-MgApplication -ApplicationId $currentAppObjectId `
+        -KeyCredentials @(@{Type = "AsymmetricX509Cert"; Usage = "Verify"; Key= $certificate.RawData; StartDateTime = $certificate.NotBefore; EndDateTime = $certificate.NotAfter;})    
+
+
+    openssl pkcs12 -in "$pwd\$certificateName.pfx" -nocerts -out "$pwd\$certificateName.key" -nodes -password pass:$unsecureCertificatePassword
+    (Get-Content $pwd\$certificateName.key) | Select-Object -Skip 6 | Set-Content $pwd\$certificateName.key
+    
+    openssl pkcs12 -in "$pwd\$certificateName.pfx" -nokeys -out "$pwd\$certificateName.cer" -password pass:$unsecureCertificatePassword
+    (Get-Content $pwd\$certificateName.cer) | Select-Object -Skip 6 | Set-Content $pwd\$certificateName.cer
+
     
     # create the service principal of the newly created application     
     $clientServicePrincipal = New-MgServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
