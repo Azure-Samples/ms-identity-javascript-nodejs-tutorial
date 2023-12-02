@@ -7,7 +7,7 @@ This is an open source project. [Suggestions](https://github.com/Azure-Samples/m
 ## Features
 
 * Simple API for authN/authZ with the [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview)
-* Handle role-based access with Azure AD [App Roles](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps) and [Security Groups](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-groups-create-azure-portal)
+* Handle role-based access with Microsoft Entra ID [App Roles](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps) and [Security Groups](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-groups-create-azure-portal)
 * Token persistence via sessions.
 
 ## Prerequisites
@@ -115,7 +115,7 @@ You can access the current authentication context via `req.authContext` variable
 
 #### Authentication
 
-Add [login()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/AuthContext.html#login) and [logout()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/AuthContext.html#logout) middleware to routes that you want to trigger a login/logout with Azure AD:
+Add [login()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/AuthContext.html#login) and [logout()](https://azure-samples.github.io/ms-identity-javascript-nodejs-tutorial/classes/AuthContext.html#logout) middleware to routes that you want to trigger a login/logout with Microsoft Entra ID:
 
 ```javascript
 app.get(
