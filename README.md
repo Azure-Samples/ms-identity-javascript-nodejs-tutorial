@@ -10,7 +10,7 @@ products:
 - azure-app-service
 - azure-key-vault
 - azure-resource-manager
-- azure-active-directory
+- microsoft-entra-id
 - azure-active-directory-b2c
 - microsoft-identity-platform
 description: "Tutorial: Enable your Node.js & Express web app to sign-in users and call APIs with the Microsoft identity platform"
@@ -25,14 +25,14 @@ urlFragment: "ms-identity-javascript-nodejs-tutorial"
 ![npm](https://img.shields.io/npm/v/@azure/msal-node?label=msal-node)
 ![GitHub](https://img.shields.io/github/license/Azure-Samples/ms-identity-javascript-nodejs-tutorial)
 
-The [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview), along with [Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Azure AD) and [Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/overview) (Azure AD B2C) are central to the **Azure** cloud ecosystem. This tutorial aims to take you through the fundamentals of modern authentication with Node.js, using the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js) (MSAL Node).
+The [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview), along with [Microsoft Entra ID](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Microsoft Entra ID) and [Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/overview) (Azure Active Directory B2C) are central to the **Azure** cloud ecosystem. This tutorial aims to take you through the fundamentals of modern authentication with Node.js, using the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js) (MSAL Node).
 
 This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) class in order to streamline routine authentication tasks such as login, logout, token acquisition. You can find the wrapper here: [msal-node-wrapper](./Shared/msal-node-wrapper). Fork it and customize as you need. Suggestions and contributions are welcome!
 
 > :warning: [msal-node-wrapper](./Shared/msal-node-wrapper) is for demo purposes only and is not recommended for production applications. If you're looking for using MSAL Node directly in your web app, please refer to:
 >
-> - [Express.js web app using MSAL Node to authenticate users with Azure AD and call Microsoft Graph](https://github.com/Azure-Samples/ms-identity-node)
-> - [A React SPA on an Express.js web app using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Azure AD and call Microsoft Graph](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/tree/main/5-AdvancedScenarios/1-call-graph-bff)
+> - [Express.js web app using MSAL Node to authenticate users with Microsoft Entra ID and call Microsoft Graph](https://github.com/Azure-Samples/ms-identity-node)
+> - [A React SPA on an Express.js web app using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Microsoft Entra ID and call Microsoft Graph](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/tree/main/5-AdvancedScenarios/1-call-graph-bff)
 
 We recommend following the chapters in successive order. However, the code samples are self-contained, so feel free to pick samples by topics that you may need at the moment.
 
@@ -53,7 +53,7 @@ Please refer to each chapter's README for sample-specific prerequisites.
 - [jwt.ms](https://jwt.ms) for inspecting your tokens
 - [Fiddler](https://www.telerik.com/fiddler) for monitoring your network activity and troubleshooting
 - Check the [MSAL Node FAQ](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/faq.md) for your questions first
-- Follow the [Azure AD Blog](https://techcommunity.microsoft.com/t5/azure-active-directory-identity/bg-p/Identity) to stay up-to-date with the latest developments
+- Follow the [Microsoft Entra ID Blog](https://techcommunity.microsoft.com/t5/azure-active-directory-identity/bg-p/Identity) to stay up-to-date with the latest developments
 
 Please refer to each chapter's README for sample-specific recommendations.
 
@@ -63,14 +63,14 @@ Please refer to each chapter's README for sample-specific recommendations.
 
 |               |               |
 |---------------|---------------|
-| <img src="./1-Authentication/1-sign-in/ReadmeFiles/topology.png" width="200"> | [**Sign-in with Azure AD**](./1-Authentication/1-sign-in/README.md) </br> Sign-in your users with  **Azure AD** and learn to work with **ID Tokens**. |
-| <img src="./1-Authentication/2-sign-in-b2c/ReadmeFiles/topology.png" width="200"> | [**Sign-in with Azure AD B2C**](./1-Authentication/2-sign-in-b2c/README.md) </br> Sign-in your customers with **Azure AD B2C**. Learn to integrate with **external social identity providers**. Learn how to use **user-flows** and **custom policies**. |
+| <img src="./1-Authentication/1-sign-in/ReadmeFiles/topology.png" width="200"> | [**Sign-in with Microsoft Entra ID**](./1-Authentication/1-sign-in/README.md) </br> Sign-in your users with  **Microsoft Entra ID** and learn to work with **ID Tokens**. |
+| <img src="./1-Authentication/2-sign-in-b2c/ReadmeFiles/topology.png" width="200"> | [**Sign-in with Azure Active Directory B2C**](./1-Authentication/2-sign-in-b2c/README.md) </br> Sign-in your customers with **Azure Active Directory B2C**. Learn to integrate with **external social identity providers**. Learn how to use **user-flows** and **custom policies**. |
 
 ### Chapter 2: Sign-in a user and get an Access Token for Microsoft Graph
 
 |                |               |
 |----------------|---------------|
-| <img src="./2-Authorization/1-call-graph/ReadmeFiles/topology.png" width="200"> | [**Get an Access Token from Azure AD and call Microsoft Graph**](./2-Authorization/1-call-graph/README.md) </br> Authenticate your users and acquire an **Access Token** for Microsoft Graph and then call the **Microsoft Graph API**. |
+| <img src="./2-Authorization/1-call-graph/ReadmeFiles/topology.png" width="200"> | [**Get an Access Token from Microsoft Entra ID and call Microsoft Graph**](./2-Authorization/1-call-graph/README.md) </br> Authenticate your users and acquire an **Access Token** for Microsoft Graph and then call the **Microsoft Graph API**. |
 
 ### Chapter 3: Deploy your app to Azure
 
@@ -103,9 +103,9 @@ Learn more about the **Microsoft identity platform**:
 - [Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/)
 - [Overview of Microsoft Authentication Library (MSAL)](https://docs.microsoft.com/azure/active-directory/develop/msal-overview)
 - [Application types for Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-app-types)
-- [Understanding Azure AD application consent experiences](https://docs.microsoft.com/azure/active-directory/develop/application-consent-experience)
+- [Understanding Microsoft Entra application consent experiences](https://docs.microsoft.com/azure/active-directory/develop/application-consent-experience)
 - [Understand user and admin consent](https://docs.microsoft.com/azure/active-directory/develop/howto-convert-app-to-be-multi-tenant#understand-user-and-admin-consent)
-- [Application and service principal objects in Azure Active Directory](https://docs.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals)
+- [Application and service principal objects in Microsoft Entra ID](https://docs.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals)
 - [Microsoft identity platform best practices and recommendations](https://docs.microsoft.com/azure/active-directory/develop/identity-platform-integration-checklist)
 
 See more code samples:

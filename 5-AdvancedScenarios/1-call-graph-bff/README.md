@@ -1,11 +1,11 @@
 ---
 page_type: sample
-name: A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Azure AD and calling Microsoft Graph
-description: A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Azure AD and calling Microsoft Graph on the user's behalf
+name: A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Microsoft Entra ID and calling Microsoft Graph
+description: A React SPA with a Node.Js (Express) back-end using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Microsoft Entra ID and calling Microsoft Graph on the user's behalf
 languages:
  - javascript
 products:
- - azure-active-directory
+ - microsoft-entra-id
  - msal-js
  - msal-node
  - ms-graph
@@ -13,13 +13,13 @@ urlFragment: ms-identity-javascript-nodejs-tutorial
 extensions:
 - services: ms-identity
 - platform: JavaScript
-- endpoint: AAD v2.0
+- endpoint: Microsoft Entra ID v2.0
 - level: 300
 - client: React SPA with Express backend
 - service: MS Graph
 ---
 
-# A React SPA with a Node.js (Express) web app using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Azure AD and call Microsoft Graph
+# A React SPA with a Node.js (Express) web app using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Microsoft Entra ID and call Microsoft Graph
 
 * [Overview](#overview)
 * [Scenario](#scenario)
@@ -42,19 +42,19 @@ This sample demonstrates a React single-page application (SPA) with an Node.js E
 ## Scenario
 
 1. The client-side React SPA initiates token acquisition by calling the login endpoint of the Express web app.
-1. Express web app uses **MSAL Node** to sign-in a user and obtain a JWT [ID Token](https://aka.ms/id-tokens) and an [Access Token](https://aka.ms/access-tokens) from **Azure AD**.
-1. Express web app uses the **access token** as a *bearer* token to authorize the user to call the Microsoft Graph API protected by **Azure AD**.
+1. Express web app uses **MSAL Node** to sign-in a user and obtain a JWT [ID Token](https://aka.ms/id-tokens) and an [Access Token](https://aka.ms/access-tokens) from **Microsoft Entra ID**.
+1. Express web app uses the **access token** as a *bearer* token to authorize the user to call the Microsoft Graph API protected by **Microsoft Entra ID**.
 1. Express web app returns the Microsoft Graph `/me` endpoint response back to the React SPA.
 
 ```mermaid
 sequenceDiagram
     participant Frontend
     participant Backend
-    participant Azure AD
+    participant Microsoft Entra ID
     participant Graph
     Frontend-)+Backend: /login
-    Backend-)+Azure AD: login.microsoftonline.com
-    Azure AD--)-Backend: token response
+    Backend-)+Microsoft Entra ID: login.microsoftonline.com
+    Microsoft Entra ID--)-Backend: token response
     Backend--)-Frontend: /login response (auth state)
     Frontend-)+Backend: /profile
     Backend-)+Graph: graph.microsoft.com/v1.0/me
@@ -79,8 +79,8 @@ sequenceDiagram
 * [Visual Studio Code](https://code.visualstudio.com/download) is recommended for running and editing this sample.
 * [VS Code Azure Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack) extension is recommended for interacting with Azure through VS Code Interface.
 * A modern web browser.
-* An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://docs.microsoft.com/azure/active-directory/develop/test-setup-environment#get-a-test-tenant)
-* A user account in your **Azure AD** tenant.
+* An **Microsoft Entra ID** tenant. For more information, see: [How to get a Microsoft Entra tenant](https://docs.microsoft.com/azure/active-directory/develop/test-setup-environment#get-a-test-tenant)
+* A user account in your **Microsoft Entra ID** tenant.
 
 ## Setup the sample
 
@@ -109,7 +109,7 @@ There is one project in this sample. To register it, you can:
 
 * follow the steps below for manually register your apps
 * or use PowerShell scripts that:
-  * **automatically** creates the Azure AD applications and related objects (passwords, permissions, dependencies) for you.
+  * **automatically** creates the Microsoft Entra applications and related objects (passwords, permissions, dependencies) for you.
   * modify the projects' configuration files.
 
 <details>
@@ -118,7 +118,7 @@ There is one project in this sample. To register it, you can:
 > :warning: If you have never used **Microsoft Graph PowerShell** before, we recommend you go through the [App Creation Scripts Guide](./AppCreationScripts/AppCreationScripts.md) once to ensure that your environment is prepared correctly for this step.
   
 1. Ensure that you have PowerShell 7 or later.
-1. Run the script to create your Azure AD application and configure the code of the sample application accordingly.
+1. Run the script to create your Microsoft Entra application and configure the code of the sample application accordingly.
 1. For interactive process -in PowerShell, run:
 
     ```PowerShell
@@ -128,20 +128,20 @@ There is one project in this sample. To register it, you can:
 
 Other ways of running the scripts are described in [App Creation Scripts guide](./AppCreationScripts/AppCreationScripts.md). The scripts also provide a guide to automated application registration, configuration and removal which can help in your CI/CD scenarios.
 
-> :information_source: This sample can make use of client certificates. You can use **AppCreationScripts** to register an Azure AD application with certificates. See: [How to use certificates instead of client secrets](./README-use-certificate.md)
+> :information_source: This sample can make use of client certificates. You can use **AppCreationScripts** to register a Microsoft Entra application with certificates. See: [How to use certificates instead of client secrets](./README-use-certificate.md)
 
 </details>
 
-#### Choose the Azure AD tenant where you want to create your applications
+#### Choose the Microsoft Entra tenant where you want to create your applications
 
 To manually register the apps, as a first step you'll need to:
 
-1. Sign in to the [Azure portal](https://portal.azure.com).
-1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Azure AD tenant.
+1. Sign in to the [Microsoft Entra admin center](https://entra.microsoft.com).
+1. If your account is present in more than one Microsoft Entra tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory** to change your portal session to the desired Microsoft Entra tenant.
 
 #### Register the service app (msal-node-webapp)
 
-1. Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure Active Directory** service.
+1. Navigate to the [Microsoft Entra admin center](https://entra.microsoft.com) and select the **Microsoft Entra ID** service.
 1. Select the **App Registrations** blade on the left, then select **New registration**.
 1. In the **Register an application page** that appears, enter your application's registration information:
     1. In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `msal-node-webapp`.
@@ -158,7 +158,7 @@ To manually register the apps, as a first step you'll need to:
     1. Type a key description (for instance `app secret`).
     1. Select one of the available key durations (**6 months**, **12 months** or **Custom**) as per your security posture.
     1. The generated key value will be displayed when you select the **Add** button. Copy and save the generated value for use in later steps.
-    1. You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
+    1. You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Microsoft Entra admin center before navigating to any other screen or blade.
     > :warning: For enhanced security, consider using **certificates** instead of client secrets. See: [How to use certificates instead of secrets](./README-use-certificate.md).
 1. Since this app signs-in users, we will now proceed to select **delegated permissions**, which is is required by apps signing-in users.
     1. In the app's registration screen, select the **API permissions** blade in the left to open the page where we add access to the APIs that your application needs:
@@ -184,9 +184,9 @@ Open the project in your IDE (like Visual Studio or Visual Studio Code) to confi
 > In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `APP\authConfig.js` file.
-1. Find the key `Enter_the_Application_Id_Here` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Azure portal.
-1. Find the key `Enter_the_Tenant_Id_Here` and replace the existing value with your Azure AD tenant/directory ID.
-1. Find the key `Enter_the_Client_Secret_Here` and replace the existing value with the generated secret that you saved during the creation of `msal-node-webapp` copied from the Azure portal.
+1. Find the key `Enter_the_Application_Id_Here` and replace the existing value with the application ID (clientId) of `msal-node-webapp` app copied from the Microsoft Entra admin center.
+1. Find the key `Enter_the_Tenant_Id_Here` and replace the existing value with your Microsoft Entra tenant/directory ID.
+1. Find the key `Enter_the_Client_Secret_Here` and replace the existing value with the generated secret that you saved during the creation of `msal-node-webapp` copied from the Microsoft Entra admin center.
 
 1. Open the `App/app.js` file.
 1. Find the string `ENTER_YOUR_SECRET_HERE` and replace it with a secret that will be used when encrypting your app's session using the [express-session](https://www.npmjs.com/package/express-session) package.
@@ -221,7 +221,7 @@ Were we successful in addressing your learning objective? Consider taking a mome
 Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
 Make sure that your questions or comments are tagged with [`msal-node` `node` `ms-identity` `adal` `msal-js` `msal`].
 
-To provide feedback on or suggest features for Azure Active Directory, visit [User Voice page](https://feedback.azure.com/d365community/forum/79b1327d-d925-ec11-b6e6-000d3a4f06a4).
+To provide feedback on or suggest features for Microsoft Entra ID, visit [User Voice page](https://feedback.azure.com/d365community/forum/79b1327d-d925-ec11-b6e6-000d3a4f06a4).
 </details>
 
 ## About the code
@@ -277,7 +277,7 @@ login = (postLoginRedirectUri) => {
 }
 ```
 
-The controller in [authController.js](./App/controllers/authController.js) processes the request and initiates a token request against Azure AD, using the [AuthProvider](./App/auth/AuthProvider.js) class which wraps MSAL Node for simplicity:
+The controller in [authController.js](./App/controllers/authController.js) processes the request and initiates a token request against Microsoft Entra ID, using the [AuthProvider](./App/auth/AuthProvider.js) class which wraps MSAL Node for simplicity:
 
 ```javascript
 exports.loginUser = async (req, res, next) => {
@@ -435,15 +435,15 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Learn More
 
-* [Microsoft identity platform (Azure Active Directory for developers)](https://docs.microsoft.com/azure/active-directory/develop/)
-* [Azure AD code samples](https://docs.microsoft.com/azure/active-directory/develop/sample-v2-code)
+* [Microsoft identity platform (Microsoft Entra ID for developers)](https://docs.microsoft.com/azure/active-directory/develop/)
+* [Microsoft Entra ID code samples](https://docs.microsoft.com/azure/active-directory/develop/sample-v2-code)
 * [Overview of Microsoft Authentication Library (MSAL)](https://docs.microsoft.com/azure/active-directory/develop/msal-overview)
 * [Register an application with the Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app)
 * [Configure a client application to access web APIs](https://docs.microsoft.com/azure/active-directory/develop/quickstart-configure-app-access-web-apis)
-* [Understanding Azure AD application consent experiences](https://docs.microsoft.com/azure/active-directory/develop/application-consent-experience)
+* [Understanding Microsoft Entra application consent experiences](https://docs.microsoft.com/azure/active-directory/develop/application-consent-experience)
 * [Understand user and admin consent](https://docs.microsoft.com/azure/active-directory/develop/howto-convert-app-to-be-multi-tenant#understand-user-and-admin-consent)
-* [Application and service principal objects in Azure Active Directory](https://docs.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals)
-* [Authentication Scenarios for Azure AD](https://docs.microsoft.com/azure/active-directory/develop/authentication-flows-app-scenarios)
+* [Application and service principal objects in Microsoft Entra ID](https://docs.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals)
+* [Authentication Scenarios for Microsoft Entra ID](https://docs.microsoft.com/azure/active-directory/develop/authentication-flows-app-scenarios)
 * [Building Zero Trust ready apps](https://aka.ms/ztdevsession)
 * [National Clouds](https://docs.microsoft.com/azure/active-directory/develop/authentication-national-cloud#app-registration-endpoints)
 * [Initialize client applications using MSAL.js](https://docs.microsoft.com/azure/active-directory/develop/msal-js-initializing-client-applications)
@@ -452,4 +452,4 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 * [Logging in MSAL.js applications](https://docs.microsoft.com/azure/active-directory/develop/msal-logging?tabs=javascript)
 * [Pass custom state in authentication requests using MSAL.js](https://docs.microsoft.com/azure/active-directory/develop/msal-js-pass-custom-state-authentication-request)
 * [Prompt behavior in MSAL.js interactive requests](https://docs.microsoft.com/azure/active-directory/develop/msal-js-prompt-behavior)
-* [Use MSAL.js to work with Azure AD B2C](https://docs.microsoft.com/azure/active-directory/develop/msal-b2c-overview)
+* [Use MSAL.js to work with Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory/develop/msal-b2c-overview)

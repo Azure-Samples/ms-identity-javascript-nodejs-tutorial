@@ -13,13 +13,13 @@
 
 ## Overview
 
-This sample demonstrates how to deploy a Node.js & Express web application to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). The application used in this sample is a slightly modified version of the web app from [**chapter 2-1**](../2-Authorization/1-call-graph/README.md). The steps here apply similarly to Azure AD and Azure AD B2C apps.
+This sample demonstrates how to deploy a Node.js & Express web application to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). The application used in this sample is a slightly modified version of the web app from [**chapter 2-1**](../2-Authorization/1-call-graph/README.md). The steps here apply similarly to Microsoft Entra ID and Azure Active Directory B2C apps.
 
 One of the principles of security is to place credentials like secrets and certificates out of your code and use it in a manner that allows them to be replaced or rotated without incurring a downtime. As such, this sample also uses the [Azure Key Vault](https://docs.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates) to store client secrets safely on the cloud.
 
 ## Scenario
 
-1. The client application uses the **MSAL Node** (via [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express)) to sign-in a user and obtain a JWT **Access Token** from **Azure AD**.
+1. The client application uses the **MSAL Node** (via [microsoft-identity-express](https://github.com/Azure-Samples/microsoft-identity-express)) to sign-in a user and obtain a JWT **Access Token** from **Microsoft Entra ID**.
 1. The **Access Token** is used as a *bearer* token to authorize the user to access the **resource** (MS Graph).
 1. The **resource server** responds with the resource that the user has access to.
 
@@ -28,8 +28,8 @@ One of the principles of security is to place credentials like secrets and certi
 ## Prerequisites
 
 - [VS Code Azure Tools Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack) extension is recommended for interacting with **Azure** through VS Code interface.
-- An **Azure AD** tenant. For more information, see: [How to get an Azure AD tenant](https://azure.microsoft.com/documentation/articles/active-directory-howto-tenant/)
-- A user account in your **Azure AD** tenant.
+- An **Microsoft Entra ID** tenant. For more information, see: [How to get a Microsoft Entra tenant](https://azure.microsoft.com/documentation/articles/active-directory-howto-tenant/)
+- A user account in your **Microsoft Entra ID** tenant.
 - An **Azure subscription**. This sample uses **Azure App Service** and **Azure Key Vault**.
 
 ## Setup
@@ -66,7 +66,7 @@ Use the same app registration credentials that you've obtained during [**chapter
 There are basically **2** stages that you will have to go through in order to deploy your projects and enable authentication:
 
 1. Upload your project files to **Azure** services and obtain published website URIs
-1. Update **Azure AD** **App Registration** with URIs you have just obtained
+1. Update **Microsoft Entra ID** **App Registration** with URIs you have just obtained
 
 There are various ways to upload your files to **Azure App Service**. Here we provide steps for uploading via **VS Code Azure Tools Extension**.
 
@@ -92,9 +92,9 @@ There are various ways to upload your files to **Azure App Service**. Here we pr
 
 ![api_step3](./ReadmeFiles/step3.png)
 
-#### Step 2: Update Azure AD App Registration
+#### Step 2: Update Microsoft Entra app Registration
 
-Navigate to the [Azure portal](https://portal.azure.com) and select the **Azure AD** service.
+Navigate to the [Microsoft Entra admin center](https://entra.microsoft.com) and select the **Microsoft Entra ID** service.
 
 1. Select the **App Registrations** blade on the left, then find and select the web app that you have registered in the previous tutorial (`example-express-webapp1`).
 1. Navigate to the **Authentication** blade. There, in **Redirect URI** section, enter the published URL website, for instance: `https://example-express-webapp1.azurewebsites.net/redirect`.
@@ -106,7 +106,7 @@ To achieve this we'll place our application's credentials in [Azure Key Vault](h
 
 #### Set up your Managed Identity
 
-1. Navigate to [Azure portal](https://portal.azure.com) and select the **Azure App Service**.
+1. Navigate to [Microsoft Entra admin center](https://entra.microsoft.com) and select the **Azure App Service**.
 1. Find and select the App Service you've created previously.
 1. On App Service portal, select **Identity**.
 1. Within the **System assigned** tab, switch **Status** to **On**. Click **Save**.
@@ -124,7 +124,7 @@ Before starting here, make sure:
 
 ##### Upload your secret to KeyVault
 
-1. Navigate to your new key vault in the Azure portal.
+1. Navigate to your new key vault in the Microsoft Entra admin center.
 1. On the Key Vault settings pages, select **Secrets**.
 1. Click on **Generate/Import**.
 1. On the **Create a secret** screen choose the following values:
@@ -146,7 +146,7 @@ Before starting here, make sure:
 
 Finally, you need to add a few environment variables to the App Service where you deployed your web app.
 
-1. In the [Azure portal](https://portal.azure.com) , search for and select **App Service**, and then select your app.
+1. In the [Microsoft Entra admin center](https://entra.microsoft.com) , search for and select **App Service**, and then select your app.
 1. Select **Configuration** blade on the left, then select **New Application Settings**.
 1. Add the following variables (name-value):
     1. **KEY_VAULT_URI**: the name of the key vault you've created, e.g. `example-key-vault`
@@ -184,7 +184,7 @@ In [app.js](./App/app.js), we instantiate an **MsalWebAppAuthClient** object asy
 - [Azure Key Vault](https://docs.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates)
 - [Azure Managed Identity](https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview)
 
-For more information about how OAuth 2.0 protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](https://docs.microsoft.com/azure/active-directory/develop/authentication-flows-app-scenarios).
+For more information about how OAuth 2.0 protocols work in this scenario and other scenarios, see [Authentication Scenarios for Microsoft Entra ID](https://docs.microsoft.com/azure/active-directory/develop/authentication-flows-app-scenarios).
 
 ## Community Help and Support
 
