@@ -32,7 +32,7 @@ export class FetchManager {
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static callApiEndpointWithToken = async (endpoint: string, accessToken: string): Promise<any> => {
-        if (StringUtils.isEmpty(accessToken)) {
+        if (StringUtils.isEmptyObj(accessToken)) {
             throw new Error(ErrorMessages.TOKEN_NOT_FOUND);
         }
 
