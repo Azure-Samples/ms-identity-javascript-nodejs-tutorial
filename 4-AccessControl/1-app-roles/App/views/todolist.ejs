@@ -30,7 +30,8 @@
                         <tr>
                             <td><%= todos[i]['name'] %></td>
                             <td>
-                                <form action='/todolist?_method=DELETE' method='POST'>
+                                <form action='/todolist' method='POST'>
+                                    <input type="hidden" name="_method" value="DELETE"/>
                                     <input type='hidden' name='id' value='<%= todos[i]["id"] %>'>
                                     <button class="btn btn-primary" type='submit'>Delete</button>
                                 </form>

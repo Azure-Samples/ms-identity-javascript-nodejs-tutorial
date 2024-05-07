@@ -22,22 +22,23 @@ exports.getTodos = (req, res) => {
 }
 
 exports.postTodo = (req, res) => {
-    const id = nanoid();
-    const name = req.body.name;
     const owner = req.authContext.getAccount().idTokenClaims['oid'];
-
-    const newTodo = new Todo(id, name, owner)
-
-    Todo.postTodo(newTodo);
+    req.body._method === "DELETE" ? deleteTodo(req, owner) : addTodo(req, owner);
     
     res.redirect('/todolist');
 }
 
-exports.deleteTodo = (req, res) => {
+const addTodo = (req, owner) => {
+    const id = nanoid();
+    const name = req.body.name;
+
+    const newTodo = new Todo(id, name, owner)
+
+    Todo.postTodo(newTodo);
+};
+
+const deleteTodo = (req, owner) => {
     const id = req.body.id;
-    const owner = req.authContext.getAccount().idTokenClaims['oid'];
 
     Todo.deleteTodo(id, owner);
-
-    res.redirect('/todolist');
-}
+};

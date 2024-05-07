@@ -5,8 +5,7 @@ const todolistController = require('../controllers/todolistController');
 const router = express.Router();
 
 // user routes
-router.get('/', todolistController.getTodos);
+router.get('', todolistController.getTodos);
 router.post('/', todolistController.postTodo);
-router.delete('/', todolistController.deleteTodo);
 
 module.exports = router;
