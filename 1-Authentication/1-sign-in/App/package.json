@@ -19,7 +19,7 @@
     "msal-node-wrapper": "file:../../../Common/msal-node-wrapper"
   },
   "devDependencies": {
-    "jest": "^27.0.6",
+    "jest": "^29.7.0",
     "nodemon": "^3.0.3",
     "supertest": "^6.1.4"
   }
