@@ -11,20 +11,20 @@
   "author": "derisen",
   "license": "MIT",
   "dependencies": {
-    "@azure/identity": "^3.2.3",
-    "@azure/keyvault-secrets": "^4.7.0",
-    "@microsoft/microsoft-graph-client": "^3.0.2",
-    "bootstrap": "^4.6.0",
-    "dotenv": "^8.2.0",
-    "ejs": "^3.1.8",
+    "@azure/identity": "^4.2.0",
+    "@azure/keyvault-secrets": "^4.8.0",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "bootstrap": "^5.3.3",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
-    "express-session": "^1.17.3",
+    "express-session": "^1.18.0",
     "isomorphic-fetch": "^3.0.0",
     "msal-node-wrapper": "file:./msal-node-wrapper-1.0.0-beta.tgz"
   },
   "devDependencies": {
-    "jest": "^27.0.6",
-    "nodemon": "^2.0.19",
-    "supertest": "^6.1.4"
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.0",
+    "supertest": "^7.0.0"
   }
 }
