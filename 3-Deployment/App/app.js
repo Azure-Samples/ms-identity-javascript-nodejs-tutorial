@@ -61,7 +61,7 @@ async function main() {
             ...authConfig,
             auth: {
                 ...authConfig.auth,
-                clientSecret: clientSecret.value
+                clientSecret
             }
         }
 
