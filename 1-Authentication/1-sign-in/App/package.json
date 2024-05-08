@@ -12,15 +12,15 @@
   "author": "derisen",
   "license": "MIT",
   "dependencies": {
-    "bootstrap": "^4.6.0",
-    "ejs": "^3.1.8",
+    "bootstrap": "^5.3.3",
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
-    "express-session": "^1.17.3",
+    "express-session": "^1.18.0",
     "msal-node-wrapper": "file:../../../Common/msal-node-wrapper"
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "nodemon": "^3.0.3",
-    "supertest": "^6.1.4"
+    "nodemon": "^3.1.0",
+    "supertest": "^7.0.0"
   }
 }
