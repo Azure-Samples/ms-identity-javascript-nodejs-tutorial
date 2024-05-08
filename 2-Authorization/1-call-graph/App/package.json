@@ -15,7 +15,7 @@
     "@microsoft/microsoft-graph-client": "^3.0.2",
     "bootstrap": "^4.6.0",
     "ejs": "^3.1.8",
-    "express": "^4.18.1",
+    "express": "^4.19.2",
     "express-session": "^1.17.3",
     "isomorphic-fetch": "^3.0.0",
     "msal-node-wrapper": "file:../../../Common/msal-node-wrapper"
