@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { StringUtils, UrlString } from "@azure/msal-common";
+import { UrlString } from "@azure/msal-common";
 import { Configuration } from "@azure/msal-node";
 import { ConfigurationErrorMessages, OIDC_SCOPES, DEFAULT_LOGGER_OPTIONS } from "../utils/Constants";
 import { AuthConfig, AppType, ProtectedResourceParams, ProtectedResourcesMap, WebAppAuthConfig } from "./ConfigurationTypes";
@@ -36,7 +36,7 @@ export class ConfigurationHelper {
     static validateAuthConfig(authConfig: AuthConfig, appType: AppType): void {
         switch (appType) {
             case AppType.WebApp:
-                if (StringUtils.isEmpty((<WebAppAuthConfig>authConfig).auth.redirectUri)) {
+                if (!(<WebAppAuthConfig>authConfig).auth.redirectUri) {
                     throw new Error(ConfigurationErrorMessages.NO_REDIRECT_URI);
                 }
                 break;
