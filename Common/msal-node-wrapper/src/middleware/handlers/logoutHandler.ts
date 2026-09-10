@@ -7,13 +7,14 @@ import { Request, Response, RequestHandler } from "express";
 import { WebAppAuthProvider } from "../../provider/WebAppAuthProvider";
 import { LogoutOptions } from "../MiddlewareOptions";
 import { UrlUtils } from "../../utils/UrlUtils";
+import { EMPTY_STRING } from "../../utils/Constants";
 
 function logoutHandler(
     this: WebAppAuthProvider,
     options: LogoutOptions
 ): RequestHandler {
     return async (req: Request, res: Response): Promise<void> => {
-        this.getLogger().trace("logoutHandler called");
+        this.getLogger().trace("logoutHandler called", EMPTY_STRING);
 
         const shouldLogoutFromIdp = options.idpLogout ? options.idpLogout : true;
         let logoutUri = options.postLogoutRedirectUri || "/";
@@ -29,7 +30,7 @@ function logoutHandler(
                     await tokenCache.removeAccount(cachedAccount);
                 }
             } catch (error) {
-                this.logger.error(`Error occurred while clearing cache for user: ${JSON.stringify(error)}`);
+                this.logger.error(`Error occurred while clearing cache for user: ${JSON.stringify(error)}`, EMPTY_STRING);
             }
         }
 

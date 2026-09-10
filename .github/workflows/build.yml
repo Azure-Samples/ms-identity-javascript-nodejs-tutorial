@@ -18,49 +18,49 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: [20.x, 22.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2.5.2
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: ${{ matrix.node-version }}
 
     - run: |
         cd Common/msal-node-wrapper
         npm ci
-        npm audit --production
+        npm audit --omit=dev
         npm run build --if-present
         npm run test
 
     - run: |
         cd 1-Authentication/1-sign-in/App
         npm install
-        npm audit --production
+        npm audit --omit=dev
         npm run test
 
     - run: |
         cd 1-Authentication/2-sign-in-b2c/App
         npm install
-        npm audit --production
+        npm audit --omit=dev
         npm run test
 
     - run: |
         cd 2-Authorization/1-call-graph/App
         npm install
-        npm audit --production
+        npm audit --omit=dev
         npm run test
 
     - run: |
         cd 4-AccessControl/1-app-roles/App
         npm install
-        npm audit --production
+        npm audit --omit=dev
         npm run test
 
     - run: |
         cd 4-AccessControl/2-security-groups/App
         npm install
-        npm audit --production
+        npm audit --omit=dev
         npm run test
