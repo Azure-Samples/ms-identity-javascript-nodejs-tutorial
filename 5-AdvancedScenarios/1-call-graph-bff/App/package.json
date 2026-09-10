@@ -4,22 +4,24 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "node --test",
         "start": "node app.js",
-        "preinstall": "cd ./client && npm install",
         "prestart": "cd ./client && npm run build"
+    },
+    "engines": {
+        "node": ">=20"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@azure/msal-node": "^2.7.0",
+        "@azure/msal-node": "^6.0.0",
         "@microsoft/microsoft-graph-client": "^3.0.7",
-        "axios": "^1.6.8",
-        "cookie-parser": "^1.4.6",
-        "express": "^4.19.2",
-        "express-session": "^1.18.0",
-        "helmet": "^7.1.0",
+        "axios": "^1.20.0",
+        "cookie-parser": "^1.4.7",
+        "express": "^5.2.1",
+        "express-session": "^1.19.0",
+        "helmet": "^8.3.0",
         "isomorphic-fetch": "^3.0.0",
         "lusca": "^1.7.0"
     }

@@ -8,23 +8,30 @@
     "dev": "nodemon server.js",
     "test": "jest --forceExit"
   },
+  "engines": {
+    "node": ">=20"
+  },
+  "overrides": {
+    "qs": "6.16.0",
+    "uuid": "11.1.1"
+  },
   "author": "derisen",
   "license": "MIT",
   "dependencies": {
-    "@azure/identity": "^4.2.0",
-    "@azure/keyvault-secrets": "^4.8.0",
+    "@azure/identity": "^4.13.2",
+    "@azure/keyvault-secrets": "^4.11.2",
     "@microsoft/microsoft-graph-client": "^3.0.7",
-    "bootstrap": "^5.3.3",
-    "dotenv": "^16.4.5",
-    "ejs": "^3.1.10",
-    "express": "^4.19.2",
-    "express-session": "^1.18.0",
+    "bootstrap": "^5.3.8",
+    "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
     "isomorphic-fetch": "^3.0.0",
     "msal-node-wrapper": "file:./msal-node-wrapper-1.0.0-beta.tgz"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "nodemon": "^3.1.0",
-    "supertest": "^7.0.0"
+    "jest": "^30.5.1",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.2.2"
   }
 }

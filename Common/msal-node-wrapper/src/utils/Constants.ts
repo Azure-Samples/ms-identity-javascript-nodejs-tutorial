@@ -3,7 +3,8 @@
  * Licensed under the MIT License.
  */
 
-import { LoggerOptions, LogLevel, OIDC_DEFAULT_SCOPES } from "@azure/msal-common";
+import type { LoggerOptions } from "@azure/msal-common/node";
+import { LogLevel } from "@azure/msal-node";
 
 /**
  * Basic authentication stages used to determine
@@ -24,7 +25,7 @@ export const AADAuthorityConstants = {
     CONSUMERS: "consumers",
 };
 
-export const OIDC_SCOPES = [...OIDC_DEFAULT_SCOPES, "email"];
+export const OIDC_SCOPES = ["openid", "profile", "offline_access", "email"];
 
 /**
  * Constants used in access control scenarios

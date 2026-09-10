@@ -10,10 +10,11 @@ import { InteractionRequiredError } from "../error/InteractionRequiredError";
 function errorMiddleware(this: WebAppAuthProvider): ErrorRequestHandler {
     return (err: unknown, req: Request, res: Response, next: NextFunction): Response | void => {
         if (err instanceof InteractionRequiredError) {
-            return req.authContext.login({
+            req.authContext.login({
                 postLoginRedirectUri: err.requestOptions.postLoginRedirectUri || req.originalUrl,
                 ...err.requestOptions
             })(req, res, next);
+            return;
         }
 
         next(err);
