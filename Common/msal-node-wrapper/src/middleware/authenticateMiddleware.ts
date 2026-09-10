@@ -7,7 +7,7 @@ import { Router } from "express";
 import { WebAppAuthProvider } from "../provider/WebAppAuthProvider";
 import { AuthenticateMiddlewareOptions } from "./MiddlewareOptions";
 import { UrlUtils } from "../utils/UrlUtils";
-import { ErrorMessages } from "../utils/Constants";
+import { EMPTY_STRING, ErrorMessages } from "../utils/Constants";
 import { AuthContext } from "./context/AuthContext";
 import redirectHandler from "./handlers/redirectHandler";
 import acquireTokenHandler from "./handlers/acquireTokenHandler";
@@ -74,11 +74,11 @@ function authenticateMiddleware(
             resourceParams.routes.forEach((route) => {
                 appRouter.use(route, (req, res, next) => {
                     if (req.authContext.getCachedTokenForResource(resourceName)) {
-                        this.getLogger().verbose("Cached token found for resource endpoint");
+                        this.getLogger().verbose("Cached token found for resource endpoint", EMPTY_STRING);
                         return next();
                     }
 
-                    this.getLogger().verbose("Acquiring token for resource: ", resourceName);
+                    this.getLogger().verbose(`Acquiring token for resource: ${resourceName}`, EMPTY_STRING);
                     return acquireTokenHandler.call(this, { scopes: resourceParams.scopes }, { resourceName })(req, res, next);
                 });
             });

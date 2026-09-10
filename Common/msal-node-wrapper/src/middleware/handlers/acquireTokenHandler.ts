@@ -8,6 +8,7 @@ import { AuthenticationResult, InteractionRequiredAuthError, SilentFlowRequest }
 import { WebAppAuthProvider } from "../../provider/WebAppAuthProvider";
 import { TokenRequestOptions, TokenRequestMiddlewareOptions } from "../MiddlewareOptions";
 import { InteractionRequiredError } from "../../error/InteractionRequiredError";
+import { EMPTY_STRING } from "../../utils/Constants";
 
 function acquireTokenHandler(
     this: WebAppAuthProvider, 
@@ -15,7 +16,7 @@ function acquireTokenHandler(
     useAsMiddlewareOptions?: TokenRequestMiddlewareOptions
 ): RequestHandler {
     return async (req: Request, _res: Response, next: NextFunction): Promise<AuthenticationResult | void> => {
-        this.getLogger().trace("acquireTokenHandler called");
+        this.getLogger().trace("acquireTokenHandler called", options.correlationId || EMPTY_STRING);
 
         try {
             const account = options.account || req.session.account;
@@ -33,7 +34,9 @@ function acquireTokenHandler(
                 account: account,
                 scopes: options.scopes,
                 claims: options.claims,
-                tokenQueryParameters: options.tokenQueryParameters,
+                correlationId: options.correlationId,
+                extraParameters: options.tokenBodyParameters,
+                extraQueryParameters: options.tokenQueryParameters,
             };
 
             const msalInstance = this.getMsalClient();

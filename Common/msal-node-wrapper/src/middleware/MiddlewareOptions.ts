@@ -12,9 +12,11 @@ export type AuthenticateMiddlewareOptions = {
     acquireTokenForResources?: ProtectedResourcesMap
 };
 
-export type LoginOptions = Pick<AuthorizationCodeRequest, "scopes" | "claims" | "tokenBodyParameters" | "tokenQueryParameters"> & Pick<AuthorizationUrlRequest, "scopes" | "account" | "loginHint" | "domainHint" | "state" | "extraQueryParameters" | "extraScopesToConsent" | "prompt" | "sid"> & {
+export type LoginOptions = Pick<AuthorizationCodeRequest, "scopes" | "claims" | "correlationId"> & Pick<AuthorizationUrlRequest, "account" | "loginHint" | "domainHint" | "state" | "extraQueryParameters" | "extraScopesToConsent" | "prompt" | "sid"> & {
     postLoginRedirectUri?: string;
     postFailureRedirectUri?: string;
+    tokenBodyParameters?: Record<string, string>;
+    tokenQueryParameters?: Record<string, string>;
 };
 
 export type LogoutOptions = Pick<CommonEndSessionRequest, "account" | "state" | "postLogoutRedirectUri" | "logoutHint" | "extraQueryParameters"> & {

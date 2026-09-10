@@ -8,11 +8,11 @@ import { StringUtils } from "@azure/msal-common";
 import { AuthorizationCodePayload, AuthorizationCodeRequest } from "@azure/msal-node";
 import { WebAppAuthProvider } from "../../provider/WebAppAuthProvider";
 import { AppState } from "../MiddlewareOptions";
-import { ErrorMessages } from "../../utils/Constants";
+import { EMPTY_STRING, ErrorMessages } from "../../utils/Constants";
 
 function redirectHandler(this: WebAppAuthProvider): RequestHandler {
     return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        this.getLogger().trace("redirectHandler called");
+        this.getLogger().trace("redirectHandler called", EMPTY_STRING);
 
         if (!req.body || !req.body.code) {
             return next(new Error(ErrorMessages.AUTH_CODE_RESPONSE_NOT_FOUND));

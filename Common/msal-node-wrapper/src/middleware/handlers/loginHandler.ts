@@ -4,8 +4,7 @@
  */
 
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import { ResponseMode } from "@azure/msal-common";
-import { AuthorizationCodeRequest, AuthorizationUrlRequest } from "@azure/msal-node";
+import { AuthorizationCodeRequest, AuthorizationUrlRequest, ResponseMode } from "@azure/msal-node";
 import { WebAppAuthProvider } from "../../provider/WebAppAuthProvider";
 import { LoginOptions, AppState } from "../MiddlewareOptions";
 import { UrlUtils } from "../../utils/UrlUtils";
@@ -16,7 +15,7 @@ function loginHandler(
     options: LoginOptions
 ): RequestHandler {
     return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        this.getLogger().trace("loginHandler called");
+        this.getLogger().trace("loginHandler called", options.correlationId || EMPTY_STRING);
 
         const state: AppState = {
             redirectTo: options.postLoginRedirectUri || "/",
@@ -32,6 +31,7 @@ function loginHandler(
             ),
             responseMode: ResponseMode.FORM_POST,
             scopes: options.scopes || [],
+            correlationId: options.correlationId,
             prompt: options.prompt || undefined,
             claims: options.claims || undefined,
             account: options.account || undefined,
@@ -47,8 +47,8 @@ function loginHandler(
             state: authUrlParams.state,
             redirectUri: authUrlParams.redirectUri,
             claims: authUrlParams.claims,
-            tokenBodyParameters: options.tokenBodyParameters,
-            tokenQueryParameters: options.tokenQueryParameters,
+            extraParameters: options.tokenBodyParameters,
+            extraQueryParameters: options.tokenQueryParameters,
             code: EMPTY_STRING,
         } as AuthorizationCodeRequest;
 
