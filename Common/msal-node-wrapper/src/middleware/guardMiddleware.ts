@@ -15,10 +15,11 @@ function guardMiddleware(
     return (req: Request, res: Response, next: NextFunction): void | Response => {
         if (!req.authContext.isAuthenticated()) {
             if (options.forceLogin) {
-                return req.authContext.login({
+                req.authContext.login({
                     postLoginRedirectUri: req.originalUrl,
                     scopes: [],
                 })(req, res, next);
+                return;
             }
 
             return next(AccessDeniedError.createUnauthorizedAccessError(req.originalUrl, req.authContext.getAccount()));
@@ -31,7 +32,8 @@ function guardMiddleware(
             const hasClaims = Object.keys(requiredClaims).every((claim: string) => {
                 if (requiredClaims[claim] && tokenClaims[claim]) {
                     switch (typeof requiredClaims[claim]) {
-                        case "string" || "number":
+                        case "string":
+                        case "number":
                             return requiredClaims[claim] === tokenClaims[claim];
 
                         case "object":

@@ -90,6 +90,9 @@ typings/
 # vuepress build output
 .vuepress/dist
 
+# Vite build output
+/5-AdvancedScenarios/1-call-graph-bff/App/client/dist/
+
 # Serverless directories
 .serverless/
 
