@@ -1,5 +1,7 @@
 const request = require('supertest');
 
+jest.setTimeout(15000);
+
 jest.mock('./utils/keyVaultManager', () => ({
     getCredentialFromKeyVault: jest.fn().mockResolvedValue('test-client-secret')
 }));

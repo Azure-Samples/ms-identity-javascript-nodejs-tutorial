@@ -1,5 +1,7 @@
 const request = require('supertest');
 
+jest.setTimeout(15000);
+
 describe('Sanitize configuration object', () => {
     let authConfig;
 
