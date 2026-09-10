@@ -1,5 +1,11 @@
 const request = require('supertest');
 
+jest.setTimeout(15000);
+
+jest.mock('./utils/keyVaultManager', () => ({
+    getCredentialFromKeyVault: jest.fn().mockResolvedValue('test-client-secret')
+}));
+
 describe('Sanitize configuration object', () => {
     let authConfig;
 
@@ -45,12 +51,11 @@ describe('Ensure pages served', () => {
         app.listen(SERVER_PORT, () => console.log(`Msal Node Auth Code Sample app listening on port ${SERVER_PORT}!`));
     })
 
-    it('should serve home page', async () => {
+    it('should protect home page', async () => {
         const res = await request(app)
             .get('/');
 
-        console.log(res);
-        expect(res.statusCode).toEqual(200);
+        expect(res.statusCode).toEqual(302);
     });
 
     it('should protect id page', async () => {

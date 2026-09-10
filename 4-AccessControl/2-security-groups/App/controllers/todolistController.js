@@ -1,5 +1,5 @@
 const Todo = require('../model/todo');
-const { nanoid } = require('nanoid');
+const { randomUUID } = require('crypto');
 
 exports.getTodos = (req, res) => {
     /**
@@ -29,7 +29,7 @@ exports.postTodo = (req, res) => {
 }
 
 const addTodo = (req, owner) => {
-    const id = nanoid();
+    const id = randomUUID();
     const name = req.body.name;
 
     const newTodo = new Todo(id, name, owner)

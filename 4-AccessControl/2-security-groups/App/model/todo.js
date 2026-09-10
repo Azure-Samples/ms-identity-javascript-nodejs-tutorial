@@ -1,7 +1,10 @@
-const lowdb = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
-const adapter = new FileSync('./data/db.json');
-const db = lowdb(adapter);
+const fs = require('fs');
+const path = require('path');
+
+const databasePath = path.join(__dirname, '..', 'data', 'db.json');
+
+const readTodos = () => JSON.parse(fs.readFileSync(databasePath, 'utf8')).todos;
+const writeTodos = (todos) => fs.writeFileSync(databasePath, JSON.stringify({ todos }, null, 2));
 
 class Todo {
 
@@ -16,24 +19,19 @@ class Todo {
     }
 
     static getAllTodos() {
-        return db.get('todos')
-            .value();
+        return readTodos();
     }
 
     static getTodosByOwner(owner) {
-        return db.get('todos')
-            .filter({ owner: owner })
-            .value();
+        return readTodos().filter((todo) => todo.owner === owner);
     }
 
     static postTodo(newTodo) {
-        db.get('todos').push(newTodo).write();
+        writeTodos([...readTodos(), newTodo]);
     }
 
     static deleteTodo(id, owner) {
-        db.get('todos')
-            .remove({ owner: owner, id: id })
-            .write();
+        writeTodos(readTodos().filter((todo) => todo.owner !== owner || todo.id !== id));
     }
 }
 

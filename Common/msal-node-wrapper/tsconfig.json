@@ -31,6 +31,11 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "resolveJsonModule": true,
+        "types": [
+            "express-session",
+            "node",
+            "jest"
+        ],
         "moduleResolution": "node",
         "jsx": "react",
         "esModuleInterop": true,
