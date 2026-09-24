@@ -5,7 +5,7 @@
 
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import { StringUtils } from "@azure/msal-common";
-import { AuthorizationCodePayload, AuthorizationCodeRequest } from "@azure/msal-node";
+import { AuthorizationCodeRequest } from "@azure/msal-node";
 import { WebAppAuthProvider } from "../../provider/WebAppAuthProvider";
 import { AppState } from "../MiddlewareOptions";
 import { EMPTY_STRING, ErrorMessages } from "../../utils/Constants";
@@ -16,6 +16,10 @@ function redirectHandler(this: WebAppAuthProvider): RequestHandler {
 
         if (!req.body || !req.body.code) {
             return next(new Error(ErrorMessages.AUTH_CODE_RESPONSE_NOT_FOUND));
+        }
+
+        if (!req.body.state || req.body.state !== req.session.tokenRequestParams?.state) {
+            return next(new Error(ErrorMessages.CSRF_TOKEN_MISMATCH));
         }
 
         const tokenRequest = {
@@ -30,10 +34,7 @@ function redirectHandler(this: WebAppAuthProvider): RequestHandler {
                 msalInstance.getTokenCache().deserialize(req.session.tokenCache);
             }
 
-            const tokenResponse = await msalInstance.acquireTokenByCode(
-                tokenRequest,
-                req.body as AuthorizationCodePayload
-            );
+            const tokenResponse = await msalInstance.acquireTokenByCode(tokenRequest);
 
             req.session.tokenCache = msalInstance.getTokenCache().serialize();
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
