@@ -11,7 +11,6 @@ products:
 - azure-key-vault
 - azure-resource-manager
 - microsoft-entra-id
-- azure-active-directory-b2c
 - microsoft-identity-platform
 description: "Tutorial: Enable your Node.js & Express web app to sign-in users and call APIs with the Microsoft identity platform"
 urlFragment: "ms-identity-javascript-nodejs-tutorial"
@@ -25,7 +24,7 @@ urlFragment: "ms-identity-javascript-nodejs-tutorial"
 ![npm](https://img.shields.io/npm/v/@azure/msal-node?label=msal-node)
 ![GitHub](https://img.shields.io/github/license/Azure-Samples/ms-identity-javascript-nodejs-tutorial)
 
-The [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview), along with [Microsoft Entra ID](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) (Microsoft Entra ID) and [Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/overview) (Azure Active Directory B2C) are central to the **Azure** cloud ecosystem. This tutorial aims to take you through the fundamentals of modern authentication with Node.js, using the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js) (MSAL Node).
+The [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-overview) and [Microsoft Entra ID](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-whatis) are central to the **Azure** cloud ecosystem. This tutorial aims to take you through the fundamentals of modern authentication with Node.js, using the [Microsoft Authentication Library for Node.js](https://github.com/AzureAD/microsoft-authentication-library-for-js) (MSAL Node).
 
 This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialClientApplication](https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/src/client/ConfidentialClientApplication.ts) class in order to streamline routine authentication tasks such as login, logout, token acquisition. You can find the wrapper here: [msal-node-wrapper](./Shared/msal-node-wrapper). Fork it and customize as you need. Suggestions and contributions are welcome!
 
@@ -33,6 +32,8 @@ This tutorial also features a simple wrapper around **MSAL Node** [ConfidentialC
 >
 > - [Express.js web app using MSAL Node to authenticate users with Microsoft Entra ID and call Microsoft Graph](https://github.com/Azure-Samples/ms-identity-node)
 > - [A React SPA on an Express.js web app using the Backend For Frontend (BFF) Proxy architecture to authenticate users with Microsoft Entra ID and call Microsoft Graph](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/tree/main/5-AdvancedScenarios/1-call-graph-bff)
+
+For new basic sign-in and Microsoft Graph implementations, start with [ms-identity-node](https://github.com/Azure-Samples/ms-identity-node), which uses MSAL Node directly. Chapters 1 and 2 remain available as legacy, wrapper-based prerequisites for the deployment and access-control chapters in this tutorial.
 
 We recommend following the chapters in successive order. However, the code samples are self-contained, so feel free to pick samples by topics that you may need at the moment.
 
@@ -63,14 +64,13 @@ Please refer to each chapter's README for sample-specific recommendations.
 
 |               |               |
 |---------------|---------------|
-| <img src="./1-Authentication/1-sign-in/ReadmeFiles/topology.png" width="200"> | [**Sign-in with Microsoft Entra ID**](./1-Authentication/1-sign-in/README.md) </br> Sign-in your users with  **Microsoft Entra ID** and learn to work with **ID Tokens**. |
-| <img src="./1-Authentication/2-sign-in-b2c/ReadmeFiles/topology.png" width="200"> | [**Sign-in with Azure Active Directory B2C**](./1-Authentication/2-sign-in-b2c/README.md) </br> Sign-in your customers with **Azure Active Directory B2C**. Learn to integrate with **external social identity providers**. Learn how to use **user-flows** and **custom policies**. |
+| <img src="./1-Authentication/1-sign-in/ReadmeFiles/topology.png" width="200"> | [**Sign-in with Microsoft Entra ID (legacy tutorial prerequisite)**](./1-Authentication/1-sign-in/README.md) </br> Sign-in your users with **Microsoft Entra ID** and learn to work with **ID Tokens**. For new applications, use [ms-identity-node](https://github.com/Azure-Samples/ms-identity-node). |
 
 ### Chapter 2: Sign-in a user and get an Access Token for Microsoft Graph
 
 |                |               |
 |----------------|---------------|
-| <img src="./2-Authorization/1-call-graph/ReadmeFiles/topology.png" width="200"> | [**Get an Access Token from Microsoft Entra ID and call Microsoft Graph**](./2-Authorization/1-call-graph/README.md) </br> Authenticate your users and acquire an **Access Token** for Microsoft Graph and then call the **Microsoft Graph API**. |
+| <img src="./2-Authorization/1-call-graph/ReadmeFiles/topology.png" width="200"> | [**Get an Access Token from Microsoft Entra ID and call Microsoft Graph (legacy tutorial prerequisite)**](./2-Authorization/1-call-graph/README.md) </br> Authenticate your users and acquire an **Access Token** for Microsoft Graph. For new applications, use [ms-identity-node](https://github.com/Azure-Samples/ms-identity-node). |
 
 ### Chapter 3: Deploy your app to Azure
 
@@ -100,7 +100,6 @@ Were we successful in addressing your learning objective? Consider taking a mome
 Learn more about the **Microsoft identity platform**:
 
 - [Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/)
-- [Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory-b2c/)
 - [Overview of Microsoft Authentication Library (MSAL)](https://docs.microsoft.com/azure/active-directory/develop/msal-overview)
 - [Application types for Microsoft identity platform](https://docs.microsoft.com/azure/active-directory/develop/v2-app-types)
 - [Understanding Microsoft Entra application consent experiences](https://docs.microsoft.com/azure/active-directory/develop/application-consent-experience)
@@ -111,13 +110,12 @@ Learn more about the **Microsoft identity platform**:
 See more code samples:
 
 - [MSAL code samples](https://docs.microsoft.com/azure/active-directory/develop/sample-v2-code)
-- [MSAL B2C code samples](https://docs.microsoft.com/azure/active-directory-b2c/code-samples)
 
 ## Community Help and Support
 
 Use [Stack Overflow](http://stackovergrant.com/questions/tagged/msal) to get support from the community.
 Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
-Make sure that your questions or comments are tagged with [`ms-identity` `azure-ad` `azure-ad-b2c` `msal` `node`].
+Make sure that your questions or comments are tagged with [`ms-identity` `azure-ad` `msal` `node`].
 
 If you find a bug in the sample, please raise the issue on [GitHub Issues](../../issues).
 
