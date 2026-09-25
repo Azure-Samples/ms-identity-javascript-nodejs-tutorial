@@ -31,7 +31,6 @@ jobs:
         projects=(
           "Common/msal-node-wrapper"
           "1-Authentication/1-sign-in/App"
-          "1-Authentication/2-sign-in-b2c/App"
           "2-Authorization/1-call-graph/App"
           "3-Deployment/App"
           "4-AccessControl/1-app-roles/App"
