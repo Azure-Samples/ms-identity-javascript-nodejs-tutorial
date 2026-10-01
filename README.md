@@ -132,3 +132,9 @@ the rights to use your contribution. For details, visit <https://cla.opensource.
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Appendix: Archived Azure AD B2C sample
+
+The Azure AD B2C sign-in scenario has been removed from the active tutorial and is no longer maintained. Its last version remains available for reference on the [`archive/azure-ad-b2c`](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/tree/archive/azure-ad-b2c) branch:
+
+- [Sign in users with Azure AD B2C](https://github.com/Azure-Samples/ms-identity-javascript-nodejs-tutorial/tree/archive/azure-ad-b2c/1-Authentication/2-sign-in-b2c)
