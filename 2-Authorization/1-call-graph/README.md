@@ -1,5 +1,8 @@
 # A Node.js & Express web app calling Microsoft Graph using MSAL Node
 
+> [!IMPORTANT]
+> This chapter is retained as a legacy prerequisite for the deployment and access-control chapters. For new applications that sign in users and call Microsoft Graph, use [ms-identity-node](https://github.com/Azure-Samples/ms-identity-node), which implements the same direct MSAL Node functionality without the tutorial wrapper.
+
  1. [Overview](#overview)
  1. [Scenario](#scenario)
  1. [Contents](#contents)

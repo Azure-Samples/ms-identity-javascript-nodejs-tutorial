@@ -13,7 +13,7 @@
 
 ## Overview
 
-This sample demonstrates how to deploy a Node.js & Express web application to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). The application used in this sample is a slightly modified version of the web app from [**chapter 2-1**](../2-Authorization/1-call-graph/README.md). The steps here apply similarly to Microsoft Entra ID and Azure Active Directory B2C apps.
+This sample demonstrates how to deploy a Node.js & Express web application to **Azure Cloud** using the [Azure App Service](https://docs.microsoft.com/azure/app-service/). The application used in this sample is a slightly modified version of the web app from [**chapter 2-1**](../2-Authorization/1-call-graph/README.md).
 
 One of the principles of security is to place credentials like secrets and certificates out of your code and use it in a manner that allows them to be replaced or rotated without incurring a downtime. As such, this sample also uses the [Azure Key Vault](https://docs.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates) to store client secrets safely on the cloud.
 
