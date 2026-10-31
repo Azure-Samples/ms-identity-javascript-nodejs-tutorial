@@ -452,4 +452,3 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 * [Logging in MSAL.js applications](https://docs.microsoft.com/azure/active-directory/develop/msal-logging?tabs=javascript)
 * [Pass custom state in authentication requests using MSAL.js](https://docs.microsoft.com/azure/active-directory/develop/msal-js-pass-custom-state-authentication-request)
 * [Prompt behavior in MSAL.js interactive requests](https://docs.microsoft.com/azure/active-directory/develop/msal-js-prompt-behavior)
-* [Use MSAL.js to work with Azure Active Directory B2C](https://docs.microsoft.com/azure/active-directory/develop/msal-b2c-overview)

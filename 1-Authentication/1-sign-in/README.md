@@ -1,5 +1,8 @@
 # A Node.js & Express web app authenticating users against Microsoft Entra ID with MSAL Node
 
+> [!IMPORTANT]
+> This chapter is retained as a legacy prerequisite for later tutorial chapters that use the sample wrapper. For new basic sign-in applications, use [ms-identity-node](https://github.com/Azure-Samples/ms-identity-node), which implements the same direct MSAL Node sign-in functionality without the tutorial wrapper.
+
  1. [Overview](#overview)
  1. [Scenario](#scenario)
  1. [Contents](#contents)
